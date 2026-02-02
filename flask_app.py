@@ -157,9 +157,9 @@ def debug_columns():
     excel_path = os.path.join(EXCEL_FOLDER, excel_files[0]['filename'])
     try:
         df = pd.read_excel(excel_path)
-        columns = df.columns.tolist()
-        # İlk satırı da göster
-        first_row = df.iloc[0].tolist() if len(df) > 0 else []
+        columns = [str(col) for col in df.columns.tolist()]
+        # İlk satırı da göster (tüm değerleri string'e çevir)
+        first_row = [str(val) for val in df.iloc[0].tolist()] if len(df) > 0 else []
         return jsonify({
             'filename': excel_files[0]['filename'],
             'columns': columns,
