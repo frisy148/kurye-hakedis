@@ -7,39 +7,36 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="login-container">
-        
-        <!-- Haftanın En İyi Kuryesi -->
-        {% if best_courier %}
+    <!-- Haftanın En İyi Kuryesi - Sağ Üst -->
+    {% if best_courier %}
+    <div class="best-courier-floating">
         <div class="best-courier-card">
-            <div class="trophy-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
-                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
-                    <path d="M4 22h16"/>
-                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
-                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
-                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
-                </svg>
-            </div>
-            <div class="best-courier-content">
-                <span class="best-courier-title">🏆 Haftanın En İyi Kuryesi</span>
+            <div class="trophy-badge">🏆</div>
+            <div class="best-courier-header">
+                <span class="best-courier-title">Haftanın Yıldızı</span>
                 <span class="best-courier-week">{{ best_courier.week }}</span>
-                <span class="best-courier-name">{{ best_courier.name }}</span>
-                <div class="best-courier-stats">
-                    <div class="stat">
-                        <span class="stat-value">{{ best_courier.dropoff }}</span>
-                        <span class="stat-label">Teslimat</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-value">{{ "%.0f"|format(best_courier.odenecek) }} ₺</span>
-                        <span class="stat-label">Kazanç</span>
-                    </div>
+            </div>
+            <div class="best-courier-name">{{ best_courier.name }}</div>
+            <div class="best-courier-region">📍 {{ best_courier.bolge }}</div>
+            <div class="best-courier-stats">
+                <div class="stat">
+                    <span class="stat-value">{{ best_courier.dropoff }}</span>
+                    <span class="stat-label">Teslimat</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">{{ "%.0f"|format(best_courier.hakedis) }}₺</span>
+                    <span class="stat-label">Hakediş</span>
                 </div>
             </div>
+            <div class="reward-section">
+                <span class="reward-label">🎁 Haftalık Ödül</span>
+                <span class="reward-value">500 ₺ Bonus</span>
+            </div>
         </div>
-        {% endif %}
-        
+    </div>
+    {% endif %}
+    
+    <div class="login-container">
         <div class="login-box">
             <div class="logo">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

@@ -86,10 +86,26 @@ def get_best_courier(excel_file):
                 odenecek_column = col
                 break
         
+        # Toplam hakediş sütununu bul
+        hakedis_column = None
+        for col in df.columns:
+            if 'toplam hakediş' in col.lower() or 'toplam hakedis' in col.lower():
+                hakedis_column = col
+                break
+        
+        # Bölge sütununu bul
+        bolge_column = None
+        for col in df.columns:
+            if 'bölge' in col.lower() or 'bolge' in col.lower():
+                bolge_column = col
+                break
+        
         result = {
             'name': str(best_courier[ad_soyad_column]),
             'dropoff': int(best_courier[dropoff_column]),
             'odenecek': float(best_courier[odenecek_column]) if odenecek_column else 0,
+            'hakedis': float(best_courier[hakedis_column]) if hakedis_column else 0,
+            'bolge': str(best_courier[bolge_column]) if bolge_column else '-',
             'week': excel_file.replace('.xlsx', '')
         }
         
