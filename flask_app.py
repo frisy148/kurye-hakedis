@@ -146,6 +146,28 @@ def api_kuryeler(excel_file):
     kuryeler = get_kuryeler_by_file(excel_file)
     return jsonify(kuryeler)
 
+@app.route('/api/debug/columns')
+def debug_columns():
+    """Excel dosyasındaki sütun isimlerini gösterir (debug için)"""
+    excel_files = get_excel_files()
+    if not excel_files:
+        return jsonify({'error': 'Excel dosyası bulunamadı'})
+    
+    # İlk Excel dosyasının sütunlarını oku
+    excel_path = os.path.join(EXCEL_FOLDER, excel_files[0]['filename'])
+    try:
+        df = pd.read_excel(excel_path)
+        columns = df.columns.tolist()
+        # İlk satırı da göster
+        first_row = df.iloc[0].tolist() if len(df) > 0 else []
+        return jsonify({
+            'filename': excel_files[0]['filename'],
+            'columns': columns,
+            'first_row_sample': first_row
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
 @app.route('/', methods=['GET', 'POST'])
 def login():
     excel_files = get_excel_files()
