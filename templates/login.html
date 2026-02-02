@@ -38,6 +38,33 @@
             </div>
         </div>
         {% endif %}
+        
+        <!-- Ödeme Takvimi -->
+        <div class="payment-calendar-card">
+            <div class="calendar-header">
+                <h2>💰 Ödeme Takvimi 2026</h2>
+                <span class="calendar-badge">Yemeksepeti Express</span>
+            </div>
+            <div class="calendar-table-wrapper">
+                <table class="calendar-table">
+                    <thead>
+                        <tr>
+                            <th>Çalışma Haftası</th>
+                            <th>Ödeme Tarihi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in odeme_takvimi %}
+                        <tr>
+                            <td>{{ item.calisma }}</td>
+                            <td class="payment-date">{{ item.odeme }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
         <div class="login-box">
             <div class="logo">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

@@ -9,6 +9,38 @@ app.secret_key = 'kurye-hakedis-secret-key'
 # Excel dosyalarının bulunduğu klasör (PythonAnywhere)
 EXCEL_FOLDER = "/home/Savasky148/mysite"
 
+# Ödeme Takvimi 2026
+ODEME_TAKVIMI = [
+    {"calisma": "8 Aralık - 14 Aralık 2025 / 15 Aralık - 21 Aralık 2025", "odeme": "2 Ocak 2026 Cuma"},
+    {"calisma": "22 Aralık - 28 Aralık 2025 / 29 Aralık 2025 - 4 Ocak 2026", "odeme": "15 Ocak 2026 Perşembe"},
+    {"calisma": "5 Ocak - 11 Ocak 2026 / 12 Ocak - 18 Ocak 2026", "odeme": "29 Ocak 2026 Perşembe"},
+    {"calisma": "19 Ocak - 25 Ocak 2026 / 26 Ocak - 1 Şubat 2026", "odeme": "12 Şubat 2026 Perşembe"},
+    {"calisma": "2 Şubat - 8 Şubat 2026 / 9 Şubat - 15 Şubat 2026", "odeme": "26 Şubat 2026 Perşembe"},
+    {"calisma": "16 Şubat - 22 Şubat 2026 / 23 Şubat - 1 Mart 2026", "odeme": "12 Mart 2026 Perşembe"},
+    {"calisma": "2 Mart - 8 Mart 2026 / 9 Mart - 15 Mart 2026", "odeme": "26 Mart 2026 Perşembe"},
+    {"calisma": "16 Mart - 22 Mart 2026 / 23 Mart - 29 Mart 2026", "odeme": "9 Nisan 2026 Perşembe"},
+    {"calisma": "30 Mart - 5 Nisan 2026 / 6 Nisan - 12 Nisan 2026", "odeme": "22 Nisan 2026 Çarşamba"},
+    {"calisma": "13 Nisan - 19 Nisan 2026 / 20 Nisan - 26 Nisan 2026", "odeme": "7 Mayıs 2026 Perşembe"},
+    {"calisma": "27 Nisan - 3 Mayıs 2026 / 4 Mayıs - 10 Mayıs 2026", "odeme": "21 Mayıs 2026 Perşembe"},
+    {"calisma": "11 Mayıs - 17 Mayıs 2026 / 18 Mayıs - 24 Mayıs 2026", "odeme": "4 Haziran 2026 Perşembe"},
+    {"calisma": "25 Mayıs - 31 Mayıs 2026 / 1 Haziran - 7 Haziran 2026", "odeme": "18 Haziran 2026 Perşembe"},
+    {"calisma": "8 Haziran - 14 Haziran 2026 / 15 Haziran - 21 Haziran 2026", "odeme": "2 Temmuz 2026 Perşembe"},
+    {"calisma": "22 Haziran - 28 Haziran 2026 / 29 Haziran - 5 Temmuz 2026", "odeme": "16 Temmuz 2026 Perşembe"},
+    {"calisma": "6 Temmuz - 12 Temmuz 2026 / 13 Temmuz - 19 Temmuz 2026", "odeme": "30 Temmuz 2026 Perşembe"},
+    {"calisma": "20 Temmuz - 26 Temmuz 2026 / 27 Temmuz - 2 Ağustos 2026", "odeme": "13 Ağustos 2026 Perşembe"},
+    {"calisma": "3 Ağustos - 9 Ağustos 2026 / 10 Ağustos - 16 Ağustos 2026", "odeme": "27 Ağustos 2026 Perşembe"},
+    {"calisma": "17 Ağustos - 23 Ağustos 2026 / 24 Ağustos - 30 Ağustos 2026", "odeme": "10 Eylül 2026 Perşembe"},
+    {"calisma": "31 Ağustos - 6 Eylül 2026 / 7 Eylül - 13 Eylül 2026", "odeme": "24 Eylül 2026 Perşembe"},
+    {"calisma": "14 Eylül - 20 Eylül 2026 / 21 Eylül - 27 Eylül 2026", "odeme": "8 Ekim 2026 Perşembe"},
+    {"calisma": "28 Eylül - 4 Ekim 2026 / 5 Ekim - 11 Ekim 2026", "odeme": "22 Ekim 2026 Perşembe"},
+    {"calisma": "12 Ekim - 18 Ekim 2026 / 19 Ekim - 25 Ekim 2026", "odeme": "5 Kasım 2026 Perşembe"},
+    {"calisma": "26 Ekim - 1 Kasım 2026 / 2 Kasım - 8 Kasım 2026", "odeme": "19 Kasım 2026 Perşembe"},
+    {"calisma": "9 Kasım - 15 Kasım 2026 / 16 Kasım - 22 Kasım 2026", "odeme": "3 Aralık 2026 Perşembe"},
+    {"calisma": "23 Kasım - 29 Kasım 2026 / 30 Kasım - 6 Aralık 2026", "odeme": "17 Aralık 2026 Perşembe"},
+    {"calisma": "7 Aralık - 13 Aralık 2026 / 14 Aralık - 20 Aralık 2026", "odeme": "Ocak 2027"},
+    {"calisma": "21 Aralık - 27 Aralık 2026 / 28 Aralık - 31 Aralık 2026", "odeme": "Ocak 2027"},
+]
+
 def get_excel_files():
     """Klasördeki tüm Excel dosyalarını listeler"""
     excel_files = []
@@ -203,7 +235,7 @@ def login():
                              data=data,
                              selected_week=selected_display)
     
-    return render_template('login.html', excel_files=excel_files, top5_data=top5_data)
+    return render_template('login.html', excel_files=excel_files, top5_data=top5_data, odeme_takvimi=ODEME_TAKVIMI)
 
 @app.route('/dashboard')
 def dashboard():
