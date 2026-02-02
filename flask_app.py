@@ -57,10 +57,10 @@ def get_kuryeler_by_file(excel_file):
         return []
 
 def get_top5_couriers_3weeks(excel_files):
-    """Son 3 haftanın verilerini toplayıp en iyi 5 kuryeyi bulur"""
+    """Son 2 haftanın verilerini toplayıp en iyi 5 kuryeyi bulur"""
     try:
-        # Son 3 hafta
-        last_3_weeks = excel_files[:3] if len(excel_files) >= 3 else excel_files
+        # Son 2 hafta
+        last_3_weeks = excel_files[:2] if len(excel_files) >= 2 else excel_files
         
         if not last_3_weeks:
             return None
