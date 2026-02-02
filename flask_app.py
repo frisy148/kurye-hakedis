@@ -56,6 +56,48 @@ def get_kuryeler_by_file(excel_file):
     except:
         return []
 
+def get_best_courier(excel_file):
+    """En iyi kuryeyi bulur (en fazla Dropoff yapan)"""
+    try:
+        excel_path = os.path.join(EXCEL_FOLDER, excel_file)
+        df = pd.read_excel(excel_path)
+        
+        ad_soyad_column = df.columns[0]
+        
+        # Dropoff sütununu bul
+        dropoff_column = None
+        for col in df.columns:
+            if 'dropoff' in col.lower():
+                dropoff_column = col
+                break
+        
+        if dropoff_column is None:
+            return None
+        
+        # En yüksek dropoff değerini bul
+        df[dropoff_column] = pd.to_numeric(df[dropoff_column], errors='coerce')
+        max_idx = df[dropoff_column].idxmax()
+        best_courier = df.loc[max_idx]
+        
+        # Ödenecek tutar sütununu bul
+        odenecek_column = None
+        for col in df.columns:
+            if 'ödenecek' in col.lower() or 'odenecek' in col.lower():
+                odenecek_column = col
+                break
+        
+        result = {
+            'name': str(best_courier[ad_soyad_column]),
+            'dropoff': int(best_courier[dropoff_column]),
+            'odenecek': float(best_courier[odenecek_column]) if odenecek_column else 0,
+            'week': excel_file.replace('.xlsx', '')
+        }
+        
+        return result
+    except Exception as e:
+        print(f"Hata: {e}")
+        return None
+
 @app.route('/api/kuryeler/<excel_file>')
 def api_kuryeler(excel_file):
     """Seçilen haftanın kurye listesini döndürür (API)"""
@@ -65,6 +107,11 @@ def api_kuryeler(excel_file):
 @app.route('/', methods=['GET', 'POST'])
 def login():
     excel_files = get_excel_files()
+    
+    # En son haftanın en iyi kuryesini bul
+    best_courier = None
+    if excel_files:
+        best_courier = get_best_courier(excel_files[0]['filename'])
     
     if request.method == 'POST':
         kurye_adi = request.form.get('kurye_adi', '').strip()
@@ -100,7 +147,7 @@ def login():
                              data=data,
                              selected_week=selected_display)
     
-    return render_template('login.html', excel_files=excel_files)
+    return render_template('login.html', excel_files=excel_files, best_courier=best_courier)
 
 @app.route('/dashboard')
 def dashboard():

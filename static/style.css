@@ -20,6 +20,138 @@ body {
     align-items: center;
     justify-content: center;
     padding: 20px;
+    gap: 25px;
+}
+
+/* Haftanın En İyi Kuryesi Kartı */
+.best-courier-card {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 165, 0, 0.1) 100%);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 25px 35px;
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    box-shadow: 0 15px 40px rgba(255, 215, 0, 0.2);
+    animation: glow 2s ease-in-out infinite alternate;
+    max-width: 500px;
+    width: 100%;
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 15px 40px rgba(255, 215, 0, 0.2);
+    }
+    to {
+        box-shadow: 0 20px 50px rgba(255, 215, 0, 0.35);
+    }
+}
+
+.trophy-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+}
+
+.trophy-icon svg {
+    width: 45px;
+    height: 45px;
+    color: #1a1a2e;
+}
+
+.best-courier-content {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.best-courier-title {
+    font-size: 14px;
+    color: #FFD700;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.best-courier-week {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.best-courier-name {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 5px 0;
+}
+
+.best-courier-stats {
+    display: flex;
+    gap: 25px;
+    margin-top: 10px;
+}
+
+.best-courier-stats .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px 20px;
+    border-radius: 12px;
+}
+
+.best-courier-stats .stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #FFD700;
+}
+
+.best-courier-stats .stat-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+}
+
+/* Mobil için En İyi Kurye Kartı */
+@media (max-width: 480px) {
+    .best-courier-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .trophy-icon {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .trophy-icon svg {
+        width: 38px;
+        height: 38px;
+    }
+    
+    .best-courier-name {
+        font-size: 18px;
+    }
+    
+    .best-courier-stats {
+        justify-content: center;
+    }
+    
+    .best-courier-stats .stat {
+        padding: 8px 15px;
+    }
+    
+    .best-courier-stats .stat-value {
+        font-size: 16px;
+    }
 }
 
 .login-box {
