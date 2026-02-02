@@ -20,104 +20,176 @@ body {
     align-items: center;
     justify-content: center;
     padding: 20px;
-    padding-top: 70px;
 }
 
-/* Haftanın En İyi Kuryesi - Yatay Bar */
-.best-courier-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(90deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
-    border-bottom: 1px solid rgba(255, 215, 0, 0.3);
-    padding: 12px 20px;
-    z-index: 1000;
+/* Liderlik Tablosu */
+.leaderboard-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 25px;
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 25px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
 }
 
-.best-courier-inner {
+.leaderboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.leaderboard-header h2 {
+    font-size: 18px;
+    color: #FFD700;
+    margin: 0;
+}
+
+.leaderboard-period {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 5px 12px;
+    border-radius: 15px;
+}
+
+.leaderboard-table {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.leaderboard-row {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 15px;
-    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
 }
 
-.best-courier-bar .trophy {
-    font-size: 20px;
+.leaderboard-row:hover {
+    background: rgba(255, 255, 255, 0.06);
 }
 
-.best-courier-bar .label {
-    color: #FFD700;
-    font-size: 13px;
-    font-weight: 600;
+.leaderboard-row.gold {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 100%);
+    border-color: rgba(255, 215, 0, 0.3);
 }
 
-.best-courier-bar .name {
-    color: #ffffff;
+.leaderboard-row.silver {
+    background: rgba(192, 192, 192, 0.08);
+    border-color: rgba(192, 192, 192, 0.2);
+}
+
+.leaderboard-row .rank {
+    font-size: 22px;
+    width: 35px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.leaderboard-row .courier-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.leaderboard-row .courier-name {
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.best-courier-bar .divider {
-    color: rgba(255, 255, 255, 0.2);
+.leaderboard-row .courier-region {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
 }
 
-.best-courier-bar .region {
-    color: rgba(255, 255, 255, 0.7);
+.leaderboard-row .courier-stats {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+}
+
+.leaderboard-row .dropoff {
     font-size: 13px;
-}
-
-.best-courier-bar .stat {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 13px;
-}
-
-.best-courier-bar .reward {
     color: #4caf50;
-    font-size: 13px;
     font-weight: 600;
 }
 
+.leaderboard-row .hakedis {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+}
 
-/* Mobil için Bar */
-@media (max-width: 768px) {
-    .best-courier-bar {
-        padding: 10px 15px;
+.leaderboard-row .reward-badge {
+    background: linear-gradient(135deg, #4caf50 0%, #8bc34a 100%);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+.leaderboard-row.gold .reward-badge {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #1a1a2e;
+}
+
+/* Mobil için Liderlik Tablosu */
+@media (max-width: 480px) {
+    .leaderboard-card {
+        padding: 15px;
+        margin-bottom: 20px;
     }
     
-    .best-courier-inner {
+    .leaderboard-header h2 {
+        font-size: 16px;
+    }
+    
+    .leaderboard-row {
+        padding: 10px 12px;
         gap: 8px;
     }
     
-    .best-courier-bar .divider {
-        display: none;
+    .leaderboard-row .rank {
+        font-size: 18px;
+        width: 28px;
     }
     
-    .best-courier-bar .label,
-    .best-courier-bar .name,
-    .best-courier-bar .region,
-    .best-courier-bar .stat,
-    .best-courier-bar .reward {
-        font-size: 11px;
+    .leaderboard-row .courier-name {
+        font-size: 13px;
     }
     
-    .best-courier-bar .trophy {
-        font-size: 16px;
-    }
-}
-
-@media (max-width: 480px) {
-    .best-courier-inner {
-        gap: 5px;
+    .leaderboard-row .courier-region {
+        font-size: 10px;
     }
     
-    .best-courier-bar .region {
-        display: none;
+    .leaderboard-row .dropoff {
+        font-size: 12px;
     }
     
-    .login-container {
-        padding-top: 80px;
+    .leaderboard-row .hakedis {
+        font-size: 10px;
+    }
+    
+    .leaderboard-row .reward-badge {
+        font-size: 10px;
+        padding: 5px 8px;
     }
 }
 

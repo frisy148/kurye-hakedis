@@ -7,26 +7,37 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <!-- Haftanın En İyi Kuryesi - Üst Bar -->
-    {% if best_courier %}
-    <div class="best-courier-bar">
-        <div class="best-courier-inner">
-            <span class="trophy">🏆</span>
-            <span class="label">Haftanın En İyisi:</span>
-            <span class="name">{{ best_courier.name }}</span>
-            <span class="divider">|</span>
-            <span class="region">📍 {{ best_courier.bolge }}</span>
-            <span class="divider">|</span>
-            <span class="stat">🚀 {{ best_courier.dropoff }} Teslimat</span>
-            <span class="divider">|</span>
-            <span class="stat">💰 {{ "%.0f"|format(best_courier.hakedis) }}₺</span>
-            <span class="divider">|</span>
-            <span class="reward">🎁 500₺ Bonus</span>
-        </div>
-    </div>
-    {% endif %}
-    
     <div class="login-container">
+        
+        <!-- Top 5 Liderlik Tablosu -->
+        {% if top5_data and top5_data.couriers %}
+        <div class="leaderboard-card">
+            <div class="leaderboard-header">
+                <h2>🏆 Liderlik Tablosu</h2>
+                <span class="leaderboard-period">Son {{ top5_data.week_count }} Hafta</span>
+            </div>
+            <div class="leaderboard-table">
+                {% for courier in top5_data.couriers %}
+                <div class="leaderboard-row {% if courier.rank == 1 %}gold{% elif courier.rank <= 3 %}silver{% endif %}">
+                    <div class="rank">
+                        {% if courier.rank == 1 %}🥇{% elif courier.rank == 2 %}🥈{% elif courier.rank == 3 %}🥉{% else %}{{ courier.rank }}{% endif %}
+                    </div>
+                    <div class="courier-info">
+                        <span class="courier-name">{{ courier.name }}</span>
+                        <span class="courier-region">📍 {{ courier.bolge }}</span>
+                    </div>
+                    <div class="courier-stats">
+                        <span class="dropoff">🚀 {{ courier.dropoff }}</span>
+                        <span class="hakedis">💰 {{ "%.0f"|format(courier.hakedis) }}₺</span>
+                    </div>
+                    <div class="reward-badge">
+                        🎁 {{ courier.reward }}₺
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
         <div class="login-box">
             <div class="logo">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

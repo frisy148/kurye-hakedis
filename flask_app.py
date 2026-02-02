@@ -56,60 +56,86 @@ def get_kuryeler_by_file(excel_file):
     except:
         return []
 
-def get_best_courier(excel_file):
-    """En iyi kuryeyi bulur (en fazla Dropoff yapan)"""
+def get_top5_couriers_3weeks(excel_files):
+    """Son 3 haftanın verilerini toplayıp en iyi 5 kuryeyi bulur"""
     try:
-        excel_path = os.path.join(EXCEL_FOLDER, excel_file)
-        df = pd.read_excel(excel_path)
+        # Son 3 hafta
+        last_3_weeks = excel_files[:3] if len(excel_files) >= 3 else excel_files
         
-        ad_soyad_column = df.columns[0]
-        
-        # Dropoff sütununu bul
-        dropoff_column = None
-        for col in df.columns:
-            if 'dropoff' in col.lower():
-                dropoff_column = col
-                break
-        
-        if dropoff_column is None:
+        if not last_3_weeks:
             return None
         
-        # En yüksek dropoff değerini bul
-        df[dropoff_column] = pd.to_numeric(df[dropoff_column], errors='coerce')
-        max_idx = df[dropoff_column].idxmax()
-        best_courier = df.loc[max_idx]
+        # Tüm kuryelerin verilerini topla
+        courier_totals = {}
         
-        # Ödenecek tutar sütununu bul
-        odenecek_column = None
-        for col in df.columns:
-            if 'ödenecek' in col.lower() or 'odenecek' in col.lower():
-                odenecek_column = col
-                break
+        for week_file in last_3_weeks:
+            excel_path = os.path.join(EXCEL_FOLDER, week_file['filename'])
+            df = pd.read_excel(excel_path)
+            
+            ad_soyad_column = df.columns[0]
+            
+            # Sütunları bul
+            dropoff_column = None
+            hakedis_column = None
+            bolge_column = None
+            
+            for col in df.columns:
+                if 'dropoff' in col.lower():
+                    dropoff_column = col
+                if 'toplam hakediş' in col.lower() or 'toplam hakedis' in col.lower():
+                    hakedis_column = col
+                if 'bölge' in col.lower() or 'bolge' in col.lower():
+                    bolge_column = col
+            
+            if dropoff_column is None:
+                continue
+            
+            # Her kurye için verileri topla
+            for _, row in df.iterrows():
+                name = str(row[ad_soyad_column]).strip()
+                if not name or name == 'nan':
+                    continue
+                
+                dropoff = pd.to_numeric(row[dropoff_column], errors='coerce')
+                if pd.isna(dropoff):
+                    dropoff = 0
+                
+                hakedis = 0
+                if hakedis_column:
+                    hakedis = pd.to_numeric(row[hakedis_column], errors='coerce')
+                    if pd.isna(hakedis):
+                        hakedis = 0
+                
+                bolge = str(row[bolge_column]) if bolge_column else '-'
+                
+                if name in courier_totals:
+                    courier_totals[name]['dropoff'] += int(dropoff)
+                    courier_totals[name]['hakedis'] += float(hakedis)
+                else:
+                    courier_totals[name] = {
+                        'name': name,
+                        'dropoff': int(dropoff),
+                        'hakedis': float(hakedis),
+                        'bolge': bolge
+                    }
         
-        # Toplam hakediş sütununu bul
-        hakedis_column = None
-        for col in df.columns:
-            if 'toplam hakediş' in col.lower() or 'toplam hakedis' in col.lower():
-                hakedis_column = col
-                break
+        # Dropoff'a göre sırala ve ilk 5'i al
+        sorted_couriers = sorted(courier_totals.values(), key=lambda x: x['dropoff'], reverse=True)
+        top5 = sorted_couriers[:5]
         
-        # Bölge sütununu bul
-        bolge_column = None
-        for col in df.columns:
-            if 'bölge' in col.lower() or 'bolge' in col.lower():
-                bolge_column = col
-                break
+        # Sıralama ve ödül ekle
+        for i, courier in enumerate(top5):
+            courier['rank'] = i + 1
+            courier['reward'] = 1000 if i == 0 else 500
         
-        result = {
-            'name': str(best_courier[ad_soyad_column]),
-            'dropoff': int(best_courier[dropoff_column]),
-            'odenecek': float(best_courier[odenecek_column]) if odenecek_column else 0,
-            'hakedis': float(best_courier[hakedis_column]) if hakedis_column else 0,
-            'bolge': str(best_courier[bolge_column]) if bolge_column else '-',
-            'week': excel_file.replace('.xlsx', '')
+        # Hafta bilgisi
+        weeks_text = " + ".join([w['display_name'] for w in last_3_weeks])
+        
+        return {
+            'couriers': top5,
+            'weeks': weeks_text,
+            'week_count': len(last_3_weeks)
         }
-        
-        return result
     except Exception as e:
         print(f"Hata: {e}")
         return None
@@ -124,10 +150,10 @@ def api_kuryeler(excel_file):
 def login():
     excel_files = get_excel_files()
     
-    # En son haftanın en iyi kuryesini bul
-    best_courier = None
+    # Son 3 haftanın en iyi 5 kuryesini bul
+    top5_data = None
     if excel_files:
-        best_courier = get_best_courier(excel_files[0]['filename'])
+        top5_data = get_top5_couriers_3weeks(excel_files)
     
     if request.method == 'POST':
         kurye_adi = request.form.get('kurye_adi', '').strip()
@@ -163,7 +189,7 @@ def login():
                              data=data,
                              selected_week=selected_display)
     
-    return render_template('login.html', excel_files=excel_files, best_courier=best_courier)
+    return render_template('login.html', excel_files=excel_files, top5_data=top5_data)
 
 @app.route('/dashboard')
 def dashboard():
