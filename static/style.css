@@ -150,127 +150,253 @@ body {
     color: #1a1a2e;
 }
 
-/* Ödeme Takvimi */
-.payment-calendar-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 25px;
-    width: 100%;
-    max-width: 700px;
-    margin-bottom: 25px;
-    border: 1px solid rgba(76, 175, 80, 0.2);
+/* Ödeme Takvimi Butonu */
+.calendar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(139, 195, 74, 0.2) 100%);
+    border: 2px solid rgba(76, 175, 80, 0.4);
+    border-radius: 14px;
+    color: #4caf50;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
 }
 
-.calendar-header {
+.calendar-btn:hover {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(139, 195, 74, 0.3) 100%);
+    border-color: #4caf50;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(76, 175, 80, 0.3);
+}
+
+.calendar-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    padding: 20px;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Modal Content */
+.modal-content {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 800px;
+    max-height: 85vh;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+    transform: scale(0.9) translateY(20px);
+    transition: all 0.3s ease;
+}
+
+.modal-overlay.active .modal-content {
+    transform: scale(1) translateY(0);
+}
+
+/* Modal Header */
+.modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 25px 30px;
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(139, 195, 74, 0.1) 100%);
+    border-bottom: 1px solid rgba(76, 175, 80, 0.2);
 }
 
-.calendar-header h2 {
-    font-size: 18px;
-    color: #4caf50;
+.modal-title {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.modal-icon {
+    font-size: 36px;
+}
+
+.modal-title h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
     margin: 0;
 }
 
-.calendar-badge {
-    font-size: 11px;
-    color: #ffffff;
-    background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
-    padding: 5px 12px;
-    border-radius: 15px;
-    font-weight: 600;
+.modal-title p {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 4px 0 0 0;
 }
 
-.calendar-table-wrapper {
-    max-height: 300px;
-    overflow-y: auto;
+.modal-close {
+    width: 40px;
+    height: 40px;
     border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 28px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    line-height: 1;
 }
 
+.modal-close:hover {
+    background: rgba(233, 69, 96, 0.3);
+    color: #e94560;
+}
+
+/* Modal Body */
+.modal-body {
+    padding: 0;
+    max-height: calc(85vh - 100px);
+    overflow-y: auto;
+}
+
+/* Calendar Table */
 .calendar-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13px;
 }
 
 .calendar-table thead {
     position: sticky;
     top: 0;
-    background: #1a1a2e;
     z-index: 1;
 }
 
 .calendar-table th {
-    padding: 12px 15px;
+    padding: 16px 20px;
     text-align: left;
-    color: rgba(255, 255, 255, 0.7);
+    background: #0f3460;
+    color: #ffffff;
     font-weight: 600;
-    border-bottom: 2px solid rgba(76, 175, 80, 0.3);
+    font-size: 14px;
+}
+
+.calendar-table th:first-child {
+    width: 65%;
 }
 
 .calendar-table td {
-    padding: 10px 15px;
+    padding: 14px 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 13px;
 }
 
-.calendar-table tr:hover {
-    background: rgba(255, 255, 255, 0.03);
+.calendar-table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.calendar-table tbody tr:hover {
+    background: rgba(76, 175, 80, 0.1);
+}
+
+.calendar-table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.calendar-table tbody tr:nth-child(even):hover {
+    background: rgba(76, 175, 80, 0.1);
 }
 
 .calendar-table .payment-date {
     color: #4caf50;
-    font-weight: 600;
+    font-weight: 700;
     white-space: nowrap;
 }
 
-.calendar-table-wrapper::-webkit-scrollbar {
-    width: 6px;
+/* Modal Scrollbar */
+.modal-body::-webkit-scrollbar {
+    width: 8px;
 }
 
-.calendar-table-wrapper::-webkit-scrollbar-track {
+.modal-body::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 3px;
 }
 
-.calendar-table-wrapper::-webkit-scrollbar-thumb {
-    background: rgba(76, 175, 80, 0.5);
-    border-radius: 3px;
+.modal-body::-webkit-scrollbar-thumb {
+    background: rgba(76, 175, 80, 0.4);
+    border-radius: 4px;
 }
 
-/* Mobil için Ödeme Takvimi */
-@media (max-width: 480px) {
-    .payment-calendar-card {
-        padding: 15px;
-        margin-bottom: 20px;
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(76, 175, 80, 0.6);
+}
+
+/* Modal Responsive */
+@media (max-width: 600px) {
+    .modal-content {
+        max-height: 90vh;
+        border-radius: 20px;
     }
     
-    .calendar-header {
-        flex-direction: column;
-        gap: 10px;
-        align-items: flex-start;
+    .modal-header {
+        padding: 20px;
     }
     
-    .calendar-header h2 {
-        font-size: 16px;
+    .modal-icon {
+        font-size: 28px;
     }
     
-    .calendar-table {
+    .modal-title h2 {
+        font-size: 18px;
+    }
+    
+    .modal-title p {
         font-size: 11px;
     }
     
-    .calendar-table th,
-    .calendar-table td {
-        padding: 8px 10px;
+    .modal-close {
+        width: 36px;
+        height: 36px;
+        font-size: 24px;
     }
     
-    .calendar-table-wrapper {
-        max-height: 250px;
+    .calendar-table th {
+        padding: 12px 15px;
+        font-size: 12px;
+    }
+    
+    .calendar-table td {
+        padding: 12px 15px;
+        font-size: 11px;
+    }
+    
+    .calendar-btn {
+        padding: 12px 20px;
+        font-size: 14px;
     }
 }
 

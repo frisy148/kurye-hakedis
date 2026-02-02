@@ -39,32 +39,6 @@
         </div>
         {% endif %}
         
-        <!-- Ödeme Takvimi -->
-        <div class="payment-calendar-card">
-            <div class="calendar-header">
-                <h2>💰 Ödeme Takvimi 2026</h2>
-                <span class="calendar-badge">Yemeksepeti Express</span>
-            </div>
-            <div class="calendar-table-wrapper">
-                <table class="calendar-table">
-                    <thead>
-                        <tr>
-                            <th>Çalışma Haftası</th>
-                            <th>Ödeme Tarihi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in odeme_takvimi %}
-                        <tr>
-                            <td>{{ item.calisma }}</td>
-                            <td class="payment-date">{{ item.odeme }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
         <div class="login-box">
             <div class="logo">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -156,8 +130,53 @@
                 </button>
             </form>
         </div>
+        <!-- Ödeme Takvimi Butonu -->
+        <button class="calendar-btn" onclick="openCalendarModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span>Ödeme Takvimi</span>
+        </button>
+        
         <div class="footer">
             <p>© 2026 Kurye Hakediş Sistemi</p>
+        </div>
+    </div>
+    
+    <!-- Ödeme Takvimi Modal -->
+    <div class="modal-overlay" id="calendarModal" onclick="closeCalendarModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <span class="modal-icon">📅</span>
+                    <div>
+                        <h2>Ödeme Takvimi 2026</h2>
+                        <p>Yemeksepeti Express - Lümen Kurye</p>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeCalendarModal(event)">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="calendar-table">
+                    <thead>
+                        <tr>
+                            <th>📋 Çalışma Haftası</th>
+                            <th>💳 Ödeme Tarihi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in odeme_takvimi %}
+                        <tr>
+                            <td>{{ item.calisma }}</td>
+                            <td class="payment-date">{{ item.odeme }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
     
@@ -279,6 +298,31 @@
             if (!kuryeAdi) {
                 e.preventDefault();
                 alert('Lütfen listeden isminizi seçin!');
+            }
+        });
+        
+        // Modal fonksiyonları
+        function openCalendarModal() {
+            document.getElementById('calendarModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeCalendarModal(event) {
+            if (event) {
+                if (event.target.classList.contains('modal-overlay') || event.target.classList.contains('modal-close')) {
+                    document.getElementById('calendarModal').classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                }
+            } else {
+                document.getElementById('calendarModal').classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+        
+        // ESC tuşu ile kapatma
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeCalendarModal();
             }
         });
     </script>
