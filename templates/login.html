@@ -41,13 +41,9 @@
         
         <div class="login-box">
             <div class="logo">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M16 16v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3"/>
-                    <rect x="10" y="3" width="11" height="11" rx="2"/>
-                    <circle cx="15.5" cy="8.5" r="1.5"/>
-                </svg>
+                <img src="{{ url_for('static', filename='lumen-logo.png') }}" alt="Lümen Kurye Logo">
             </div>
-            <h1>Kurye Hakediş Takip Sistemi</h1>
+            <h1>Kurye Hakediş Sistemi</h1>
             <p class="subtitle">Hakediş bilgilerinizi görüntülemek için bilgileri girin</p>
             
             {% with messages = get_flashed_messages(with_categories=true) %}

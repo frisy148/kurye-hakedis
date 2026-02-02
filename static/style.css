@@ -7,9 +7,18 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    background: linear-gradient(135deg, #0a1628 0%, #132238 50%, #1a3a5c 100%);
     min-height: 100vh;
     color: #ffffff;
+}
+
+/* Lümen Kurumsal Renkler */
+:root {
+    --lumen-dark: #0a1628;
+    --lumen-blue: #1a3a5c;
+    --lumen-light-blue: #2a4a6c;
+    --lumen-gold: #c9a227;
+    --lumen-gold-light: #d4b84a;
 }
 
 /* Login Sayfası */
@@ -31,7 +40,7 @@ body {
     width: 100%;
     max-width: 500px;
     margin-bottom: 25px;
-    border: 1px solid rgba(255, 215, 0, 0.2);
+    border: 1px solid rgba(201, 162, 39, 0.3);
 }
 
 .leaderboard-header {
@@ -45,7 +54,7 @@ body {
 
 .leaderboard-header h2 {
     font-size: 18px;
-    color: #FFD700;
+    color: #c9a227;
     margin: 0;
 }
 
@@ -79,8 +88,8 @@ body {
 }
 
 .leaderboard-row.gold {
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 100%);
-    border-color: rgba(255, 215, 0, 0.3);
+    background: linear-gradient(135deg, rgba(201, 162, 39, 0.2) 0%, rgba(201, 162, 39, 0.08) 100%);
+    border-color: rgba(201, 162, 39, 0.4);
 }
 
 .leaderboard-row.silver {
@@ -146,8 +155,8 @@ body {
 }
 
 .leaderboard-row.gold .reward-badge {
-    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-    color: #1a1a2e;
+    background: linear-gradient(135deg, #c9a227 0%, #d4b84a 100%);
+    color: #0a1628;
 }
 
 /* Ödeme Takvimi Butonu */
@@ -157,10 +166,10 @@ body {
     justify-content: center;
     gap: 10px;
     padding: 14px 28px;
-    background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(139, 195, 74, 0.2) 100%);
-    border: 2px solid rgba(76, 175, 80, 0.4);
+    background: linear-gradient(135deg, rgba(201, 162, 39, 0.15) 0%, rgba(212, 184, 74, 0.15) 100%);
+    border: 2px solid rgba(201, 162, 39, 0.4);
     border-radius: 14px;
-    color: #4caf50;
+    color: #c9a227;
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
@@ -169,10 +178,10 @@ body {
 }
 
 .calendar-btn:hover {
-    background: linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(139, 195, 74, 0.3) 100%);
-    border-color: #4caf50;
+    background: linear-gradient(135deg, rgba(201, 162, 39, 0.25) 0%, rgba(212, 184, 74, 0.25) 100%);
+    border-color: #c9a227;
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(76, 175, 80, 0.3);
+    box-shadow: 0 10px 25px rgba(201, 162, 39, 0.3);
 }
 
 .calendar-btn svg {
@@ -206,13 +215,13 @@ body {
 
 /* Modal Content */
 .modal-content {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: linear-gradient(135deg, #0a1628 0%, #132238 100%);
     border-radius: 24px;
     width: 100%;
     max-width: 800px;
     max-height: 85vh;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(201, 162, 39, 0.2);
     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
     transform: scale(0.9) translateY(20px);
     transition: all 0.3s ease;
@@ -228,8 +237,8 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 25px 30px;
-    background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(139, 195, 74, 0.1) 100%);
-    border-bottom: 1px solid rgba(76, 175, 80, 0.2);
+    background: linear-gradient(135deg, rgba(201, 162, 39, 0.15) 0%, rgba(201, 162, 39, 0.08) 100%);
+    border-bottom: 1px solid rgba(201, 162, 39, 0.2);
 }
 
 .modal-title {
@@ -272,8 +281,8 @@ body {
 }
 
 .modal-close:hover {
-    background: rgba(233, 69, 96, 0.3);
-    color: #e94560;
+    background: rgba(201, 162, 39, 0.3);
+    color: #c9a227;
 }
 
 /* Modal Body */
@@ -298,8 +307,8 @@ body {
 .calendar-table th {
     padding: 16px 20px;
     text-align: left;
-    background: #0f3460;
-    color: #ffffff;
+    background: #1a3a5c;
+    color: #c9a227;
     font-weight: 600;
     font-size: 14px;
 }
@@ -320,7 +329,7 @@ body {
 }
 
 .calendar-table tbody tr:hover {
-    background: rgba(76, 175, 80, 0.1);
+    background: rgba(201, 162, 39, 0.1);
 }
 
 .calendar-table tbody tr:nth-child(even) {
@@ -328,11 +337,11 @@ body {
 }
 
 .calendar-table tbody tr:nth-child(even):hover {
-    background: rgba(76, 175, 80, 0.1);
+    background: rgba(201, 162, 39, 0.1);
 }
 
 .calendar-table .payment-date {
-    color: #4caf50;
+    color: #c9a227;
     font-weight: 700;
     white-space: nowrap;
 }
@@ -347,12 +356,12 @@ body {
 }
 
 .modal-body::-webkit-scrollbar-thumb {
-    background: rgba(76, 175, 80, 0.4);
+    background: rgba(201, 162, 39, 0.4);
     border-radius: 4px;
 }
 
 .modal-body::-webkit-scrollbar-thumb:hover {
-    background: rgba(76, 175, 80, 0.6);
+    background: rgba(201, 162, 39, 0.6);
 }
 
 /* Modal Responsive */
@@ -444,32 +453,29 @@ body {
 }
 
 .login-box {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 40px;
     width: 100%;
     max-width: 420px;
     box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(201, 162, 39, 0.2);
 }
 
 .logo {
-    width: 80px;
-    height: 80px;
+    width: 180px;
+    height: auto;
     margin: 0 auto 20px;
-    background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
-    border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 10px 30px rgba(233, 69, 96, 0.4);
 }
 
-.logo svg {
-    width: 45px;
-    height: 45px;
-    color: white;
+.logo img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
 }
 
 .login-box h1 {
@@ -537,9 +543,9 @@ body {
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #e94560;
+    border-color: #c9a227;
     background: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 0 20px rgba(233, 69, 96, 0.3);
+    box-shadow: 0 0 20px rgba(201, 162, 39, 0.3);
 }
 
 /* Searchable Select */
@@ -574,8 +580,8 @@ body {
     top: 100%;
     left: 0;
     right: 0;
-    background: #1a1a2e;
-    border: 2px solid rgba(233, 69, 96, 0.3);
+    background: #0a1628;
+    border: 2px solid rgba(201, 162, 39, 0.3);
     border-radius: 12px;
     margin-top: 5px;
     max-height: 250px;
@@ -596,8 +602,8 @@ body {
 }
 
 .dropdown-item:hover {
-    background: rgba(233, 69, 96, 0.2);
-    color: #e94560;
+    background: rgba(201, 162, 39, 0.2);
+    color: #c9a227;
 }
 
 .dropdown-item.no-result {
@@ -621,7 +627,7 @@ body {
 }
 
 .dropdown-list::-webkit-scrollbar-thumb {
-    background: rgba(233, 69, 96, 0.5);
+    background: rgba(201, 162, 39, 0.5);
     border-radius: 4px;
 }
 
@@ -680,7 +686,7 @@ body {
     width: 24px;
     height: 24px;
     border: 3px solid rgba(255, 255, 255, 0.2);
-    border-top-color: #e94560;
+    border-top-color: #c9a227;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
@@ -715,24 +721,24 @@ body {
 .btn-login {
     width: 100%;
     padding: 15px 30px;
-    background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+    background: linear-gradient(135deg, #c9a227 0%, #d4b84a 100%);
     border: none;
     border-radius: 12px;
     font-size: 16px;
     font-weight: 600;
-    color: white;
+    color: #0a1628;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
     transition: all 0.3s ease;
-    box-shadow: 0 10px 30px rgba(233, 69, 96, 0.4);
+    box-shadow: 0 10px 30px rgba(201, 162, 39, 0.4);
 }
 
 .btn-login:hover {
     transform: translateY(-3px);
-    box-shadow: 0 15px 40px rgba(233, 69, 96, 0.5);
+    box-shadow: 0 15px 40px rgba(201, 162, 39, 0.5);
 }
 
 .btn-login svg {
@@ -1411,12 +1417,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(233, 69, 96, 0.5);
+    background: rgba(201, 162, 39, 0.5);
     border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(233, 69, 96, 0.7);
+    background: rgba(201, 162, 39, 0.7);
 }
 
 /* Animasyonlar */
