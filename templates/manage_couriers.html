@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}" dir="{{ t.get('dir', 'ltr') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ t.get('site_title', 'Kurye Hakedis') }} - {{ t.get('manage_couriers', 'Kurye Yönetimi') }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>{{ t.get('site_title', 'Kurye Hakedis') }}</h1>
+            </div>
+            <nav class="nav-links">
+                <ul>
+                    <li><a href="{{ url_for('login') }}"><i class="fas fa-home"></i> {{ t.get('back', 'Geri') }}</a></li>
+                    <li><a href="{{ url_for('manage_couriers') }}" class="active"><i class="fas fa-users"></i> {{ t.get('manage_couriers', 'Kurye Yönetimi') }}</a></li>
+                    <!-- Diğer menü öğeleri buraya eklenebilir -->
+                </ul>
+            </nav>
+            <div class="language-switcher">
+                {% for lang_code, lang_data in languages.items() %}
+                    <a href="{{ url_for('set_language', lang=lang_code) }}" class="lang-btn {% if current_lang == lang_code %}active{% endif %}">{{ lang_data['lang_name'] }}</a>
+                {% endfor %}
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h2>{{ t.get('courier_list', 'Kurye Listesi') }}</h2>
+            </header>
+
+            <div class="flash-messages">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <div class="card">
+                <h3>{{ t.get('add_new_courier', 'Yeni Kurye Ekle') }}</h3>
+                <form action="{{ url_for('add_courier') }}" method="POST" class="form-grid">
+                    <div class="form-group">
+                        <label for="name">{{ t.get('courier_name', 'Kurye Adı') }}</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">{{ t.get('phone_number', 'Telefon') }}</label>
+                        <input type="text" id="phone" name="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="region">{{ t.get('courier_region', 'Bölge') }}</label>
+                        <input type="text" id="region" name="region">
+                    </div>
+                    <div class="form-group">
+                        <label for="status">{{ t.get('courier_status', 'Durum') }}</label>
+                        <select id="status" name="status">
+                            <option value="Aktif">{{ t.get('active', 'Aktif') }}</option>
+                            <option value="Pasif">{{ t.get('inactive', 'Pasif') }}</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">{{ t.get('add_courier_btn', 'Ekle') }}</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>{{ t.get('courier_list', 'Kurye Listesi') }}</h3>
+                <div class="form-group">
+                    <input type="text" id="searchCourier" onkeyup="filterTable()" placeholder="{{ t.get('search_courier', 'Kurye ara...') }}">
+                </div>
+                <div class="table-actions">
+                    <form action="{{ url_for('import_excel') }}" method="POST" enctype="multipart/form-data" class="inline-form">
+                        <label for="excel_file_upload" class="btn btn-secondary">{{ t.get('import_from_excel', "Excel'den İçe Aktar") }}</label>
+                        <input type="file" id="excel_file_upload" name="file" accept=".xlsx, .xls" style="display: none;" onchange="this.form.submit()">
+                    </form>
+                    <a href="{{ url_for('export_excel') }}" class="btn btn-secondary">{{ t.get('export_to_excel', 'Excel'e Aktar') }}</a>
+                </div>
+                <table id="courierTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>{{ t.get('courier_name', 'Kurye Adı') }}</th>
+                            <th>{{ t.get('phone_number', 'Telefon') }}</th>
+                            <th>{{ t.get('courier_region', 'Bölge') }}</th>
+                            <th>{{ t.get('courier_status', 'Durum') }}</th>
+                            <th>{{ t.get('actions', 'Eylemler') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for courier in couriers %}
+                        <tr>
+                            <td>{{ courier.id }}</td>
+                            <td>{{ courier.name }}</td>
+                            <td>{{ courier.phone }}</td>
+                            <td>{{ courier.region }}</td>
+                            <td>{{ courier.status }}</td>
+                            <td>
+                                <a href="{{ url_for('edit_courier', id=courier.id) }}" class="btn btn-edit">{{ t.get('edit_courier_btn', 'Düzenle') }}</a>
+                                <form action="{{ url_for('delete_courier', id=courier.id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('{{ t.get('confirm_delete', 'Bu kuryeyi silmek istediğinizden emin misiniz?') }}');">
+                                    <button type="submit" class="btn btn-delete">{{ t.get('delete_courier_btn', 'Sil') }}</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function filterTable() {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("searchCourier");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("courierTable");
+            tr = table.getElementsByTagName("tr");
+
+            for (i = 0; i < tr.length; i++) {
+                tdName = tr[i].getElementsByTagName("td")[1]; // Kurye Adı sütunu
+                tdRegion = tr[i].getElementsByTagName("td")[3]; // Bölge sütunu
+                tdStatus = tr[i].getElementsByTagName("td")[4]; // Durum sütunu
+
+                if (tdName || tdRegion || tdStatus) {
+                    var nameMatch = tdName ? tdName.textContent.toUpperCase().indexOf(filter) > -1 : false;
+                    var regionMatch = tdRegion ? tdRegion.textContent.toUpperCase().indexOf(filter) > -1 : false;
+                    var statusMatch = tdStatus ? tdStatus.textContent.toUpperCase().indexOf(filter) > -1 : false;
+
+                    if (nameMatch || regionMatch || statusMatch) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

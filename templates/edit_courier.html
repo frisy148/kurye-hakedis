@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}" dir="{{ t['dir'] }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ t['site_title'] }} - {{ t['edit_courier_btn'] }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>{{ t['site_title'] }}</h1>
+            </div>
+            <nav class="nav-links">
+                <ul>
+                    <li><a href="{{ url_for('login') }}"><i class="fas fa-home"></i> {{ t['back'] }}</a></li>
+                    <li><a href="{{ url_for('manage_couriers') }}" class="active"><i class="fas fa-users"></i> {{ t['manage_couriers'] }}</a></li>
+                    <!-- Diğer menü öğeleri buraya eklenebilir -->
+                </ul>
+            </nav>
+            <div class="language-switcher">
+                {% for lang_code, lang_data in languages.items() %}
+                    <a href="{{ url_for('set_language', lang=lang_code) }}" class="lang-btn {% if current_lang == lang_code %}active{% endif %}">{{ lang_data['lang_name'] }}</a>
+                {% endfor %}
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h2>{{ t['edit_courier_btn'] }}</h2>
+            </header>
+
+            <div class="flash-messages">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <div class="card">
+                <form action="{{ url_for('edit_courier', id=courier.id) }}" method="POST" class="form-grid">
+                    <div class="form-group">
+                        <label for="name">{{ t['courier_name'] }}</label>
+                        <input type="text" id="name" name="name" value="{{ courier.name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">{{ t['phone_number'] }}</label>
+                        <input type="text" id="phone" name="phone" value="{{ courier.phone or '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="region">{{ t['courier_region'] }}</label>
+                        <input type="text" id="region" name="region" value="{{ courier.region or '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="status">{{ t['courier_status'] }}</label>
+                        <select id="status" name="status">
+                            <option value="Aktif" {% if courier.status == 'Aktif' %}selected{% endif %}>{{ t['active'] }}</option>
+                            <option value="Pasif" {% if courier.status == 'Pasif' %}selected{% endif %}>{{ t['inactive'] }}</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">{{ t['save_changes'] }}</button>
+                    <a href="{{ url_for('manage_couriers') }}" class="btn btn-secondary">{{ t['cancel'] }}</a>
+                </form>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

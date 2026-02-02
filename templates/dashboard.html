@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ kurye_adi }} - Hakediş Bilgileri</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-left">
+                <h1>Hakediş Bilgileri</h1>
+                <p class="welcome-text">Hoş geldiniz, <strong>{{ kurye_adi }}</strong></p>
+                <p class="week-info">Dönem: <strong>{{ selected_week }}</strong></p>
+            </div>
+            <div class="header-right">
+                <a href="/" class="btn-logout">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16,17 21,12 16,7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    <span>Geri Dön</span>
+                </a>
+            </div>
+        </header>
+        
+        <main class="dashboard-content">
+            {% if data %}
+                {% for row in data %}
+                
+                <!-- Ana Özet Kartları -->
+                <div class="main-summary">
+                    <div class="big-card total-card">
+                        <div class="big-card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                            </svg>
+                        </div>
+                        <div class="big-card-content">
+                            <span class="big-card-label">Toplam Hakediş</span>
+                            <span class="big-card-value">{{ "%.2f"|format(row[columns.index('Toplam Hakediş')] if 'Toplam Hakediş' in columns else 0) }} <small>₺</small></span>
+                        </div>
+                    </div>
+                    
+                    <div class="big-card payment-card">
+                        <div class="big-card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                                <line x1="1" y1="10" x2="23" y2="10"/>
+                            </svg>
+                        </div>
+                        <div class="big-card-content">
+                            <span class="big-card-label">Ödenecek Tutar</span>
+                            <span class="big-card-value highlight">{{ "%.2f"|format(row[columns.index('Ödenecek Tutar')] if 'Ödenecek Tutar' in columns else 0) }} <small>₺</small></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- İkincil Özet Kartları -->
+                <div class="card-grid">
+                    <div class="summary-card deduction">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="8" y1="12" x2="16" y2="12"/>
+                            </svg>
+                        </div>
+                        <div class="card-info">
+                            <span class="card-label">Toplam Kesinti</span>
+                            <span class="card-value">{{ "%.2f"|format(row[columns.index('Toplam Kesinti Tutarı')] if 'Toplam Kesinti Tutarı' in columns else 0) }} ₺</span>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card region">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                        </div>
+                        <div class="card-info">
+                            <span class="card-label">Bölge</span>
+                            <span class="card-value region-name">{{ row[columns.index('Bölge')] if 'Bölge' in columns else '-' }}</span>
+                        </div>
+                    </div>
+                    
+                    {% if 'Pickup' in columns %}
+                    <div class="summary-card pickup">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                                <line x1="12" y1="22.08" x2="12" y2="12"/>
+                            </svg>
+                        </div>
+                        <div class="card-info">
+                            <span class="card-label">Pickup Sayısı</span>
+                            <span class="card-value">{{ row[columns.index('Pickup')] }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if 'Dropoff' in columns %}
+                    <div class="summary-card dropoff">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                        </div>
+                        <div class="card-info">
+                            <span class="card-label">Dropoff Sayısı</span>
+                            <span class="card-value">{{ row[columns.index('Dropoff')] }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- KAZANÇLAR BÖLÜMÜ -->
+                <div class="details-section">
+                    <div class="section-header earnings-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="1" x2="12" y2="23"/>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                        </svg>
+                        <h2>Kazançlar</h2>
+                    </div>
+                    <div class="detail-grid">
+                        {% if 'Pickup Tutar' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Pickup Tutar</span>
+                            <span class="detail-value positive">+{{ "%.2f"|format(row[columns.index('Pickup Tutar')]) }} ₺</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if 'Dropoff Tutar' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Dropoff Tutar</span>
+                            <span class="detail-value positive">+{{ "%.2f"|format(row[columns.index('Dropoff Tutar')]) }} ₺</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if 'Mesafe Tutarı' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Mesafe Tutarı</span>
+                            <span class="detail-value positive">+{{ "%.2f"|format(row[columns.index('Mesafe Tutarı')]) }} ₺</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if 'Garanti Bölge Tutarı' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Garanti Bölge Tutarı</span>
+                            <span class="detail-value positive">+{{ "%.2f"|format(row[columns.index('Garanti Bölge Tutarı')]) }} ₺</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if 'Gece Mesaisi Tutarı' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Gece Mesaisi Tutarı</span>
+                            <span class="detail-value positive">+{{ "%.2f"|format(row[columns.index('Gece Mesaisi Tutarı')]) }} ₺</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if 'Bölge Kampanya Tutarı' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Bölge Kampanya Tutarı</span>
+                            <span class="detail-value positive">+{{ "%.2f"|format(row[columns.index('Bölge Kampanya Tutarı')]) }} ₺</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if 'Haftalık Ek Paket Tutarı' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Haftalık Ek Paket</span>
+                            <span class="detail-value positive">+{{ "%.2f"|format(row[columns.index('Haftalık Ek Paket Tutarı')]) }} ₺</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if 'Günlük Bonus' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Günlük Bonus</span>
+                            <span class="detail-value positive">+{{ "%.2f"|format(row[columns.index('Günlük Bonus')]) }} ₺</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if 'Hakediş Zam Ödemesi KDV Dahil' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Hakediş Zam Ödemesi (KDV Dahil)</span>
+                            <span class="detail-value positive">+{{ "%.2f"|format(row[columns.index('Hakediş Zam Ödemesi KDV Dahil')]) }} ₺</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if 'Bahşiş Tutar' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Bahşiş Tutar</span>
+                            <span class="detail-value positive">+{{ "%.2f"|format(row[columns.index('Bahşiş Tutar')]) }} ₺</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- KESİNTİLER BÖLÜMÜ -->
+                <div class="details-section">
+                    <div class="section-header deductions-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="8" y1="12" x2="16" y2="12"/>
+                        </svg>
+                        <h2>Kesintiler</h2>
+                    </div>
+                    <div class="detail-grid">
+                        {% if 'Tevkifat Tutar' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Tevkifat Tutar</span>
+                            <span class="detail-value negative">-{{ "%.2f"|format(row[columns.index('Tevkifat Tutar')]) }} ₺</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if 'Nakit' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Nakit</span>
+                            <span class="detail-value negative">-{{ "%.2f"|format(row[columns.index('Nakit')]) }} ₺</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if 'Kredi Kartı' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Kredi Kartı</span>
+                            <span class="detail-value negative">-{{ "%.2f"|format(row[columns.index('Kredi Kartı')]) }} ₺</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if 'Sigorta Kesintisi' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Sigorta Kesintisi</span>
+                            <span class="detail-value negative">-{{ "%.2f"|format(row[columns.index('Sigorta Kesintisi')]) }} ₺</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if 'Ssk, İş Güvenlik Kesintisi' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">SSK, İş Güvenlik Kesintisi</span>
+                            <span class="detail-value negative">-{{ "%.2f"|format(row[columns.index('Ssk, İş Güvenlik Kesintisi')]) }} ₺</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if 'Saha Kesintileri' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Saha Kesintileri</span>
+                            <span class="detail-value negative">-{{ "%.2f"|format(row[columns.index('Saha Kesintileri')]) }} ₺</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if 'Ekipman Kesintisi' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Ekipman Kesintisi</span>
+                            <span class="detail-value negative">-{{ "%.2f"|format(row[columns.index('Ekipman Kesintisi')]) }} ₺</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if 'İade Edilmesi Gereken Maaş Tutarı' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">İade Edilmesi Gereken Maaş</span>
+                            <span class="detail-value negative">-{{ "%.2f"|format(row[columns.index('İade Edilmesi Gereken Maaş Tutarı')]) }} ₺</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if 'Yemeksepeti İade' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Yemeksepeti İade</span>
+                            <span class="detail-value negative">-{{ "%.2f"|format(row[columns.index('Yemeksepeti İade')]) }} ₺</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- ÖZET BÖLÜMÜ -->
+                <div class="final-summary">
+                    <div class="summary-row">
+                        <span class="summary-label">Toplam Hakediş</span>
+                        <span class="summary-value positive">{{ "%.2f"|format(row[columns.index('Toplam Hakediş')] if 'Toplam Hakediş' in columns else 0) }} ₺</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Toplam Kesinti</span>
+                        <span class="summary-value negative">-{{ "%.2f"|format(row[columns.index('Toplam Kesinti Tutarı')] if 'Toplam Kesinti Tutarı' in columns else 0) }} ₺</span>
+                    </div>
+                    <div class="summary-divider"></div>
+                    <div class="summary-row final">
+                        <span class="summary-label">Ödenecek Tutar</span>
+                        <span class="summary-value final-value">{{ "%.2f"|format(row[columns.index('Ödenecek Tutar')] if 'Ödenecek Tutar' in columns else 0) }} ₺</span>
+                    </div>
+                </div>
+                
+                {% endfor %}
+            {% else %}
+                <div class="no-data">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <p>Veri bulunamadı.</p>
+                </div>
+            {% endif %}
+        </main>
+        
+        <footer class="dashboard-footer">
+            <p>© 2026 Kurye Hakediş Sistemi</p>
+        </footer>
+    </div>
+</body>
+</html>

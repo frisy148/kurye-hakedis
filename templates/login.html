@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kurye Hakediş Sistemi</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 16v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3"/>
+                    <rect x="10" y="3" width="11" height="11" rx="2"/>
+                    <circle cx="15.5" cy="8.5" r="1.5"/>
+                </svg>
+            </div>
+            <h1>Kurye Hakediş Sistemi</h1>
+            <p class="subtitle">Hakediş bilgilerinizi görüntülemek için bilgileri girin</p>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST" action="/" id="login-form">
+                <!-- Adım 1: Hafta Seçimi -->
+                <div class="form-group">
+                    <label for="excel_file">1. Hafta Seçin</label>
+                    <select id="excel_file" name="excel_file" required onchange="loadKuryeler()">
+                        <option value="">-- Hafta Seçiniz --</option>
+                        {% for ef in excel_files %}
+                            <option value="{{ ef.filename }}">{{ ef.display_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Yükleniyor göstergesi -->
+                <div id="loading" class="loading-indicator" style="display: none;">
+                    <div class="spinner"></div>
+                    <span>Kuryeler yükleniyor...</span>
+                </div>
+                
+                <!-- Adım 2: İsim Seçimi -->
+                <div class="form-group" id="name-field" style="display: none;">
+                    <label for="kurye_search">2. İsminizi Yazın veya Seçin</label>
+                    
+                    <div class="searchable-select">
+                        <input 
+                            type="text" 
+                            id="kurye_search" 
+                            class="search-input"
+                            placeholder="İsim aramak için yazın..."
+                            autocomplete="off"
+                            onkeyup="filterKuryeler()"
+                            onfocus="showDropdown()"
+                        >
+                        <div class="dropdown-arrow" onclick="toggleDropdown()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </div>
+                        
+                        <div class="dropdown-list" id="dropdown-list"></div>
+                    </div>
+                    
+                    <input type="hidden" id="kurye_adi" name="kurye_adi" required>
+                    
+                    <div class="selected-name" id="selected-name" style="display: none;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                        <span id="selected-name-text"></span>
+                        <button type="button" class="clear-btn" onclick="clearSelection()">×</button>
+                    </div>
+                    
+                    <div class="input-note">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="16" x2="12" y2="12"/>
+                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                        <span>Listede isminiz yoksa, seçtiğiniz haftada kaydınız bulunmuyor olabilir.</span>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-login" id="submit-btn" style="display: none;">
+                    <span>Giriş Yap</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
+        <div class="footer">
+            <p>© 2026 Kurye Hakediş Sistemi</p>
+        </div>
+    </div>
+    
+    <script>
+        var allKuryeler = [];
+        var dropdownOpen = false;
+        
+        function loadKuryeler() {
+            var weekSelect = document.getElementById('excel_file');
+            var nameField = document.getElementById('name-field');
+            var submitBtn = document.getElementById('submit-btn');
+            var loading = document.getElementById('loading');
+            
+            clearSelection();
+            
+            if (weekSelect.value === '') {
+                nameField.style.display = 'none';
+                submitBtn.style.display = 'none';
+                return;
+            }
+            
+            loading.style.display = 'flex';
+            nameField.style.display = 'none';
+            submitBtn.style.display = 'none';
+            
+            fetch('/api/kuryeler/' + encodeURIComponent(weekSelect.value))
+                .then(response => response.json())
+                .then(kuryeler => {
+                    allKuryeler = kuryeler;
+                    renderDropdown(kuryeler);
+                    
+                    loading.style.display = 'none';
+                    nameField.style.display = 'block';
+                    submitBtn.style.display = 'flex';
+                })
+                .catch(error => {
+                    console.error('Hata:', error);
+                    loading.style.display = 'none';
+                    alert('Kuryeler yüklenirken hata oluştu!');
+                });
+        }
+        
+        function renderDropdown(kuryeler) {
+            var dropdownList = document.getElementById('dropdown-list');
+            dropdownList.innerHTML = '';
+            
+            if (kuryeler.length === 0) {
+                dropdownList.innerHTML = '<div class="dropdown-item no-result">Sonuç bulunamadı</div>';
+                return;
+            }
+            
+            kuryeler.forEach(function(kurye) {
+                var item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.textContent = kurye;
+                item.onclick = function() {
+                    selectKurye(kurye);
+                };
+                dropdownList.appendChild(item);
+            });
+        }
+        
+        function filterKuryeler() {
+            var searchValue = document.getElementById('kurye_search').value.toLowerCase();
+            var filtered = allKuryeler.filter(function(kurye) {
+                return kurye.toLowerCase().includes(searchValue);
+            });
+            renderDropdown(filtered);
+            showDropdown();
+        }
+        
+        function showDropdown() {
+            var dropdown = document.getElementById('dropdown-list');
+            dropdown.style.display = 'block';
+            dropdownOpen = true;
+        }
+        
+        function hideDropdown() {
+            var dropdown = document.getElementById('dropdown-list');
+            dropdown.style.display = 'none';
+            dropdownOpen = false;
+        }
+        
+        function toggleDropdown() {
+            if (dropdownOpen) {
+                hideDropdown();
+            } else {
+                showDropdown();
+                document.getElementById('kurye_search').focus();
+            }
+        }
+        
+        function selectKurye(kurye) {
+            document.getElementById('kurye_adi').value = kurye;
+            document.getElementById('kurye_search').value = '';
+            document.getElementById('selected-name-text').textContent = kurye;
+            document.getElementById('selected-name').style.display = 'flex';
+            document.getElementById('kurye_search').placeholder = 'Başka isim aramak için yazın...';
+            hideDropdown();
+        }
+        
+        function clearSelection() {
+            document.getElementById('kurye_adi').value = '';
+            document.getElementById('kurye_search').value = '';
+            document.getElementById('selected-name').style.display = 'none';
+            document.getElementById('kurye_search').placeholder = 'İsim aramak için yazın...';
+            renderDropdown(allKuryeler);
+        }
+        
+        document.addEventListener('click', function(e) {
+            var searchBox = document.querySelector('.searchable-select');
+            if (searchBox && !searchBox.contains(e.target)) {
+                hideDropdown();
+            }
+        });
+        
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            var kuryeAdi = document.getElementById('kurye_adi').value;
+            if (!kuryeAdi) {
+                e.preventDefault();
+                alert('Lütfen listeden isminizi seçin!');
+            }
+        });
+    </script>
+</body>
+</html>
