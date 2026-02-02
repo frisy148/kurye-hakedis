@@ -72,24 +72,12 @@ def get_top5_couriers_3weeks(excel_files):
             excel_path = os.path.join(EXCEL_FOLDER, week_file['filename'])
             df = pd.read_excel(excel_path)
             
+            # Sütunları index ile al (daha güvenilir)
+            # 0: Ad-Soyad, 1: Bölge, 2: Pickup, 3: Dropoff, 14: Toplam Hakediş
             ad_soyad_column = df.columns[0]
-            
-            # Sütunları bul - TAM EŞLEŞMEyle
-            dropoff_column = None
-            hakedis_column = None
-            bolge_column = None
-            
-            for col in df.columns:
-                col_lower = col.lower().strip()
-                # Sadece "Dropoff" sütununu al (Dropoff Tutar değil)
-                if col_lower == 'dropoff':
-                    dropoff_column = col
-                # Toplam Hakediş
-                if 'toplam hakediş' in col_lower or 'toplam hakedis' in col_lower:
-                    hakedis_column = col
-                # Sadece "Bölge" sütununu al (Bölge Kampanya Tutarı değil)
-                if col_lower == 'bölge' or col_lower == 'bolge':
-                    bolge_column = col
+            bolge_column = df.columns[1] if len(df.columns) > 1 else None
+            dropoff_column = df.columns[3] if len(df.columns) > 3 else None
+            hakedis_column = df.columns[14] if len(df.columns) > 14 else None
             
             if dropoff_column is None:
                 continue
