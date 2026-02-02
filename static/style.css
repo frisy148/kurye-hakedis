@@ -34,6 +34,24 @@ body {
     justify-content: center;
     padding: 20px;
     background: linear-gradient(180deg, #f5f7fa 0%, #e8ecf1 100%);
+    position: relative;
+}
+
+/* Arka Plan Görseli */
+.login-container::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/static/bg-courier.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.08;
+    z-index: 0;
+    pointer-events: none;
 }
 
 /* Liderlik Tablosu */
@@ -46,6 +64,8 @@ body {
     margin-bottom: 25px;
     box-shadow: 0 4px 20px rgba(26, 39, 68, 0.08);
     border: 1px solid var(--lumen-gray);
+    position: relative;
+    z-index: 1;
 }
 
 .leaderboard-header {
@@ -182,6 +202,8 @@ body {
     transition: all 0.3s ease;
     margin-top: 20px;
     box-shadow: 0 2px 8px rgba(26, 39, 68, 0.08);
+    position: relative;
+    z-index: 1;
 }
 
 .calendar-btn:hover {
@@ -470,6 +492,8 @@ body {
     max-width: 420px;
     box-shadow: 0 10px 40px rgba(26, 39, 68, 0.1);
     border: 1px solid var(--lumen-gray);
+    position: relative;
+    z-index: 1;
 }
 
 .logo {
@@ -780,6 +804,8 @@ body {
     margin-top: 30px;
     color: var(--lumen-text-light);
     font-size: 12px;
+    position: relative;
+    z-index: 1;
 }
 
 /* ==================== DASHBOARD SAYFASI ==================== */
