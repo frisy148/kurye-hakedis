@@ -20,187 +20,104 @@ body {
     align-items: center;
     justify-content: center;
     padding: 20px;
-    gap: 25px;
+    padding-top: 70px;
 }
 
-/* Haftanın En İyi Kuryesi - Floating Card */
-.best-courier-floating {
+/* Haftanın En İyi Kuryesi - Yatay Bar */
+.best-courier-bar {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(90deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
+    border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+    padding: 12px 20px;
     z-index: 1000;
-    animation: slideIn 0.5s ease-out;
 }
 
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(100px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-.best-courier-card {
-    background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%);
-    backdrop-filter: blur(15px);
-    border-radius: 20px;
-    padding: 20px;
-    width: 280px;
-    border: 2px solid rgba(255, 215, 0, 0.4);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(255, 215, 0, 0.2);
-    animation: glow 2s ease-in-out infinite alternate;
-}
-
-@keyframes glow {
-    from {
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(255, 215, 0, 0.2);
-    }
-    to {
-        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.35);
-    }
-}
-
-.trophy-badge {
-    font-size: 40px;
-    text-align: center;
-    margin-bottom: 10px;
-    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
-}
-
-.best-courier-header {
+.best-courier-inner {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
-}
-
-.best-courier-title {
-    font-size: 12px;
-    color: #FFD700;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-}
-
-.best-courier-week {
-    font-size: 10px;
-    color: rgba(255, 255, 255, 0.5);
-    background: rgba(255, 255, 255, 0.1);
-    padding: 4px 8px;
-    border-radius: 10px;
-}
-
-.best-courier-name {
-    font-size: 20px;
-    font-weight: 700;
-    color: #ffffff;
-    text-align: center;
-    margin: 10px 0;
-    text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-}
-
-.best-courier-region {
-    text-align: center;
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 15px;
-}
-
-.best-courier-stats {
-    display: flex;
     justify-content: center;
     gap: 15px;
-    margin-bottom: 15px;
+    flex-wrap: wrap;
 }
 
-.best-courier-stats .stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: rgba(255, 215, 0, 0.1);
-    padding: 10px 18px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 215, 0, 0.2);
+.best-courier-bar .trophy {
+    font-size: 20px;
 }
 
-.best-courier-stats .stat-value {
-    font-size: 18px;
-    font-weight: 700;
+.best-courier-bar .label {
     color: #FFD700;
-}
-
-.best-courier-stats .stat-label {
-    font-size: 10px;
-    color: rgba(255, 255, 255, 0.6);
-    text-transform: uppercase;
-    margin-top: 3px;
-}
-
-.reward-section {
-    background: linear-gradient(135deg, #4caf50 0%, #8bc34a 100%);
-    border-radius: 12px;
-    padding: 12px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.reward-label {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
     font-weight: 600;
 }
 
-.reward-value {
-    font-size: 18px;
-    font-weight: 700;
+.best-courier-bar .name {
     color: #ffffff;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    font-size: 14px;
+    font-weight: 700;
 }
 
-/* Mobil için En İyi Kurye Kartı */
+.best-courier-bar .divider {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.best-courier-bar .region {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+}
+
+.best-courier-bar .stat {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 13px;
+}
+
+.best-courier-bar .reward {
+    color: #4caf50;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+/* Mobil için Bar */
 @media (max-width: 768px) {
-    .best-courier-floating {
-        position: relative;
-        top: 0;
-        right: 0;
-        margin-bottom: 20px;
+    .best-courier-bar {
+        padding: 10px 15px;
     }
     
-    .best-courier-card {
-        width: 100%;
-        max-width: 320px;
-        margin: 0 auto;
+    .best-courier-inner {
+        gap: 8px;
+    }
+    
+    .best-courier-bar .divider {
+        display: none;
+    }
+    
+    .best-courier-bar .label,
+    .best-courier-bar .name,
+    .best-courier-bar .region,
+    .best-courier-bar .stat,
+    .best-courier-bar .reward {
+        font-size: 11px;
+    }
+    
+    .best-courier-bar .trophy {
+        font-size: 16px;
     }
 }
 
 @media (max-width: 480px) {
-    .best-courier-card {
-        padding: 15px;
+    .best-courier-inner {
+        gap: 5px;
     }
     
-    .trophy-badge {
-        font-size: 35px;
+    .best-courier-bar .region {
+        display: none;
     }
     
-    .best-courier-name {
-        font-size: 18px;
-    }
-    
-    .best-courier-stats .stat {
-        padding: 8px 12px;
-    }
-    
-    .best-courier-stats .stat-value {
-        font-size: 16px;
-    }
-    
-    .reward-value {
-        font-size: 16px;
+    .login-container {
+        padding-top: 80px;
     }
 }
 

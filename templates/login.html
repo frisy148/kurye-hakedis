@@ -7,31 +7,21 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <!-- Haftanın En İyi Kuryesi - Sağ Üst -->
+    <!-- Haftanın En İyi Kuryesi - Üst Bar -->
     {% if best_courier %}
-    <div class="best-courier-floating">
-        <div class="best-courier-card">
-            <div class="trophy-badge">🏆</div>
-            <div class="best-courier-header">
-                <span class="best-courier-title">Haftanın Yıldızı</span>
-                <span class="best-courier-week">{{ best_courier.week }}</span>
-            </div>
-            <div class="best-courier-name">{{ best_courier.name }}</div>
-            <div class="best-courier-region">📍 {{ best_courier.bolge }}</div>
-            <div class="best-courier-stats">
-                <div class="stat">
-                    <span class="stat-value">{{ best_courier.dropoff }}</span>
-                    <span class="stat-label">Teslimat</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-value">{{ "%.0f"|format(best_courier.hakedis) }}₺</span>
-                    <span class="stat-label">Hakediş</span>
-                </div>
-            </div>
-            <div class="reward-section">
-                <span class="reward-label">🎁 Haftalık Ödül</span>
-                <span class="reward-value">500 ₺ Bonus</span>
-            </div>
+    <div class="best-courier-bar">
+        <div class="best-courier-inner">
+            <span class="trophy">🏆</span>
+            <span class="label">Haftanın En İyisi:</span>
+            <span class="name">{{ best_courier.name }}</span>
+            <span class="divider">|</span>
+            <span class="region">📍 {{ best_courier.bolge }}</span>
+            <span class="divider">|</span>
+            <span class="stat">🚀 {{ best_courier.dropoff }} Teslimat</span>
+            <span class="divider">|</span>
+            <span class="stat">💰 {{ "%.0f"|format(best_courier.hakedis) }}₺</span>
+            <span class="divider">|</span>
+            <span class="reward">🎁 500₺ Bonus</span>
         </div>
     </div>
     {% endif %}
