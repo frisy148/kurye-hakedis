@@ -1,0 +1,17 @@
+---
+description: PythonAnywhere deploy sırası - Commit+Push hatırlatması
+alwaysApply: true
+---
+
+# PythonAnywhere Deploy Hatırlatması
+
+Bu proje PythonAnywhere'de çalışıyor. **Her kod değişikliğinden sonra** kullanıcıya şunu hatırlat:
+
+## Sıra (unutma!)
+
+1. **GitHub Desktop** → Commit + Push
+2. **PythonAnywhere Konsol** → `cd ~/mysite && git pull origin main`
+3. **Web** sekmesi → Reload
+4. Tarayıcıda **Ctrl+Shift+R**
+
+Detaylar: `DEPLOY.md`

@@ -1,21 +1,35 @@
 # PythonAnywhere Güncelleme
 
-GitHub'a push ettikten sonra sitede değişikliklerin görünmesi için:
+## ⚠️ HER GÜNCELLEMEDE SIRASIYLA:
 
-## 1. Konsolu aç
-- PythonAnywhere → **Consoles** → **Bash** (yeni veya mevcut konsol)
+### 1. GitHub Desktop
+**Commit + Push** yap (önce bunu unutma!)
 
-## 2. Pull script'ini çalıştır
+### 2. PythonAnywhere Konsol
+Bash açıp şunu yaz:
 ```bash
-cd ~/mysite && bash pull.sh
+cd ~/mysite && git pull origin main
 ```
 
-Veya tek komut:
+### 3. Web
+**Web** sekmesi → **Reload** butonu
+
+### 4. Tarayıcı
+**Ctrl+Shift+R** ile sayfayı yenile
+
+---
+
+## Detaylı Adımlar
+
+### 1. Konsolu aç
+- PythonAnywhere → **Consoles** → **Bash**
+
+### 2. Konsolda çalıştır
 ```bash
-cd ~/mysite && git fetch origin && git pull origin main
+cd ~/mysite && git pull origin main
 ```
 
-## 3. Web'i yenile
+### 3. Web'i yenile
 - **Web** sekmesi → **Reload** butonu
 
 ---
