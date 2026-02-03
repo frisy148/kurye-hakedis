@@ -174,7 +174,7 @@ def get_top5_couriers_3weeks(excel_files):
         print(f"Hata: {e}")
         return None
 
-@app.route('/api/kuryeler/<excel_file>')
+@app.route('/api/kuryeler/<path:excel_file>')
 def api_kuryeler(excel_file):
     """Seçilen haftanın kurye listesini döndürür (API)"""
     kuryeler = get_kuryeler_by_file(excel_file)
