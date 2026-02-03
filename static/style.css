@@ -30,7 +30,7 @@ body::after {
     display: none !important;
 }
 
-/* Login Sayfası */
+/* Login Sayfası - arka plan bg-kurye.png */
 .login-container {
     min-height: 100vh;
     display: flex;
@@ -39,6 +39,25 @@ body::after {
     justify-content: center;
     padding: 20px;
     position: relative;
+}
+.login-container::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('/static/bg-kurye.png') center center / cover no-repeat;
+    opacity: 0.5;
+    z-index: 0;
+    pointer-events: none;
+}
+.login-container > .leaderboard-card,
+.login-container > .login-box,
+.login-container > .calendar-btn,
+.login-container > .footer {
+    position: relative;
+    z-index: 1;
 }
 
 /* Liderlik Tablosu */
