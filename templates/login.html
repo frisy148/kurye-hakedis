@@ -15,12 +15,15 @@
 <body>
     <div class="login-container">
         <div class="bg-layer" style="position:fixed;top:0;left:0;right:0;bottom:0;background:url('https://savasky148.pythonanywhere.com/static/bg-kurye.png') center/cover no-repeat;opacity:0.5;z-index:0;pointer-events:none;"></div>
-        <!-- Top 5 Liderlik Tablosu -->
+        <!-- Son 2 Hafta Performansları -->
         {% if top5_data and top5_data.couriers %}
         <div class="leaderboard-card">
             <div class="leaderboard-header">
-                <h2>🏆 Liderlik Tablosu</h2>
-                <span class="leaderboard-period">Son {{ top5_data.week_count }} Hafta</span>
+                <div>
+                    <h2>🔥 2 Haftalık En İyi Performanslar</h2>
+                    <p class="leaderboard-description">En çok paket teslim eden ve en yüksek kazancı yakalayan kuryeler</p>
+                </div>
+                <span class="leaderboard-period">Son {{ top5_data.week_count }} haftanın özeti</span>
             </div>
             <div class="leaderboard-table">
                 {% for courier in top5_data.couriers %}
@@ -33,11 +36,11 @@
                         <span class="courier-region">📍 {{ courier.bolge }}</span>
                     </div>
                     <div class="courier-stats">
-                        <span class="dropoff">🚀 {{ courier.dropoff }}</span>
-                        <span class="hakedis">💰 {{ "%.0f"|format(courier.hakedis) }}₺</span>
+                        <span class="dropoff">📦 {{ courier.dropoff }} paket</span>
+                        <span class="hakedis">💸 {{ "%.0f"|format(courier.hakedis) }}₺ kazanç</span>
                     </div>
                     <div class="reward-badge">
-                        🎁 {{ courier.reward }}₺
+                        🎁 Ödül yakında...
                     </div>
                 </div>
                 {% endfor %}

@@ -89,6 +89,12 @@ body::after {
     margin: 0;
 }
 
+.leaderboard-description {
+    font-size: 12px;
+    color: var(--lumen-text-light);
+    margin-top: 4px;
+}
+
 .leaderboard-period {
     font-size: 12px;
     color: var(--lumen-white);
