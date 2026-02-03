@@ -4,7 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kurye Hakediş Sistemi</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=4">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
+    <style>
+        .login-container::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url("{{ url_for('static', filename='bg-kurye.png') }}") center/cover no-repeat;
+            opacity: 0.25;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .login-container > * { position: relative; z-index: 1; }
+    </style>
 </head>
 <body>
     <div class="login-container">

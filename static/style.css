@@ -30,7 +30,7 @@ body::after {
     display: none !important;
 }
 
-/* Login Sayfası - arka plan sadece düz renk, görsel yok */
+/* Login Sayfası */
 .login-container {
     min-height: 100vh;
     display: flex;
@@ -38,18 +38,7 @@ body::after {
     align-items: center;
     justify-content: center;
     padding: 20px;
-    background: #f5f7fa !important;
-    background-image: none !important;
-}
-.login-container::before {
-    display: none !important;
-    content: none !important;
-    background-image: none !important;
-}
-.login-container::after {
-    display: none !important;
-    content: none !important;
-    background-image: none !important;
+    position: relative;
 }
 
 /* Liderlik Tablosu */
