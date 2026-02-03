@@ -20,12 +20,17 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: var(--lumen-bg);
+    background: #f5f7fa !important;
+    background-image: none !important;
     min-height: 100vh;
     color: var(--lumen-text);
 }
+body::before,
+body::after {
+    display: none !important;
+}
 
-/* Login Sayfası */
+/* Login Sayfası - arka plan sadece düz renk, görsel yok */
 .login-container {
     min-height: 100vh;
     display: flex;
@@ -33,7 +38,18 @@ body {
     align-items: center;
     justify-content: center;
     padding: 20px;
-    background: linear-gradient(180deg, #f5f7fa 0%, #e8ecf1 100%);
+    background: #f5f7fa !important;
+    background-image: none !important;
+}
+.login-container::before {
+    display: none !important;
+    content: none !important;
+    background-image: none !important;
+}
+.login-container::after {
+    display: none !important;
+    content: none !important;
+    background-image: none !important;
 }
 
 /* Liderlik Tablosu */
