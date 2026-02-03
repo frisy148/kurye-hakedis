@@ -170,8 +170,7 @@ def get_top5_couriers_3weeks(excel_files):
             'weeks': weeks_text,
             'week_count': len(last_3_weeks)
         }
-    except Exception as e:
-        print(f"Hata: {e}")
+    except Exception:
         return None
 
 @app.route('/api/kuryeler/<path:excel_file>')
@@ -179,28 +178,6 @@ def api_kuryeler(excel_file):
     """Seçilen haftanın kurye listesini döndürür (API)"""
     kuryeler = get_kuryeler_by_file(excel_file)
     return jsonify(kuryeler)
-
-@app.route('/api/debug/columns')
-def debug_columns():
-    """Excel dosyasındaki sütun isimlerini gösterir (debug için)"""
-    excel_files = get_excel_files()
-    if not excel_files:
-        return jsonify({'error': 'Excel dosyası bulunamadı'})
-    
-    # İlk Excel dosyasının sütunlarını oku
-    excel_path = os.path.join(EXCEL_FOLDER, excel_files[0]['filename'])
-    try:
-        df = pd.read_excel(excel_path)
-        columns = [str(col) for col in df.columns.tolist()]
-        # İlk satırı da göster (tüm değerleri string'e çevir)
-        first_row = [str(val) for val in df.iloc[0].tolist()] if len(df) > 0 else []
-        return jsonify({
-            'filename': excel_files[0]['filename'],
-            'columns': columns,
-            'first_row_sample': first_row
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)})
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
