@@ -6,15 +6,6 @@
     <title>Kurye Hakediş Sistemi</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=6">
     <style>
-        .login-container::before {
-            content: '';
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: url('https://savasky148.pythonanywhere.com/static/bg-kurye.png') center/cover no-repeat;
-            opacity: 0.5;
-            z-index: 0;
-            pointer-events: none;
-        }
         .login-container .leaderboard-card,
         .login-container .login-box,
         .login-container .calendar-btn,
@@ -23,7 +14,7 @@
 </head>
 <body>
     <div class="login-container">
-        
+        <div class="bg-layer" style="position:fixed;top:0;left:0;right:0;bottom:0;background:url('https://savasky148.pythonanywhere.com/static/bg-kurye.png') center/cover no-repeat;opacity:0.5;z-index:0;pointer-events:none;"></div>
         <!-- Top 5 Liderlik Tablosu -->
         {% if top5_data and top5_data.couriers %}
         <div class="leaderboard-card">
