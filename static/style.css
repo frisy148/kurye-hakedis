@@ -45,11 +45,11 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&q=80');
+    background-image: url('bg-courier.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    opacity: 0.18;
+    opacity: 0.32;
     z-index: 0;
     pointer-events: none;
 }
