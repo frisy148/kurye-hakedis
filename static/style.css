@@ -34,24 +34,6 @@ body {
     justify-content: center;
     padding: 20px;
     background: linear-gradient(180deg, #f5f7fa 0%, #e8ecf1 100%);
-    position: relative;
-}
-
-/* Arka Plan Görseli */
-.login-container::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: url('bg-courier.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    opacity: 0.32;
-    z-index: 0;
-    pointer-events: none;
 }
 
 /* Liderlik Tablosu */
