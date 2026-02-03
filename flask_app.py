@@ -42,17 +42,27 @@ ODEME_TAKVIMI = [
 ]
 
 def get_excel_files():
-    """Klasördeki tüm Excel dosyalarını listeler"""
+    """mysite ve mysite/excel_files klasörlerindeki tüm Excel dosyalarını listeler"""
     excel_files = []
-    if not os.path.exists(EXCEL_FOLDER):
-        return []
-    for file in os.listdir(EXCEL_FOLDER):
-        if file.endswith('.xlsx') and not file.startswith('~'):
-            display_name = file.replace('.xlsx', '')
-            excel_files.append({
-                'filename': file,
-                'display_name': display_name
-            })
+    # Ana klasör
+    if os.path.exists(EXCEL_FOLDER):
+        for file in os.listdir(EXCEL_FOLDER):
+            if file.endswith('.xlsx') and not file.startswith('~'):
+                display_name = file.replace('.xlsx', '')
+                excel_files.append({
+                    'filename': file,
+                    'display_name': display_name
+                })
+    # excel_files alt klasörü (PythonAnywhere'de Excel'ler burada olabilir)
+    excel_sub = os.path.join(EXCEL_FOLDER, 'excel_files')
+    if os.path.exists(excel_sub):
+        for file in os.listdir(excel_sub):
+            if file.endswith('.xlsx') and not file.startswith('~'):
+                display_name = file.replace('.xlsx', '')
+                excel_files.append({
+                    'filename': os.path.join('excel_files', file),
+                    'display_name': display_name
+                })
     excel_files.sort(key=lambda x: x['display_name'], reverse=True)
     return excel_files
 
