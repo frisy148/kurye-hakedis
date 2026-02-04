@@ -634,7 +634,9 @@ body::after {
 }
 
 .login-box {
-    background: var(--surface-card);
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-radius: 20px;
     padding: 40px;
     width: 100%;
@@ -643,6 +645,10 @@ body::after {
     border: 1px solid var(--surface-border);
     position: relative;
     z-index: 1;
+}
+
+:root[data-theme="dark"] .login-box {
+    background: rgba(20, 31, 53, 0.88);
 }
 
 .logo {
