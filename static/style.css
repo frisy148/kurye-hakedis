@@ -16,14 +16,33 @@
     --lumen-gray: #e8ecf1;
     --lumen-text: #1a2744;
     --lumen-text-light: #5a6a7a;
+    --surface-card: var(--lumen-white);
+    --surface-muted: var(--lumen-bg);
+    --surface-border: #e8ecf1;
+    --surface-hover: #eef1f5;
+    --shadow-soft: rgba(26, 39, 68, 0.08);
+}
+
+:root[data-theme="dark"] {
+    --lumen-text: #e4ebf7;
+    --lumen-text-light: #9fb1cb;
+    --surface-card: #141f35;
+    --surface-muted: #0b1526;
+    --surface-border: #1f2c46;
+    --surface-hover: #1c2640;
+    --shadow-soft: rgba(3, 6, 15, 0.6);
 }
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f5f7fa !important;
+    background: var(--surface-muted) !important;
     background-image: none !important;
     min-height: 100vh;
     color: var(--lumen-text);
+}
+
+:root[data-theme="dark"] body {
+    background: var(--surface-muted) !important;
 }
 body::before,
 body::after {
@@ -60,16 +79,80 @@ body::after {
     z-index: 1;
 }
 
+.theme-toggle-container {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 15px;
+    position: relative;
+    z-index: 1;
+}
+
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--surface-border);
+    background: var(--surface-card);
+    color: var(--lumen-text);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px var(--shadow-soft);
+}
+
+.theme-toggle .icon {
+    font-size: 14px;
+    opacity: 0.4;
+}
+
+.theme-toggle[aria-pressed="true"] .icon.moon,
+.theme-toggle:not([aria-pressed="true"]) .icon.sun {
+    opacity: 1;
+}
+
+.theme-toggle:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px var(--shadow-soft);
+}
+
+.theme-toggle.theme-toggle--ghost {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: #ffffff;
+    box-shadow: none;
+}
+
+.theme-toggle.theme-toggle--ghost:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+:root[data-theme="dark"] .theme-toggle.theme-toggle--ghost {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.55);
+}
+
+.dashboard-header .theme-toggle-container {
+    width: auto;
+    max-width: none;
+    margin-left: auto;
+    margin-bottom: 0;
+}
+
 /* Liderlik Tablosu */
 .leaderboard-card {
-    background: var(--lumen-white);
+    background: var(--surface-card);
     border-radius: 16px;
     padding: 25px;
     width: 100%;
     max-width: 500px;
     margin-bottom: 25px;
-    box-shadow: 0 4px 20px rgba(26, 39, 68, 0.08);
-    border: 1px solid var(--lumen-gray);
+    box-shadow: 0 4px 20px var(--shadow-soft);
+    border: 1px solid var(--surface-border);
     position: relative;
     z-index: 1;
 }
@@ -80,12 +163,12 @@ body::after {
     align-items: center;
     margin-bottom: 20px;
     padding-bottom: 15px;
-    border-bottom: 1px solid var(--lumen-gray);
+    border-bottom: 1px solid var(--surface-border);
 }
 
 .leaderboard-header h2 {
     font-size: 18px;
-    color: var(--lumen-dark);
+    color: var(--lumen-text);
     margin: 0;
 }
 
@@ -114,14 +197,14 @@ body::after {
     align-items: center;
     gap: 12px;
     padding: 12px 15px;
-    background: var(--lumen-bg);
+    background: var(--surface-muted);
     border-radius: 12px;
-    border: 1px solid var(--lumen-gray);
+    border: 1px solid var(--surface-border);
     transition: all 0.2s ease;
 }
 
 .leaderboard-row:hover {
-    background: #eef1f5;
+    background: var(--surface-hover);
     border-color: var(--lumen-dark);
 }
 
@@ -153,7 +236,7 @@ body::after {
 .leaderboard-row .courier-name {
     font-size: 14px;
     font-weight: 600;
-    color: var(--lumen-dark);
+    color: var(--lumen-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -204,10 +287,10 @@ body::after {
     justify-content: center;
     gap: 10px;
     padding: 12px 24px;
-    background: var(--lumen-white);
-    border: 2px solid var(--lumen-gray);
+    background: var(--surface-card);
+    border: 2px solid var(--surface-border);
     border-radius: 10px;
-    color: var(--lumen-dark);
+    color: var(--lumen-text);
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -219,7 +302,7 @@ body::after {
 }
 
 .calendar-btn:hover {
-    background: var(--lumen-bg);
+    background: var(--surface-hover);
     border-color: var(--lumen-dark);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(26, 39, 68, 0.12);
@@ -256,13 +339,13 @@ body::after {
 
 /* Modal Content */
 .modal-content {
-    background: var(--lumen-white);
+    background: var(--surface-card);
     border-radius: 20px;
     width: 100%;
     max-width: 800px;
     max-height: 85vh;
     overflow: hidden;
-    border: 1px solid var(--lumen-gray);
+    border: 1px solid var(--surface-border);
     box-shadow: 0 25px 60px rgba(26, 39, 68, 0.25);
     transform: scale(0.9) translateY(20px);
     transition: all 0.3s ease;
@@ -279,7 +362,7 @@ body::after {
     align-items: center;
     padding: 25px 30px;
     background: var(--lumen-dark);
-    border-bottom: 1px solid var(--lumen-gray);
+    border-bottom: 1px solid var(--surface-border);
 }
 
 .modal-title {
@@ -348,11 +431,11 @@ body::after {
 .calendar-table th {
     padding: 16px 20px;
     text-align: left;
-    background: var(--lumen-bg);
-    color: var(--lumen-dark);
+    background: var(--surface-muted);
+    color: var(--lumen-text);
     font-weight: 600;
     font-size: 14px;
-    border-bottom: 2px solid var(--lumen-gray);
+    border-bottom: 2px solid var(--surface-border);
 }
 
 .calendar-table th:first-child {
@@ -361,8 +444,8 @@ body::after {
 
 .calendar-table td {
     padding: 14px 20px;
-    border-bottom: 1px solid var(--lumen-gray);
-    color: var(--lumen-dark);
+    border-bottom: 1px solid var(--surface-border);
+    color: var(--lumen-text);
     font-size: 13px;
 }
 
@@ -371,15 +454,15 @@ body::after {
 }
 
 .calendar-table tbody tr:hover {
-    background: var(--lumen-bg);
+    background: var(--surface-hover);
 }
 
 .calendar-table tbody tr:nth-child(even) {
-    background: #fafbfc;
+    background: var(--surface-hover);
 }
 
 .calendar-table tbody tr:nth-child(even):hover {
-    background: var(--lumen-bg);
+    background: var(--surface-hover);
 }
 
 .calendar-table .payment-date {
@@ -394,7 +477,7 @@ body::after {
 }
 
 .modal-body::-webkit-scrollbar-track {
-    background: var(--lumen-gray);
+    background: var(--surface-border);
 }
 
 .modal-body::-webkit-scrollbar-thumb {
@@ -497,13 +580,13 @@ body::after {
 }
 
 .login-box {
-    background: var(--lumen-white);
+    background: var(--surface-card);
     border-radius: 20px;
     padding: 40px;
     width: 100%;
     max-width: 420px;
-    box-shadow: 0 10px 40px rgba(26, 39, 68, 0.1);
-    border: 1px solid var(--lumen-gray);
+    box-shadow: 0 10px 40px var(--shadow-soft);
+    border: 1px solid var(--surface-border);
     position: relative;
     z-index: 1;
 }
@@ -528,7 +611,7 @@ body::after {
     font-size: 22px;
     font-weight: 700;
     margin-bottom: 8px;
-    color: var(--lumen-dark);
+    color: var(--lumen-text);
 }
 
 .subtitle {
@@ -546,7 +629,7 @@ body::after {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: var(--lumen-dark);
+    color: var(--lumen-text);
     font-size: 14px;
 }
 
@@ -554,11 +637,11 @@ body::after {
 .form-group select {
     width: 100%;
     padding: 14px 18px;
-    background: var(--lumen-bg);
-    border: 2px solid var(--lumen-gray);
+    background: var(--surface-muted);
+    border: 2px solid var(--surface-border);
     border-radius: 10px;
     font-size: 15px;
-    color: var(--lumen-dark);
+    color: var(--lumen-text);
     transition: all 0.3s ease;
 }
 
@@ -569,13 +652,13 @@ body::after {
     background-repeat: no-repeat;
     background-position: right 15px center;
     background-size: 20px;
-    background-color: var(--lumen-bg);
+    background-color: var(--surface-muted);
     padding-right: 50px;
 }
 
 .form-group select option {
-    background: var(--lumen-white);
-    color: var(--lumen-dark);
+    background: var(--surface-card);
+    color: var(--lumen-text);
     padding: 10px;
 }
 
@@ -586,8 +669,8 @@ body::after {
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
-    border-color: var(--lumen-dark);
-    background: var(--lumen-white);
+    border-color: var(--lumen-blue);
+    background: var(--surface-card);
     box-shadow: 0 0 0 4px rgba(26, 39, 68, 0.1);
 }
 
@@ -623,8 +706,8 @@ body::after {
     top: 100%;
     left: 0;
     right: 0;
-    background: var(--lumen-white);
-    border: 2px solid var(--lumen-dark);
+    background: var(--surface-card);
+    border: 2px solid var(--surface-border);
     border-radius: 10px;
     margin-top: 5px;
     max-height: 250px;
@@ -637,8 +720,8 @@ body::after {
     padding: 12px 18px;
     cursor: pointer;
     transition: all 0.2s ease;
-    border-bottom: 1px solid var(--lumen-gray);
-    color: var(--lumen-dark);
+    border-bottom: 1px solid var(--surface-border);
+    color: var(--lumen-text);
 }
 
 .dropdown-item:last-child {
@@ -646,8 +729,8 @@ body::after {
 }
 
 .dropdown-item:hover {
-    background: var(--lumen-bg);
-    color: var(--lumen-dark);
+    background: var(--surface-hover);
+    color: var(--lumen-text);
 }
 
 .dropdown-item.no-result {
@@ -666,7 +749,7 @@ body::after {
 }
 
 .dropdown-list::-webkit-scrollbar-track {
-    background: var(--lumen-gray);
+    background: var(--surface-border);
     border-radius: 4px;
 }
 
@@ -729,8 +812,8 @@ body::after {
 .spinner {
     width: 24px;
     height: 24px;
-    border: 3px solid var(--lumen-gray);
-    border-top-color: var(--lumen-dark);
+    border: 3px solid var(--surface-border);
+    border-top-color: var(--lumen-gold);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
@@ -826,7 +909,7 @@ body::after {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: var(--lumen-bg);
+    background: var(--surface-muted);
 }
 
 .dashboard-header {
@@ -906,15 +989,15 @@ body::after {
 }
 
 .big-card {
-    background: var(--lumen-white);
+    background: var(--surface-card);
     border-radius: 16px;
     padding: 25px;
     display: flex;
     align-items: center;
     gap: 20px;
-    border: 1px solid var(--lumen-gray);
+    border: 1px solid var(--surface-border);
     transition: all 0.3s ease;
-    box-shadow: 0 2px 10px rgba(26, 39, 68, 0.06);
+    box-shadow: 0 2px 10px var(--shadow-soft);
 }
 
 .big-card:hover {
@@ -962,7 +1045,7 @@ body::after {
 .big-card-value {
     font-size: 28px;
     font-weight: 700;
-    color: var(--lumen-dark);
+    color: var(--lumen-text);
 }
 
 .big-card-value.highlight {
@@ -983,15 +1066,15 @@ body::after {
 }
 
 .summary-card {
-    background: var(--lumen-white);
+    background: var(--surface-card);
     border-radius: 12px;
     padding: 20px;
     display: flex;
     align-items: center;
     gap: 15px;
-    border: 1px solid var(--lumen-gray);
+    border: 1px solid var(--surface-border);
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(26, 39, 68, 0.05);
+    box-shadow: 0 2px 8px var(--shadow-soft);
 }
 
 .summary-card:hover {
@@ -1046,7 +1129,7 @@ body::after {
 .card-value {
     font-size: 18px;
     font-weight: 700;
-    color: var(--lumen-dark);
+    color: var(--lumen-text);
 }
 
 .card-value.region-name {
@@ -1058,12 +1141,12 @@ body::after {
 
 /* Detay Bölümleri */
 .details-section {
-    background: var(--lumen-white);
+    background: var(--surface-card);
     border-radius: 16px;
     padding: 25px;
     margin-bottom: 20px;
-    border: 1px solid var(--lumen-gray);
-    box-shadow: 0 2px 10px rgba(26, 39, 68, 0.05);
+    border: 1px solid var(--surface-border);
+    box-shadow: 0 2px 10px var(--shadow-soft);
 }
 
 .section-header {
@@ -1072,7 +1155,7 @@ body::after {
     gap: 12px;
     margin-bottom: 20px;
     padding-bottom: 15px;
-    border-bottom: 1px solid var(--lumen-gray);
+    border-bottom: 1px solid var(--surface-border);
 }
 
 .section-header svg {
@@ -1104,14 +1187,14 @@ body::after {
     justify-content: space-between;
     align-items: center;
     padding: 14px 16px;
-    background: var(--lumen-bg);
+    background: var(--surface-muted);
     border-radius: 10px;
-    border: 1px solid var(--lumen-gray);
+    border: 1px solid var(--surface-border);
     transition: all 0.2s ease;
 }
 
 .detail-item:hover {
-    background: #eef1f5;
+    background: var(--surface-hover);
 }
 
 .detail-label {
@@ -1134,11 +1217,11 @@ body::after {
 
 /* Final Özet */
 .final-summary {
-    background: var(--lumen-white);
+    background: var(--surface-card);
     border-radius: 16px;
     padding: 25px;
-    border: 2px solid var(--lumen-dark);
-    box-shadow: 0 4px 15px rgba(26, 39, 68, 0.1);
+    border: 2px solid var(--surface-border);
+    box-shadow: 0 4px 15px var(--shadow-soft);
 }
 
 .summary-row {
@@ -1168,7 +1251,7 @@ body::after {
 
 .summary-divider {
     height: 2px;
-    background: var(--lumen-gray);
+    background: var(--surface-border);
     margin: 10px 0;
 }
 
@@ -1179,12 +1262,12 @@ body::after {
 .summary-row.final .summary-label {
     font-size: 18px;
     font-weight: 600;
-    color: var(--lumen-dark);
+    color: var(--lumen-text);
 }
 
 .summary-row.final .final-value {
     font-size: 28px;
-    color: var(--lumen-dark);
+    color: var(--lumen-text);
 }
 
 /* No Data */
@@ -1203,12 +1286,12 @@ body::after {
 
 /* Footer */
 .dashboard-footer {
-    background: var(--lumen-white);
+    background: var(--surface-card);
     padding: 20px;
     text-align: center;
     color: var(--lumen-text-light);
     font-size: 12px;
-    border-top: 1px solid var(--lumen-gray);
+    border-top: 1px solid var(--surface-border);
 }
 
 /* ==================== MOBİL UYUMLULUK ==================== */
@@ -1454,7 +1537,7 @@ body::after {
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--lumen-gray);
+    background: var(--surface-border);
     border-radius: 4px;
 }
 

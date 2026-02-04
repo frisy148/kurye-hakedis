@@ -15,6 +15,13 @@
 <body>
     <div class="login-container">
         <div class="bg-layer" style="position:fixed;top:0;left:0;right:0;bottom:0;background:url('https://savasky148.pythonanywhere.com/static/bg-kurye.png') center/cover no-repeat;opacity:0.5;z-index:0;pointer-events:none;"></div>
+        <div class="theme-toggle-container">
+            <button type="button" class="theme-toggle" aria-pressed="false" data-theme-toggle>
+                <span class="icon sun">☀️</span>
+                <span class="icon moon">🌙</span>
+                <span data-theme-text>Dark Mod</span>
+            </button>
+        </div>
         <!-- Son 2 Hafta Performansları -->
         {% if top5_data and top5_data.couriers %}
         <div class="leaderboard-card">
@@ -185,6 +192,7 @@
         </div>
     </div>
     
+    <script src="{{ url_for('static', filename='theme.js') }}?v=1"></script>
     <script>
         var allKuryeler = [];
         var dropdownOpen = false;
