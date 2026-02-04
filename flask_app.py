@@ -103,15 +103,26 @@ def get_kurye_data(kurye_adi, excel_file):
     try:
         excel_path = os.path.join(EXCEL_FOLDER, excel_file)
         df = pd.read_excel(excel_path)
-        ad_soyad_column = df.columns[0]
+        if df.empty or len(df.columns) == 0:
+            return None, None
+        ad_soyad_column = str(df.columns[0]).strip()
         df[ad_soyad_column] = df[ad_soyad_column].astype(str)
         kurye_verisi = df[df[ad_soyad_column].str.lower().str.strip() == kurye_adi.lower().strip()]
-        
         if kurye_verisi.empty:
             return None, None
-        
-        columns = df.columns.tolist()
-        data = kurye_verisi.values.tolist()
+        # Sütun isimlerini düz metin yap (telefon/Excel farklılıkları için)
+        columns = [str(c).strip() for c in df.columns.tolist()]
+        # Satırları sütun sırasına göre listeye çevir (duplicate sütun adı olursa da güvenli)
+        data = []
+        for _, r in kurye_verisi.iterrows():
+            row = []
+            for i in range(len(columns)):
+                try:
+                    val = r.iloc[i]
+                    row.append(val if pd.notna(val) else None)
+                except (IndexError, KeyError):
+                    row.append(None)
+            data.append(row)
         return columns, data
     except FileNotFoundError:
         return None, "Excel dosyası bulunamadı!"
@@ -484,14 +495,18 @@ def get_payment_reminder(selected_week: str) -> Optional[Dict]:
 
 
 def get_row_value(columns: List[str], row: List, column_name: str) -> float:
-    if column_name in columns:
-        try:
-            index = columns.index(column_name)
-        except ValueError:
-            return 0.0
-        if index < len(row):
-            return to_numeric(row[index])
-    return 0.0
+    if not columns or not row or not column_name:
+        return 0.0
+    try:
+        index = columns.index(column_name)
+    except (ValueError, AttributeError):
+        return 0.0
+    if index >= len(row):
+        return 0.0
+    try:
+        return to_numeric(row[index])
+    except (TypeError, ValueError):
+        return 0.0
 
 
 DEDUCTION_CATEGORIES = {
@@ -548,15 +563,15 @@ def build_financial_summary(columns: List[str], row: List) -> Dict:
     if other_total:
         breakdown.append({'label': 'Diğer', 'amount': other_total})
 
-    breakdown.sort(key=lambda item: item['amount'], reverse=True)
+    breakdown.sort(key=lambda item: float(item.get('amount') or 0), reverse=True)
 
     return {
-        'total_earnings': total_earnings,
-        'total_deductions': total_deductions,
-        'total_deductions_display': total_deductions_display,
-        'net_balance': net_balance,
+        'total_earnings': float(total_earnings or 0),
+        'total_deductions': float(total_deductions or 0),
+        'total_deductions_display': float(total_deductions_display or 0),
+        'net_balance': float(net_balance or 0),
         'status': status,
-        'deduction_breakdown': breakdown
+        'deduction_breakdown': [{'label': b['label'], 'amount': float(b.get('amount') or 0)} for b in breakdown]
     }
 
 
