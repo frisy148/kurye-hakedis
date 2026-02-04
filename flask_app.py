@@ -237,6 +237,12 @@ def to_numeric(value) -> float:
     return float(num)
 
 
+@app.template_filter('to_float')
+def template_to_float(value):
+    """Şablonda Excel'den gelen string/object değerleri sayıya çevirir (%.2f için)."""
+    return to_numeric(value)
+
+
 def get_courier_weekly_series(kurye_adi: str, excel_files: List[Dict], limit: int = 12) -> List[Dict]:
     """Kuryenin haftalık paket ve hakediş serisini döndürür."""
     if not kurye_adi or not excel_files:
