@@ -534,7 +534,8 @@ def build_financial_summary(columns: List[str], row: List) -> Dict:
     yemeksepeti_iade = get_row_value(columns, row, 'Yemeksepeti İade')
     # Yemeksepeti İade kuryeye geri yatan para; toplam kesinti gösteriminden düşülür
     total_deductions_display = total_deductions - yemeksepeti_iade
-    net_balance = get_row_value(columns, row, 'Ödenecek Tutar')
+    # Ödenecek tutarı hesapla (Excel sütununa güvenme; Toplam Hakediş - Kesinti)
+    net_balance = total_earnings - total_deductions_display
 
     if net_balance > 0:
         status = 'positive'
