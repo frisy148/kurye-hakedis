@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Yükleme Paneli</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            background: var(--lumen-bg);
+        }
+        .upload-container {
+            max-width: 640px;
+            margin: 60px auto;
+            background: var(--surface-card);
+            border: 1px solid var(--surface-border);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(26, 39, 68, 0.12);
+            padding: 35px;
+        }
+        .upload-container h1 {
+            font-size: 24px;
+            margin-bottom: 6px;
+            color: var(--lumen-text);
+        }
+        .upload-container p {
+            color: var(--lumen-text-light);
+            margin-bottom: 20px;
+        }
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .upload-form label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--lumen-text);
+        }
+        .upload-form input[type="password"],
+        .upload-form input[type="file"] {
+            background: var(--surface-muted);
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 14px;
+        }
+        .upload-form button {
+            align-self: flex-start;
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #1e88e5 0%, #42a5f5 100%);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 24px rgba(30, 136, 229, 0.25);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .upload-form button:hover {
+            transform: translateY(-1px);
+        }
+        .flash-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .flash-messages .alert {
+            padding: 12px 15px;
+            border-radius: 12px;
+            font-size: 13px;
+        }
+        .alert-success {
+            background: rgba(76, 175, 80, 0.12);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            color: #2e7d32;
+        }
+        .alert-error {
+            background: rgba(233, 69, 96, 0.12);
+            border: 1px solid rgba(233, 69, 96, 0.3);
+            color: #c62828;
+        }
+        .upload-summary {
+            margin-top: 25px;
+            padding: 18px;
+            border-radius: 16px;
+            border: 1px dashed var(--surface-border);
+            background: var(--surface-muted);
+        }
+        .upload-history {
+            margin-top: 30px;
+        }
+        .upload-history h2 {
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+        .upload-history ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .upload-history li {
+            font-size: 13px;
+            color: var(--lumen-text-light);
+        }
+        @media (max-width: 768px) {
+            .upload-container {
+                margin: 40px 16px;
+                padding: 25px 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <h1>Excel Yükleme Paneli</h1>
+        <p>Yeni haftanın hakediş tablosunu yüklemek için parolayı girin ve Excel dosyasını seçin.</p>
+
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <form class="upload-form" method="POST" enctype="multipart/form-data">
+            <div>
+                <label for="password">Yükleme Parolası</label>
+                <input type="password" id="password" name="password" placeholder="Parolayı girin" required autocomplete="off">
+            </div>
+            <div>
+                <label for="file">Excel Dosyası (.xlsx veya .xls)</label>
+                <input type="file" id="file" name="file" accept=".xlsx,.xls" required>
+            </div>
+            <button type="submit">Dosyayı Yükle</button>
+        </form>
+
+        {% if summary %}
+        <div class="upload-summary">
+            <strong>{{ summary.filename }}</strong> dosyası analiz edildi.<br>
+            Toplam satır sayısı: {{ summary.row_count }} • Sütun sayısı: {{ summary.column_count }}<br>
+            {% if summary.missing_columns %}
+            <span style="color:#c62828;">Eksik sütunlar: {{ summary.missing_columns|join(', ') }}</span>
+            {% else %}
+            <span style="color:#2e7d32;">Dosya yapısı doğrulandı.</span>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if history %}
+        <div class="upload-history">
+            <h2>Son Yüklemeler</h2>
+            <ul>
+                {% for entry in history[:5] %}
+                <li>{{ entry.filename }} • {{ entry.rows }} satır • {{ entry.saved_at }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

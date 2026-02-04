@@ -75,12 +75,26 @@
                 <!-- Adım 1: Hafta Seçimi -->
                 <div class="form-group">
                     <label for="excel_file">1. Hafta Seçin</label>
-                    <select id="excel_file" name="excel_file" required onchange="loadKuryeler()">
-                        <option value="">-- Hafta Seçiniz --</option>
-                        {% for ef in excel_files %}
-                            <option value="{{ ef.filename }}">{{ ef.display_name }}</option>
-                        {% endfor %}
-                    </select>
+                    <div class="week-selector">
+                        <input
+                            type="text"
+                            id="week_search"
+                            class="week-search"
+                            placeholder="Hafta ara..."
+                            onkeyup="filterWeeks()"
+                            aria-label="Hafta arama"
+                        >
+                        <select id="excel_file" name="excel_file" required onchange="loadKuryeler()">
+                            <option value="">-- Hafta Seçiniz --</option>
+                            {% for group, weeks in excel_files|groupby('group') %}
+                                <optgroup label="{{ group }}">
+                                    {% for ef in weeks %}
+                                        <option value="{{ ef.filename }}">{{ ef.display_name }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
                 
                 <!-- Yükleniyor göstergesi -->
@@ -156,6 +170,24 @@
             <p>© 2026 Kurye Hakediş Sistemi</p>
         </div>
     </div>
+
+    <div class="feature-highlights">
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Performans Grafikleri</h3>
+            <p>Haftalık paket ve hakediş trendini kolayca takip et.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🎯</div>
+            <h3>Kişisel Hedefler</h3>
+            <p>Haftalık paket hedefini belirle, ilerlemeni dashboard’da gör.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Ödeme Hatırlatıcıları</h3>
+            <p>Sıradaki ödeme tarihini ve kalan zamanı tek ekranda yakala.</p>
+        </div>
+    </div>
     
     <!-- Ödeme Takvimi Modal -->
     <div class="modal-overlay" id="calendarModal" onclick="closeCalendarModal(event)">
@@ -195,6 +227,38 @@
     <script>
         var allKuryeler = [];
         var dropdownOpen = false;
+        
+        function filterWeeks() {
+            var searchField = document.getElementById('week_search');
+            var select = document.getElementById('excel_file');
+            if (!searchField || !select) return;
+
+            var filterValue = searchField.value.toLowerCase();
+            var options = select.options;
+
+            for (var i = 0; i < options.length; i++) {
+                var option = options[i];
+                if (!option.value) {
+                    continue;
+                }
+                var match = option.textContent.toLowerCase().includes(filterValue);
+                option.hidden = !match;
+            }
+
+            var groups = select.getElementsByTagName('optgroup');
+            for (var g = 0; g < groups.length; g++) {
+                var group = groups[g];
+                var visible = false;
+                var childOptions = group.children;
+                for (var j = 0; j < childOptions.length; j++) {
+                    if (!childOptions[j].hidden) {
+                        visible = true;
+                        break;
+                    }
+                }
+                group.hidden = !visible;
+            }
+        }
         
         function loadKuryeler() {
             var weekSelect = document.getElementById('excel_file');

@@ -2,12 +2,22 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 import pandas as pd
 import os
+import re
+import json
+import io
+from datetime import datetime
+from typing import List, Dict, Optional
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = 'kurye-hakedis-secret-key'
+os.makedirs(app.instance_path, exist_ok=True)
 
 # Excel dosyalarının bulunduğu klasör (PythonAnywhere)
 EXCEL_FOLDER = "/home/Savasky148/mysite"
+TARGETS_FILE = os.path.join(app.instance_path, 'targets.json')
+UPLOAD_HISTORY_FILE = os.path.join(app.instance_path, 'uploads.json')
+UPLOAD_PASSWORD = os.environ.get('UPLOAD_PASSWORD', 'kurye2026!')
 
 # Ödeme Takvimi 2026
 ODEME_TAKVIMI = [
@@ -41,6 +51,27 @@ ODEME_TAKVIMI = [
     {"calisma": "21 Aralık - 27 Aralık 2026 / 28 Aralık - 31 Aralık 2026", "odeme": "Ocak 2027"},
 ]
 
+MONTHS_TR = {
+    'ocak': 1,
+    'subat': 2,
+    'şubat': 2,
+    'mart': 3,
+    'nisan': 4,
+    'mayis': 5,
+    'mayıs': 5,
+    'haziran': 6,
+    'temmuz': 7,
+    'agustos': 8,
+    'ağustos': 8,
+    'eylul': 9,
+    'eylül': 9,
+    'ekim': 10,
+    'kasim': 11,
+    'kasım': 11,
+    'aralik': 12,
+    'aralık': 12,
+}
+
 def get_excel_files():
     """mysite ve mysite/excel_files klasörlerindeki tüm Excel dosyalarını listeler"""
     excel_files = []
@@ -51,7 +82,8 @@ def get_excel_files():
                 display_name = file.replace('.xlsx', '')
                 excel_files.append({
                     'filename': file,
-                    'display_name': display_name
+                    'display_name': display_name,
+                    'group': extract_month_group(display_name)
                 })
     # excel_files alt klasörü (PythonAnywhere'de Excel'ler burada olabilir)
     excel_sub = os.path.join(EXCEL_FOLDER, 'excel_files')
@@ -61,7 +93,8 @@ def get_excel_files():
                 display_name = file.replace('.xlsx', '')
                 excel_files.append({
                     'filename': os.path.join('excel_files', file),
-                    'display_name': display_name
+                    'display_name': display_name,
+                    'group': extract_month_group(display_name)
                 })
     excel_files.sort(key=lambda x: x['display_name'], reverse=True)
     return excel_files
@@ -173,6 +206,488 @@ def get_top5_couriers_3weeks(excel_files):
     except Exception:
         return None
 
+
+def find_column(columns: List[str], candidates: List[str], fallback_index: Optional[int] = None) -> Optional[str]:
+    """Verilen sütun isimleri arasında ilk eşleşmeyi döndürür, yoksa fallback index kullanır."""
+    if not columns:
+        return None
+    for candidate in candidates:
+        if candidate in columns:
+            return candidate
+    if fallback_index is not None and 0 <= fallback_index < len(columns):
+        return columns[fallback_index]
+    return None
+
+
+def to_numeric(value) -> float:
+    """NaN ve hataları sıfıra çevirerek numerik değer döndürür."""
+    num = pd.to_numeric(value, errors='coerce')
+    if pd.isna(num):
+        return 0.0
+    return float(num)
+
+
+def get_courier_weekly_series(kurye_adi: str, excel_files: List[Dict], limit: int = 12) -> List[Dict]:
+    """Kuryenin haftalık paket ve hakediş serisini döndürür."""
+    if not kurye_adi or not excel_files:
+        return []
+
+    weekly_data = []
+    normalized_name = kurye_adi.lower().strip()
+
+    for idx, week_file in enumerate(excel_files[:limit]):
+        excel_path = os.path.join(EXCEL_FOLDER, week_file['filename'])
+        try:
+            df = pd.read_excel(excel_path)
+        except Exception:
+            continue
+
+        if df.empty:
+            continue
+
+        columns = df.columns.tolist()
+        ad_soyad_column = columns[0]
+        df[ad_soyad_column] = df[ad_soyad_column].astype(str)
+        row = df[df[ad_soyad_column].str.lower().str.strip() == normalized_name]
+
+        if row.empty:
+            continue
+
+        record = row.iloc[0]
+
+        pickup_col = find_column(columns, ['Pickup', 'Pickup Sayısı', 'Pickup Adedi'], None)
+        dropoff_col = find_column(columns, ['Dropoff', 'Dropoff Sayısı', 'Dropoff Adedi'], 3)
+        total_earnings_col = find_column(columns, ['Toplam Hakediş', 'Toplam Hakediş Tutarı'], 14)
+        payout_col = find_column(columns, ['Ödenecek Tutar', 'Odenecek Tutar', 'Net Ödeme'], None)
+
+        weekly_data.append({
+            'label': week_file['display_name'],
+            'pickup': to_numeric(record.get(pickup_col)) if pickup_col else 0,
+            'dropoff': to_numeric(record.get(dropoff_col)) if dropoff_col else 0,
+            'total_earnings': to_numeric(record.get(total_earnings_col)) if total_earnings_col else 0,
+            'payout': to_numeric(record.get(payout_col)) if payout_col else 0,
+        })
+
+    weekly_data.reverse()  # Eski haftadan yeni haftaya
+    return weekly_data
+
+
+def get_company_overview(excel_files: List[Dict]) -> Optional[Dict]:
+    """Son haftaya ait genel istatistikleri döndürür."""
+    if not excel_files:
+        return None
+
+    latest = excel_files[0]
+    excel_path = os.path.join(EXCEL_FOLDER, latest['filename'])
+    try:
+        df = pd.read_excel(excel_path)
+    except Exception:
+        return None
+
+    if df.empty:
+        return None
+
+    columns = df.columns.tolist()
+    ad_soyad_column = columns[0]
+    dropoff_col = find_column(columns, ['Dropoff', 'Dropoff Sayısı', 'Dropoff Adedi'], 3)
+    total_earnings_col = find_column(columns, ['Toplam Hakediş', 'Toplam Hakediş Tutarı'], 14)
+    payout_col = find_column(columns, ['Ödenecek Tutar', 'Odenecek Tutar', 'Net Ödeme'], None)
+
+    def column_sum(col_name):
+        if not col_name or col_name not in df:
+            return 0.0
+        numeric_series = pd.to_numeric(df[col_name], errors='coerce').fillna(0)
+        return float(numeric_series.sum())
+
+    total_dropoff = 0.0
+    if dropoff_col and dropoff_col in df:
+        total_dropoff = float(pd.to_numeric(df[dropoff_col], errors='coerce').fillna(0).sum())
+
+    total_earnings = column_sum(total_earnings_col)
+    total_payout = column_sum(payout_col)
+    active_couriers = df[ad_soyad_column].dropna().astype(str).str.strip()
+    active_courier_count = active_couriers[active_couriers != ''].nunique()
+
+    average_payout = total_payout / active_courier_count if active_courier_count else 0.0
+
+    return {
+        'week_label': latest['display_name'],
+        'total_dropoff': int(total_dropoff),
+        'total_earnings': total_earnings,
+        'total_payout': total_payout,
+        'active_courier_count': int(active_courier_count),
+        'average_payout': average_payout
+    }
+
+
+def normalize_text(value: str) -> str:
+    if not value:
+        return ''
+    text = value.lower()
+    replacements = {
+        'hakediş tablosu': '',
+        'hakediş': '',
+        'tablosu': '',
+        '.xlsx': '',
+        '.xls': ''
+    }
+    for key, replacement in replacements.items():
+        text = text.replace(key, replacement)
+    text = text.replace('-', ' ')
+    text = re.sub(r'\s+', ' ', text)
+    return text.strip()
+
+
+def normalize_month(month_name: str) -> str:
+    mapping = {
+        'ı': 'i',
+        'İ': 'i',
+        'ş': 's',
+        'Ş': 's',
+        'ğ': 'g',
+        'Ğ': 'g',
+        'ü': 'u',
+        'Ü': 'u',
+        'ö': 'o',
+        'Ö': 'o',
+        'ç': 'c',
+        'Ç': 'c'
+    }
+    for src, target in mapping.items():
+        month_name = month_name.replace(src, target)
+    return month_name.lower()
+
+
+def extract_month_group(display_name: str) -> str:
+    if not display_name:
+        return 'Diğer'
+    tokens = display_name.replace('-', ' ').split()
+    month_label = None
+    year_label = None
+    for token in tokens:
+        normalized = normalize_month(token)
+        if normalized in MONTHS_TR and not month_label:
+            month_label = token.capitalize()
+        elif token.isdigit() and len(token) == 4:
+            year_label = token
+    if month_label and year_label:
+        return f"{month_label} {year_label}"
+    if month_label:
+        return month_label
+    return 'Diğer'
+
+
+def parse_turkish_date(date_text: str) -> Optional[datetime]:
+    if not date_text:
+        return None
+    match = re.search(r'(\d{1,2})\s+([A-Za-zÇĞİÖŞÜçğıöşü]+)\s+(\d{4})', date_text)
+    if not match:
+        return None
+    day = int(match.group(1))
+    month_name = normalize_month(match.group(2))
+    year = int(match.group(3))
+    month = MONTHS_TR.get(month_name)
+    if not month:
+        return None
+    try:
+        return datetime(year, month, day)
+    except ValueError:
+        return None
+
+
+def get_payment_reminder(selected_week: str) -> Optional[Dict]:
+    if not selected_week or not ODEME_TAKVIMI:
+        return None
+
+    normalized_week = normalize_text(selected_week)
+    matched_entry = None
+
+    for entry in ODEME_TAKVIMI:
+        normalized_entry = normalize_text(entry.get('calisma', ''))
+        if normalized_week and normalized_week in normalized_entry:
+            matched_entry = entry
+            break
+
+    if not matched_entry:
+        first_token = normalized_week.split(' ')[0] if normalized_week else ''
+        for entry in ODEME_TAKVIMI:
+            normalized_entry = normalize_text(entry.get('calisma', ''))
+            if first_token and first_token in normalized_entry:
+                matched_entry = entry
+                break
+
+    if not matched_entry:
+        matched_entry = ODEME_TAKVIMI[0]
+
+    payment_text = matched_entry.get('odeme', '')
+    payment_date = parse_turkish_date(payment_text)
+    days_remaining = None
+    if payment_date:
+        days_remaining = (payment_date.date() - datetime.today().date()).days
+
+    if days_remaining is None:
+        message = "Ödeme takvimi yakında paylaşılacak."
+        status = 'pending'
+    elif days_remaining < 0:
+        message = f"Ödeme {abs(days_remaining)} gün gecikti."
+        status = 'overdue'
+    elif days_remaining == 0:
+        message = "Ödeme bugün hesabında!"
+        status = 'today'
+    elif days_remaining == 1:
+        message = "Ödemeye 1 gün kaldı."
+        status = 'soon'
+    else:
+        message = f"Ödemeye {days_remaining} gün kaldı."
+        status = 'soon' if days_remaining <= 3 else 'scheduled'
+
+    return {
+        'week_range': matched_entry.get('calisma'),
+        'payment_date': payment_text,
+        'days_remaining': days_remaining,
+        'status': status,
+        'message': message
+    }
+
+
+def get_row_value(columns: List[str], row: List, column_name: str) -> float:
+    if column_name in columns:
+        try:
+            index = columns.index(column_name)
+        except ValueError:
+            return 0.0
+        if index < len(row):
+            return to_numeric(row[index])
+    return 0.0
+
+
+DEDUCTION_CATEGORIES = {
+    'Vergi & Sigorta': ['Tevkifat Tutar', 'Sigorta Kesintisi', 'Ssk, İş Güvenlik Kesintisi'],
+    'Tahsilat Farkı': ['Nakit', 'Kredi Kartı'],
+    'İadeler': ['İade Edilmesi Gereken Maaş Tutarı', 'Yemeksepeti İade'],
+    'Ekipman': ['Ekipman Kesintisi'],
+}
+
+
+def build_financial_summary(columns: List[str], row: List) -> Dict:
+    total_earnings = get_row_value(columns, row, 'Toplam Hakediş')
+    total_deductions = get_row_value(columns, row, 'Toplam Kesinti Tutarı')
+    net_balance = get_row_value(columns, row, 'Ödenecek Tutar')
+
+    if net_balance > 0:
+        status = 'positive'
+    elif net_balance < 0:
+        status = 'negative'
+    else:
+        status = 'neutral'
+
+    breakdown = []
+    used_columns = set()
+
+    for label, names in DEDUCTION_CATEGORIES.items():
+        total = 0.0
+        for name in names:
+            value = get_row_value(columns, row, name)
+            if value:
+                total += value
+                used_columns.add(name)
+        if total:
+            breakdown.append({'label': label, 'amount': total})
+
+    other_total = 0.0
+    for idx, column_name in enumerate(columns):
+        if column_name in used_columns or idx == 0:
+            continue
+        if any(keyword in column_name for keyword in ['Kesinti', 'İade', 'Tutar']) or column_name in ['Nakit', 'Kredi Kartı']:
+            value = to_numeric(row[idx])
+            if value:
+                other_total += value
+
+    if other_total:
+        breakdown.append({'label': 'Diğer', 'amount': other_total})
+
+    breakdown.sort(key=lambda item: item['amount'], reverse=True)
+
+    return {
+        'total_earnings': total_earnings,
+        'total_deductions': total_deductions,
+        'net_balance': net_balance,
+        'status': status,
+        'deduction_breakdown': breakdown
+    }
+
+
+def load_targets() -> Dict:
+    if not os.path.exists(TARGETS_FILE):
+        return {}
+    try:
+        with open(TARGETS_FILE, 'r', encoding='utf-8') as target_file:
+            data = json.load(target_file)
+            if isinstance(data, dict):
+                return data
+    except (ValueError, OSError):
+        pass
+    return {}
+
+
+def save_targets(targets: Dict) -> None:
+    try:
+        with open(TARGETS_FILE, 'w', encoding='utf-8') as target_file:
+            json.dump(targets, target_file, ensure_ascii=False, indent=2)
+    except OSError:
+        pass
+
+
+def load_upload_history() -> List[Dict]:
+    if not os.path.exists(UPLOAD_HISTORY_FILE):
+        return []
+    try:
+        with open(UPLOAD_HISTORY_FILE, 'r', encoding='utf-8') as history_file:
+            data = json.load(history_file)
+            if isinstance(data, list):
+                return data
+    except (OSError, ValueError):
+        pass
+    return []
+
+
+def save_upload_history(entries: List[Dict]) -> None:
+    try:
+        with open(UPLOAD_HISTORY_FILE, 'w', encoding='utf-8') as history_file:
+            json.dump(entries, history_file, ensure_ascii=False, indent=2)
+    except OSError:
+        pass
+
+
+def append_upload_history(entry: Dict) -> None:
+    history = load_upload_history()
+    history.insert(0, entry)
+    history = history[:20]
+    save_upload_history(history)
+
+
+def inspect_excel_dataframe(df: pd.DataFrame) -> Dict:
+    columns = df.columns.tolist()
+    row_count = len(df)
+
+    column_checks = {
+        'Dropoff': find_column(columns, ['Dropoff', 'Dropoff Sayısı', 'Dropoff Adedi'], 3),
+        'Toplam Hakediş': find_column(columns, ['Toplam Hakediş', 'Toplam Hakediş Tutarı'], 14),
+        'Ödenecek Tutar': find_column(columns, ['Ödenecek Tutar', 'Odenecek Tutar', 'Net Ödeme'], None)
+    }
+
+    missing = [label for label, column_name in column_checks.items() if column_name is None]
+
+    return {
+        'row_count': row_count,
+        'column_count': len(columns),
+        'missing_columns': missing
+    }
+
+
+def build_target_context(kurye_adi: str, columns: List[str], row: List) -> Dict:
+    targets = load_targets()
+    stored = targets.get(kurye_adi, {})
+    goal_value = to_numeric(stored.get('goal')) if stored else 0.0
+    current_dropoff = get_row_value(columns, row, 'Dropoff')
+    progress = 0
+    if goal_value > 0:
+        progress = min(100, (current_dropoff / goal_value) * 100)
+
+    return {
+        'goal': goal_value,
+        'current': current_dropoff,
+        'progress': progress,
+        'updated_at': stored.get('updated_at')
+    }
+
+
+def build_week_metrics(week_file: Dict) -> Dict[str, Dict]:
+    excel_path = os.path.join(EXCEL_FOLDER, week_file['filename'])
+    try:
+        df = pd.read_excel(excel_path)
+    except Exception:
+        return {}
+
+    if df.empty:
+        return {}
+
+    columns = df.columns.tolist()
+    ad_soyad_column = columns[0]
+    dropoff_col = find_column(columns, ['Dropoff', 'Dropoff Sayısı', 'Dropoff Adedi'], 3)
+    total_earnings_col = find_column(columns, ['Toplam Hakediş', 'Toplam Hakediş Tutarı'], 14)
+    payout_col = find_column(columns, ['Ödenecek Tutar', 'Odenecek Tutar', 'Net Ödeme'], None)
+
+    metrics = {}
+    for _, row in df.iterrows():
+        name = str(row[ad_soyad_column]).strip()
+        if not name or name.lower() == 'nan':
+            continue
+        metrics[name] = {
+            'dropoff': to_numeric(row.get(dropoff_col)) if dropoff_col else 0,
+            'earnings': to_numeric(row.get(total_earnings_col)) if total_earnings_col else 0,
+            'payout': to_numeric(row.get(payout_col)) if payout_col else 0,
+        }
+    return metrics
+
+
+def get_weekly_badges(excel_files: List[Dict]) -> List[Dict]:
+    if not excel_files:
+        return []
+
+    latest_metrics = build_week_metrics(excel_files[0])
+    if not latest_metrics:
+        return []
+
+    badges = []
+
+    # Highest dropoff
+    top_dropoff = max(latest_metrics.items(), key=lambda item: item[1]['dropoff'])
+    badges.append({
+        'title': 'Paket Şampiyonu',
+        'courier': top_dropoff[0],
+        'value': int(top_dropoff[1]['dropoff']),
+        'suffix': 'paket',
+        'description': 'Son hafta en fazla teslimatı yapan kurye.'
+    })
+
+    # Highest earnings
+    top_earner = max(latest_metrics.items(), key=lambda item: item[1]['earnings'])
+    badges.append({
+        'title': 'Kazanç Lideri',
+        'courier': top_earner[0],
+        'value': int(round(top_earner[1]['earnings'])),
+        'suffix': '₺',
+        'description': 'Haftanın en yüksek hakedişini elde etti.'
+    })
+
+    # Biggest improvement compared to previous week
+    if len(excel_files) > 1:
+        previous_metrics = build_week_metrics(excel_files[1])
+        best_improvement = None
+        for name, current in latest_metrics.items():
+            previous = previous_metrics.get(name)
+            if not previous:
+                continue
+            diff = current['dropoff'] - previous['dropoff']
+            if diff > 0:
+                if not best_improvement or diff > best_improvement['diff']:
+                    best_improvement = {
+                        'name': name,
+                        'diff': diff,
+                        'current_dropoff': current['dropoff']
+                    }
+        if best_improvement:
+            badges.append({
+                'title': 'Atılım Yapan',
+                'courier': best_improvement['name'],
+                'value': int(best_improvement['diff']),
+                'suffix': 'paket artış',
+                'description': f"Önceki haftaya göre {int(best_improvement['diff'])} paket daha fazla teslimat yaptı."
+            })
+
+    return badges
+
 @app.route('/api/kuryeler/<path:excel_file>')
 def api_kuryeler(excel_file):
     """Seçilen haftanın kurye listesini döndürür (API)"""
@@ -215,14 +730,112 @@ def login():
             return redirect(url_for('login'))
         
         selected_display = selected_file.replace('.xlsx', '')
+        weekly_series = get_courier_weekly_series(kurye_adi, excel_files)
+        company_overview = get_company_overview(excel_files)
+        payment_reminder = get_payment_reminder(selected_display)
+        financial_summary = build_financial_summary(columns, data[0] if data else [])
+        weekly_badges = get_weekly_badges(excel_files)
         
         return render_template('dashboard.html', 
                              kurye_adi=kurye_adi, 
                              columns=columns, 
                              data=data,
-                             selected_week=selected_display)
+                             selected_week=selected_display,
+                             weekly_series=weekly_series,
+                             company_overview=company_overview,
+                             payment_reminder=payment_reminder,
+                         financial_summary=financial_summary,
+                         weekly_badges=weekly_badges,
+                         target_info=build_target_context(kurye_adi, columns, data[0] if data else []))
     
     return render_template('login.html', excel_files=excel_files, top5_data=top5_data, odeme_takvimi=ODEME_TAKVIMI)
+
+@app.route('/api/targets', methods=['POST'])
+def update_target():
+    payload = request.form or request.get_json(silent=True) or {}
+    kurye_adi = str(payload.get('kurye_adi', '')).strip()
+    goal_raw = payload.get('goal')
+
+    if not kurye_adi:
+        return jsonify(success=False, message='Kurye adı gerekli'), 400
+
+    try:
+        goal_value = float(goal_raw)
+    except (TypeError, ValueError):
+        return jsonify(success=False, message='Geçerli bir hedef giriniz.'), 400
+
+    if goal_value < 0:
+        return jsonify(success=False, message='Hedef değeri 0 veya daha büyük olmalı.'), 400
+
+    targets = load_targets()
+    targets[kurye_adi] = {
+        'goal': goal_value,
+        'updated_at': datetime.utcnow().isoformat()
+    }
+    save_targets(targets)
+
+    return jsonify(success=True, goal=goal_value)
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload_excel():
+    history = load_upload_history()
+    summary = None
+
+    if request.method == 'POST':
+        password = request.form.get('password', '').strip()
+        if password != UPLOAD_PASSWORD:
+            flash('Geçersiz parola! Yükleme yapılamadı.', 'error')
+            return render_template('upload.html', history=history, summary=summary)
+
+        uploaded_file = request.files.get('file')
+        if not uploaded_file or uploaded_file.filename == '':
+            flash('Lütfen yüklemek için bir Excel dosyası seçin.', 'error')
+            return render_template('upload.html', history=history, summary=summary)
+
+        filename = secure_filename(uploaded_file.filename)
+        if not filename.lower().endswith(('.xlsx', '.xls')):
+            flash('Yalnızca .xlsx veya .xls uzantılı dosyalar kabul edilir.', 'error')
+            return render_template('upload.html', history=history, summary=summary)
+
+        file_bytes = uploaded_file.read()
+        excel_stream = io.BytesIO(file_bytes)
+
+        try:
+            df = pd.read_excel(excel_stream)
+        except Exception:
+            flash('Excel dosyası okunamadı. Dosyanın bozulmadığından emin olun.', 'error')
+            return render_template('upload.html', history=history, summary=summary)
+
+        summary = inspect_excel_dataframe(df)
+        summary['filename'] = filename
+
+        if summary['missing_columns']:
+            missing_text = ', '.join(summary['missing_columns'])
+            flash(f"Excel dosyasında eksik sütunlar var: {missing_text}", 'error')
+            return render_template('upload.html', history=history, summary=summary)
+
+        excel_dir = os.path.join(EXCEL_FOLDER, 'excel_files')
+        os.makedirs(excel_dir, exist_ok=True)
+        destination_path = os.path.join(excel_dir, filename)
+
+        try:
+            with open(destination_path, 'wb') as destination_file:
+                destination_file.write(file_bytes)
+        except OSError:
+            flash('Dosya diske kaydedilirken hata oluştu.', 'error')
+            return render_template('upload.html', history=history, summary=summary)
+
+        append_upload_history({
+            'filename': filename,
+            'saved_at': datetime.utcnow().isoformat(),
+            'rows': summary['row_count'],
+            'columns': summary['column_count']
+        })
+
+        flash('Dosya başarıyla yüklendi ve doğrulandı.', 'success')
+        history = load_upload_history()
+
+    return render_template('upload.html', history=history, summary=summary)
 
 @app.route('/dashboard')
 def dashboard():
