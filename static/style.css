@@ -280,6 +280,25 @@ body::after {
     color: var(--lumen-dark);
 }
 
+:root[data-theme="dark"] .leaderboard-row.gold {
+    background: linear-gradient(135deg, #3b2c0d 0%, #5d4514 100%);
+    border-color: #b88f1a;
+}
+
+:root[data-theme="dark"] .leaderboard-row.silver {
+    background: linear-gradient(135deg, #1b2537 0%, #2b3a54 100%);
+    border-color: #7484a3;
+}
+
+:root[data-theme="dark"] .leaderboard-row.gold .reward-badge {
+    background: linear-gradient(135deg, #b88f1a 0%, #d6aa2b 100%);
+    color: #1a1e2a;
+}
+
+:root[data-theme="dark"] .leaderboard-row .reward-badge {
+    background: linear-gradient(135deg, #1f5d2d 0%, #2f7a3d 100%);
+}
+
 /* Ödeme Takvimi Butonu */
 .calendar-btn {
     display: flex;
@@ -604,6 +623,17 @@ body::after {
     width: 100%;
     height: auto;
     object-fit: contain;
+}
+
+:root[data-theme="dark"] .logo {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 12px 28px var(--shadow-soft);
+}
+
+:root[data-theme="dark"] .logo img {
+    filter: brightness(0.85) contrast(1.05);
 }
 
 .login-box h1 {
