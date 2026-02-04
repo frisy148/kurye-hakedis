@@ -408,7 +408,33 @@ def get_payment_reminder(selected_week: str) -> Optional[Dict]:
             break
 
     if not matched_entry:
-        return None
+        # Yıl içermeyen hafta adları için gün/aralık eşleştir
+        range_match = re.search(r'(\d{1,2})\s*-\s*(\d{1,2})\s+([A-Za-zÇĞİÖŞÜçğıöşü]+)', selected_week)
+        if range_match:
+            start_day = range_match.group(1)
+            end_day = range_match.group(2)
+            month_name = normalize_month(range_match.group(3))
+            range_key = f"{start_day}-{end_day} {month_name}"
+
+            for entry in ODEME_TAKVIMI:
+                entry_text = entry.get('calisma', '')
+                entry_matches = re.findall(r'(\d{1,2})\s*-\s*(\d{1,2})\s+([A-Za-zÇĞİÖŞÜçğıöşü]+)', entry_text)
+                for entry_match in entry_matches:
+                    entry_key = f"{entry_match[0]}-{entry_match[1]} {normalize_month(entry_match[2])}"
+                    if entry_key == range_key:
+                        matched_entry = entry
+                        break
+                if matched_entry:
+                    break
+
+    if not matched_entry:
+        return {
+            'week_range': selected_week,
+            'payment_date': 'Ödeme tarihi bulunamadı',
+            'days_remaining': None,
+            'status': 'pending',
+            'message': 'Ödeme tarihi bu dönem için duyurulacak.'
+        }
 
     payment_text = matched_entry.get('odeme', '')
     payment_date = parse_turkish_date(payment_text)
