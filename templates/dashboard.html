@@ -60,7 +60,7 @@
                 </div>
                 {% endif %}
                 
-                {% if payment_reminder or weekly_badges %}
+                {% if payment_reminder %}
                 <section class="insight-section">
                     <div class="insight-grid">
                         <div class="insight-column">
@@ -74,26 +74,6 @@
                                 <div class="reminder-message reminder-message--{{ payment_reminder.status }}">
                                     {{ payment_reminder.message }}
                                 </div>
-                            </div>
-                            {% endif %}
-                            {% if weekly_badges %}
-                            <div class="insight-card insight-card--badges">
-                                <div class="insight-card-header">
-                                    <h2>Haftanın Rozetleri</h2>
-                                    <p>Ekipte öne çıkan performanslar</p>
-                                </div>
-                                <ul class="badge-list">
-                                    {% for badge in weekly_badges %}
-                                    <li>
-                                        <div class="badge-heading">
-                                            <span class="badge-title">{{ badge.title }}</span>
-                                            <span class="badge-value">{{ badge.value }} {{ badge.suffix }}</span>
-                                        </div>
-                                        <div class="badge-courier">{{ badge.courier }}</div>
-                                        <p class="badge-desc">{{ badge.description }}</p>
-                                    </li>
-                                    {% endfor %}
-                                </ul>
                             </div>
                             {% endif %}
                         </div>
@@ -359,19 +339,6 @@
                         </div>
                         {% endif %}
                         </div>
-                        {% if financial_summary.deduction_breakdown %}
-                        <div class="deduction-breakdown">
-                            <h3>Kesinti Özeti</h3>
-                            <ul>
-                                {% for item in financial_summary.deduction_breakdown %}
-                                <li>
-                                    <span>{{ item.label }}</span>
-                                    <strong>{{ item.amount | round(0) | int }}₺</strong>
-                                </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        {% endif %}
                     </div>
                 </div>
                 

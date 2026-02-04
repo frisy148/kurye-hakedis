@@ -563,91 +563,6 @@ def inspect_excel_dataframe(df: pd.DataFrame) -> Dict:
     }
 
 
-def build_week_metrics(week_file: Dict) -> Dict[str, Dict]:
-    excel_path = os.path.join(EXCEL_FOLDER, week_file['filename'])
-    try:
-        df = pd.read_excel(excel_path)
-    except Exception:
-        return {}
-
-    if df.empty:
-        return {}
-
-    columns = df.columns.tolist()
-    ad_soyad_column = columns[0]
-    dropoff_col = find_column(columns, ['Dropoff', 'Dropoff Sayısı', 'Dropoff Adedi'], 3)
-    total_earnings_col = find_column(columns, ['Toplam Hakediş', 'Toplam Hakediş Tutarı'], 14)
-    payout_col = find_column(columns, ['Ödenecek Tutar', 'Odenecek Tutar', 'Net Ödeme'], None)
-
-    metrics = {}
-    for _, row in df.iterrows():
-        name = str(row[ad_soyad_column]).strip()
-        if not name or name.lower() == 'nan':
-            continue
-        metrics[name] = {
-            'dropoff': to_numeric(row.get(dropoff_col)) if dropoff_col else 0,
-            'earnings': to_numeric(row.get(total_earnings_col)) if total_earnings_col else 0,
-            'payout': to_numeric(row.get(payout_col)) if payout_col else 0,
-        }
-    return metrics
-
-
-def get_weekly_badges(excel_files: List[Dict]) -> List[Dict]:
-    if not excel_files:
-        return []
-
-    latest_metrics = build_week_metrics(excel_files[0])
-    if not latest_metrics:
-        return []
-
-    badges = []
-
-    # Highest dropoff
-    top_dropoff = max(latest_metrics.items(), key=lambda item: item[1]['dropoff'])
-    badges.append({
-        'title': 'Paket Şampiyonu',
-        'courier': top_dropoff[0],
-        'value': int(top_dropoff[1]['dropoff']),
-        'suffix': 'paket',
-        'description': 'Son hafta en fazla teslimatı yapan kurye.'
-    })
-
-    # Highest earnings
-    top_earner = max(latest_metrics.items(), key=lambda item: item[1]['earnings'])
-    badges.append({
-        'title': 'Kazanç Lideri',
-        'courier': top_earner[0],
-        'value': int(round(top_earner[1]['earnings'])),
-        'suffix': '₺',
-        'description': 'Haftanın en yüksek hakedişini elde etti.'
-    })
-
-    # Biggest improvement compared to previous week
-    if len(excel_files) > 1:
-        previous_metrics = build_week_metrics(excel_files[1])
-        best_improvement = None
-        for name, current in latest_metrics.items():
-            previous = previous_metrics.get(name)
-            if not previous:
-                continue
-            diff = current['dropoff'] - previous['dropoff']
-            if diff > 0:
-                if not best_improvement or diff > best_improvement['diff']:
-                    best_improvement = {
-                        'name': name,
-                        'diff': diff,
-                        'current_dropoff': current['dropoff']
-                    }
-        if best_improvement:
-            badges.append({
-                'title': 'Atılım Yapan',
-                'courier': best_improvement['name'],
-                'value': int(best_improvement['diff']),
-                'suffix': 'paket artış',
-                'description': f"Önceki haftaya göre {int(best_improvement['diff'])} paket daha fazla teslimat yaptı."
-            })
-
-    return badges
 
 @app.route('/api/kuryeler/<path:excel_file>')
 def api_kuryeler(excel_file):
@@ -693,16 +608,13 @@ def login():
         selected_display = selected_file.replace('.xlsx', '')
         payment_reminder = get_payment_reminder(selected_display)
         financial_summary = build_financial_summary(columns, data[0] if data else [])
-        weekly_badges = get_weekly_badges(excel_files)
-        
         return render_template('dashboard.html', 
                              kurye_adi=kurye_adi, 
                              columns=columns, 
                              data=data,
                              selected_week=selected_display,
                              payment_reminder=payment_reminder,
-                         financial_summary=financial_summary,
-                             weekly_badges=weekly_badges)
+                             financial_summary=financial_summary)
     
     return render_template('login.html', excel_files=excel_files, top5_data=top5_data, odeme_takvimi=ODEME_TAKVIMI)
 
