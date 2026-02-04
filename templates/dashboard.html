@@ -104,7 +104,7 @@
                         </div>
                         <div class="big-card-content">
                             <span class="big-card-label">Ödenecek Tutar</span>
-                            <span class="big-card-value highlight">{{ "%.2f"|format(((row[columns.index('Ödenecek Tutar')] if 'Ödenecek Tutar' in columns else 0)|to_float)) }} <small>₺</small></span>
+                            <span class="big-card-value highlight">{{ "%.2f"|format(financial_summary.net_balance|to_float) }} <small>₺</small></span>
                         </div>
                     </div>
                 </div>
@@ -355,7 +355,7 @@
                     <div class="summary-divider"></div>
                     <div class="summary-row final">
                         <span class="summary-label">Ödenecek Tutar</span>
-                        <span class="summary-value final-value">{{ "%.2f"|format(((row[columns.index('Ödenecek Tutar')] if 'Ödenecek Tutar' in columns else 0)|to_float)) }} ₺</span>
+                        <span class="summary-value final-value">{{ "%.2f"|format(financial_summary.net_balance|to_float) }} ₺</span>
                     </div>
                 </div>
                 
