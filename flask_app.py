@@ -15,7 +15,6 @@ os.makedirs(app.instance_path, exist_ok=True)
 
 # Excel dosyalarının bulunduğu klasör (PythonAnywhere)
 EXCEL_FOLDER = "/home/Savasky148/mysite"
-TARGETS_FILE = os.path.join(app.instance_path, 'targets.json')
 UPLOAD_HISTORY_FILE = os.path.join(app.instance_path, 'uploads.json')
 UPLOAD_PASSWORD = os.environ.get('UPLOAD_PASSWORD', 'kurye2026!')
 
@@ -517,27 +516,6 @@ def build_financial_summary(columns: List[str], row: List) -> Dict:
     }
 
 
-def load_targets() -> Dict:
-    if not os.path.exists(TARGETS_FILE):
-        return {}
-    try:
-        with open(TARGETS_FILE, 'r', encoding='utf-8') as target_file:
-            data = json.load(target_file)
-            if isinstance(data, dict):
-                return data
-    except (ValueError, OSError):
-        pass
-    return {}
-
-
-def save_targets(targets: Dict) -> None:
-    try:
-        with open(TARGETS_FILE, 'w', encoding='utf-8') as target_file:
-            json.dump(targets, target_file, ensure_ascii=False, indent=2)
-    except OSError:
-        pass
-
-
 def load_upload_history() -> List[Dict]:
     if not os.path.exists(UPLOAD_HISTORY_FILE):
         return []
@@ -582,23 +560,6 @@ def inspect_excel_dataframe(df: pd.DataFrame) -> Dict:
         'row_count': row_count,
         'column_count': len(columns),
         'missing_columns': missing
-    }
-
-
-def build_target_context(kurye_adi: str, columns: List[str], row: List) -> Dict:
-    targets = load_targets()
-    stored = targets.get(kurye_adi, {})
-    goal_value = to_numeric(stored.get('goal')) if stored else 0.0
-    current_dropoff = get_row_value(columns, row, 'Dropoff')
-    progress = 0
-    if goal_value > 0:
-        progress = min(100, (current_dropoff / goal_value) * 100)
-
-    return {
-        'goal': goal_value,
-        'current': current_dropoff,
-        'progress': progress,
-        'updated_at': stored.get('updated_at')
     }
 
 
@@ -730,8 +691,6 @@ def login():
             return redirect(url_for('login'))
         
         selected_display = selected_file.replace('.xlsx', '')
-        weekly_series = get_courier_weekly_series(kurye_adi, excel_files)
-        company_overview = get_company_overview(excel_files)
         payment_reminder = get_payment_reminder(selected_display)
         financial_summary = build_financial_summary(columns, data[0] if data else [])
         weekly_badges = get_weekly_badges(excel_files)
@@ -741,40 +700,11 @@ def login():
                              columns=columns, 
                              data=data,
                              selected_week=selected_display,
-                             weekly_series=weekly_series,
-                             company_overview=company_overview,
                              payment_reminder=payment_reminder,
                          financial_summary=financial_summary,
-                         weekly_badges=weekly_badges,
-                         target_info=build_target_context(kurye_adi, columns, data[0] if data else []))
+                             weekly_badges=weekly_badges)
     
     return render_template('login.html', excel_files=excel_files, top5_data=top5_data, odeme_takvimi=ODEME_TAKVIMI)
-
-@app.route('/api/targets', methods=['POST'])
-def update_target():
-    payload = request.form or request.get_json(silent=True) or {}
-    kurye_adi = str(payload.get('kurye_adi', '')).strip()
-    goal_raw = payload.get('goal')
-
-    if not kurye_adi:
-        return jsonify(success=False, message='Kurye adı gerekli'), 400
-
-    try:
-        goal_value = float(goal_raw)
-    except (TypeError, ValueError):
-        return jsonify(success=False, message='Geçerli bir hedef giriniz.'), 400
-
-    if goal_value < 0:
-        return jsonify(success=False, message='Hedef değeri 0 veya daha büyük olmalı.'), 400
-
-    targets = load_targets()
-    targets[kurye_adi] = {
-        'goal': goal_value,
-        'updated_at': datetime.utcnow().isoformat()
-    }
-    save_targets(targets)
-
-    return jsonify(success=True, goal=goal_value)
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_excel():

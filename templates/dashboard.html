@@ -60,47 +60,10 @@
                 </div>
                 {% endif %}
                 
-                {% if weekly_series or payment_reminder or company_overview or weekly_badges %}
+                {% if payment_reminder or weekly_badges %}
                 <section class="insight-section">
                     <div class="insight-grid">
-                        {% if weekly_series %}
-                        <div class="insight-card insight-card--chart">
-                            <div class="insight-card-header">
-                                <h2>Haftalık Performans</h2>
-                                <p>Son haftalardaki paket ve hakediş değişimi</p>
-                            </div>
-                            <div class="insight-chart-wrapper">
-                                <canvas id="weeklyTrendChart"></canvas>
-                            </div>
-                        </div>
-                        {% endif %}
                         <div class="insight-column">
-                            {% if target_info %}
-                            <div class="insight-card insight-card--target" data-current-dropoff="{{ target_info.current | round(0) | int }}">
-                                <div class="insight-card-header">
-                                    <h2>Haftalık Hedefin</h2>
-                                    <p>Daha çok paket için hedef belirle</p>
-                                </div>
-                                <div class="goal-progress" data-goal-current="{{ target_info.current | round(0) | int }}">
-                                    <div class="goal-progress-bar">
-                                        <div class="goal-progress-fill" data-goal-progress style="width: {{ target_info.progress | round(0) }}%;"></div>
-                                    </div>
-                                    <div class="goal-progress-meta">
-                                        <span>Şu an: <strong data-goal-current>{{ target_info.current | round(0) | int }}</strong> paket</span>
-                                        <span>Hedef: <strong data-goal-target>{{ target_info.goal | round(0) | int if target_info.goal else '—' }}</strong> paket</span>
-                                    </div>
-                                </div>
-                                <form id="goal-form" class="goal-form" data-courier="{{ kurye_adi }}">
-                                    <label>Haftalık hedefini güncelle</label>
-                                    <div class="goal-input">
-                                        <input type="number" name="goal" min="0" step="1" value="{{ target_info.goal | round(0) | int if target_info.goal else '' }}" placeholder="Örn. 450">
-                                        <button type="submit">Kaydet</button>
-                                    </div>
-                                    <input type="hidden" name="kurye_adi" value="{{ kurye_adi }}">
-                                    <span class="goal-feedback" id="goal-feedback" aria-live="polite"></span>
-                                </form>
-                            </div>
-                            {% endif %}
                             {% if payment_reminder %}
                             <div class="insight-card insight-card--reminder">
                                 <div class="insight-card-header">
@@ -111,36 +74,6 @@
                                 <div class="reminder-message reminder-message--{{ payment_reminder.status }}">
                                     {{ payment_reminder.message }}
                                 </div>
-                            </div>
-                            {% endif %}
-                            {% if company_overview %}
-                            <div class="insight-card insight-card--summary">
-                                <div class="insight-card-header">
-                                    <h2>Ağ Performansı</h2>
-                                    <p>{{ company_overview.week_label }}</p>
-                                </div>
-                                <ul class="summary-list">
-                                    <li>
-                                        <span>Toplam Dropoff</span>
-                                        <strong>{{ company_overview.total_dropoff | int }}</strong>
-                                    </li>
-                                    <li>
-                                        <span>Toplam Hakediş</span>
-                                        <strong>{{ company_overview.total_earnings | round(0) | int }}₺</strong>
-                                    </li>
-                                    <li>
-                                        <span>Toplam Ödeme</span>
-                                        <strong>{{ company_overview.total_payout | round(0) | int }}₺</strong>
-                                    </li>
-                                    <li>
-                                        <span>Aktif Kurye</span>
-                                        <strong>{{ company_overview.active_courier_count }}</strong>
-                                    </li>
-                                    <li>
-                                        <span>Ortalama Ödeme</span>
-                                        <strong>{{ company_overview.average_payout | round(0) | int }}₺</strong>
-                                    </li>
-                                </ul>
                             </div>
                             {% endif %}
                             {% if weekly_badges %}
@@ -477,10 +410,5 @@
         </footer>
     </div>
     <script src="{{ url_for('static', filename='theme.js') }}?v=1"></script>
-    {% if weekly_series %}
-    <script id="weekly-series-data" type="application/json">{{ weekly_series | tojson }}</script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    {% endif %}
-    <script src="{{ url_for('static', filename='dashboard.js') }}?v=1"></script>
 </body>
 </html>
