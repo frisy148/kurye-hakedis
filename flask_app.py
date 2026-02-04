@@ -145,34 +145,34 @@ def get_top5_couriers_3weeks(excel_files):
         for week_file in last_3_weeks:
             excel_path = os.path.join(EXCEL_FOLDER, week_file['filename'])
             df = pd.read_excel(excel_path)
-            
-            # Sütunları index ile al (daha güvenilir)
-            # 0: Ad-Soyad, 1: Bölge, 2: Pickup, 3: Dropoff, 14: Toplam Hakediş
-            ad_soyad_column = df.columns[0]
-            bolge_column = df.columns[1] if len(df.columns) > 1 else None
-            dropoff_column = df.columns[3] if len(df.columns) > 3 else None
-            hakedis_column = df.columns[14] if len(df.columns) > 14 else None
-            
-            if dropoff_column is None:
+            columns = [str(c) for c in df.columns]
+
+            # Sütunları isimle bul (Excel yapısı değişse de doğru sütun okunur)
+            ad_soyad_column = find_column(columns, ['Ad-Soyad', 'Ad Soyad', 'Kurye'], 0)
+            bolge_column = find_column(columns, ['Bölge', 'Bolge'], 1)
+            dropoff_column = find_column(columns, ['Dropoff', 'Dropoff Sayısı', 'Dropoff Adedi'], 3)
+            hakedis_column = find_column(columns, ['Toplam Hakediş', 'Toplam Hakediş Tutarı'], 14)
+
+            if not ad_soyad_column or not dropoff_column:
                 continue
-            
+
             # Her kurye için verileri topla
             for _, row in df.iterrows():
                 name = str(row[ad_soyad_column]).strip()
                 if not name or name == 'nan':
                     continue
-                
+
                 dropoff = pd.to_numeric(row[dropoff_column], errors='coerce')
                 if pd.isna(dropoff):
                     dropoff = 0
-                
+
                 hakedis = 0
-                if hakedis_column:
+                if hakedis_column and hakedis_column in row.index:
                     hakedis = pd.to_numeric(row[hakedis_column], errors='coerce')
                     if pd.isna(hakedis):
                         hakedis = 0
-                
-                bolge = str(row[bolge_column]) if bolge_column else '-'
+
+                bolge = str(row[bolge_column]).strip() if bolge_column and bolge_column in row.index else '-'
                 
                 if name in courier_totals:
                     courier_totals[name]['dropoff'] += int(dropoff)
