@@ -1171,6 +1171,11 @@ body::after {
     color: #c62828;
 }
 
+.reminder-message--paid {
+    background: rgba(76, 175, 80, 0.15);
+    color: #2e7d32;
+}
+
 
 .finance-alert {
     display: flex;

@@ -394,42 +394,57 @@ def parse_turkish_date(date_text: str) -> Optional[datetime]:
         return None
 
 
+def _parse_week_from_display(display: str) -> Optional[tuple]:
+    """'5-11 Ocak' veya 'excel_files/5-11 Ocak Hakediş Tablosu' -> (5, 11, 'ocak')."""
+    if not display:
+        return None
+    # Sadece dosya adı kısmını kullan (yol varsa)
+    name = display.split('/')[-1].strip()
+    # "X-Y Ay" formatı
+    m = re.search(r'(\d{1,2})\s*-\s*(\d{1,2})\s+([A-Za-zÇĞİÖŞÜçğıöşü]+)', name)
+    if m:
+        return (m.group(1), m.group(2), normalize_month(m.group(3)))
+    return None
+
+
+def _parse_calisma_ranges(calisma: str) -> list:
+    """'5 Ocak - 11 Ocak 2026 / 12 Ocak - 18 Ocak 2026' -> [(5,11,'ocak'), (12,18,'ocak')]."""
+    if not calisma:
+        return []
+    ranges = []
+    for part in calisma.split('/'):
+        part = part.strip()
+        # "5 Ocak - 11 Ocak 2026" veya "29 Aralık 2025 - 4 Ocak 2026"
+        m = re.search(r'(\d{1,2})\s+([A-Za-zÇĞİÖŞÜçğıöşü]+)\s*-\s*(\d{1,2})\s+([A-Za-zÇĞİÖŞÜçğıöşü]+)', part)
+        if m:
+            d1, ay1, d2, ay2 = m.group(1), normalize_month(m.group(2)), m.group(3), normalize_month(m.group(4))
+            ranges.append((d1, d2, ay1))
+            if ay1 != ay2:
+                ranges.append((d1, d2, ay2))
+    return ranges
+
+
 def get_payment_reminder(selected_week: str) -> Optional[Dict]:
     if not selected_week or not ODEME_TAKVIMI:
         return None
 
-    normalized_week = normalize_text(selected_week)
+    week_tup = _parse_week_from_display(selected_week)
     matched_entry = None
 
-    for entry in ODEME_TAKVIMI:
-        normalized_entry = normalize_text(entry.get('calisma', ''))
-        if normalized_week and normalized_week in normalized_entry:
-            matched_entry = entry
-            break
-
-    if not matched_entry:
-        # Yıl içermeyen hafta adları için gün/aralık eşleştir
-        range_match = re.search(r'(\d{1,2})\s*-\s*(\d{1,2})\s+([A-Za-zÇĞİÖŞÜçğıöşü]+)', selected_week)
-        if range_match:
-            start_day = range_match.group(1)
-            end_day = range_match.group(2)
-            month_name = normalize_month(range_match.group(3))
-            range_key = f"{start_day}-{end_day} {month_name}"
-
-            for entry in ODEME_TAKVIMI:
-                entry_text = entry.get('calisma', '')
-                entry_matches = re.findall(r'(\d{1,2})\s*-\s*(\d{1,2})\s+([A-Za-zÇĞİÖŞÜçğıöşü]+)', entry_text)
-                for entry_match in entry_matches:
-                    entry_key = f"{entry_match[0]}-{entry_match[1]} {normalize_month(entry_match[2])}"
-                    if entry_key == range_key:
-                        matched_entry = entry
-                        break
-                if matched_entry:
+    if week_tup:
+        start_day, end_day, month_norm = week_tup
+        for entry in ODEME_TAKVIMI:
+            ranges = _parse_calisma_ranges(entry.get('calisma', ''))
+            for r in ranges:
+                if r[0] == start_day and r[1] == end_day and r[2] == month_norm:
+                    matched_entry = entry
                     break
+            if matched_entry:
+                break
 
     if not matched_entry:
         return {
-            'week_range': selected_week,
+            'week_range': selected_week.split('/')[-1].strip() if selected_week else selected_week,
             'payment_date': 'Ödeme tarihi bulunamadı',
             'days_remaining': None,
             'status': 'pending',
@@ -446,8 +461,8 @@ def get_payment_reminder(selected_week: str) -> Optional[Dict]:
         message = "Ödeme tarihi bu dönem için duyurulacak."
         status = 'pending'
     elif days_remaining < 0:
-        message = f"Ödeme {abs(days_remaining)} gün gecikti."
-        status = 'overdue'
+        message = f"Bu tarihte ödendi 📅 {payment_text}"
+        status = 'paid'
     elif days_remaining == 0:
         message = "Ödeme bugün hesabında!"
         status = 'today'
