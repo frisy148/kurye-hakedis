@@ -489,6 +489,9 @@ DEDUCTION_CATEGORIES = {
 def build_financial_summary(columns: List[str], row: List) -> Dict:
     total_earnings = get_row_value(columns, row, 'Toplam Hakediş')
     total_deductions = get_row_value(columns, row, 'Toplam Kesinti Tutarı')
+    yemeksepeti_iade = get_row_value(columns, row, 'Yemeksepeti İade')
+    # Yemeksepeti İade kuryeye geri yatan para; toplam kesinti gösteriminden düşülür
+    total_deductions_display = total_deductions - yemeksepeti_iade
     net_balance = get_row_value(columns, row, 'Ödenecek Tutar')
 
     if net_balance > 0:
@@ -528,6 +531,7 @@ def build_financial_summary(columns: List[str], row: List) -> Dict:
     return {
         'total_earnings': total_earnings,
         'total_deductions': total_deductions,
+        'total_deductions_display': total_deductions_display,
         'net_balance': net_balance,
         'status': status,
         'deduction_breakdown': breakdown

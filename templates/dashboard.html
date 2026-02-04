@@ -55,7 +55,7 @@
                         {% else %}
                         <p>Bu hafta ödenecek tutar dengede görünüyor.</p>
                         {% endif %}
-                        <span>Toplam hakediş: {{ financial_summary.total_earnings | round(0) | int }}₺ • Kesinti toplamı: {{ financial_summary.total_deductions | round(0) | int }}₺</span>
+                        <span>Toplam hakediş: {{ financial_summary.total_earnings | round(0) | int }}₺ • Kesinti toplamı: {{ financial_summary.total_deductions_display | round(0) | int }}₺</span>
                     </div>
                 </div>
                 {% endif %}
@@ -120,7 +120,7 @@
                         </div>
                         <div class="card-info">
                             <span class="card-label">Toplam Kesinti</span>
-                            <span class="card-value">{{ "%.2f"|format(row[columns.index('Toplam Kesinti Tutarı')] if 'Toplam Kesinti Tutarı' in columns else 0) }} ₺</span>
+                            <span class="card-value">{{ "%.2f"|format(financial_summary.total_deductions_display) }} ₺</span>
                         </div>
                     </div>
                     
@@ -350,7 +350,7 @@
                     </div>
                     <div class="summary-row">
                         <span class="summary-label">Toplam Kesinti</span>
-                        <span class="summary-value negative">-{{ "%.2f"|format(row[columns.index('Toplam Kesinti Tutarı')] if 'Toplam Kesinti Tutarı' in columns else 0) }} ₺</span>
+                        <span class="summary-value negative">-{{ "%.2f"|format(financial_summary.total_deductions_display) }} ₺</span>
                     </div>
                     <div class="summary-divider"></div>
                     <div class="summary-row final">
