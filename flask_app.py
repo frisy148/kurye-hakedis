@@ -360,7 +360,8 @@ def normalize_month(month_name: str) -> str:
 def extract_month_group(display_name: str) -> str:
     if not display_name:
         return 'Diğer'
-    tokens = display_name.replace('-', ' ').split()
+    # Alt çizgili dosya adları da ay/yıl çıksın: "19-25_Ocak_2026_Hakedis_Tablosu" -> "Ocak 2026"
+    tokens = display_name.replace('_', ' ').replace('-', ' ').split()
     month_label = None
     year_label = None
     for token in tokens:
@@ -395,12 +396,12 @@ def parse_turkish_date(date_text: str) -> Optional[datetime]:
 
 
 def _parse_week_from_display(display: str) -> Optional[tuple]:
-    """'5-11 Ocak' veya 'excel_files/5-11 Ocak Hakediş Tablosu' -> (5, 11, 'ocak')."""
+    """'5-11 Ocak' veya 'excel_files/19-25_Ocak_2026_Hakedis_Tablosu' -> (19, 25, 'ocak')."""
     if not display:
         return None
-    # Sadece dosya adı kısmını kullan (yol varsa)
-    name = display.split('/')[-1].strip()
-    # "X-Y Ay" formatı
+    # Sadece dosya adı kısmını kullan (yol varsa); alt çizgi = boşluk say ki "19-25_Ocak" eşleşsin
+    name = display.split('/')[-1].strip().replace('_', ' ')
+    # "X-Y Ay" veya "X-Y Ay Yıl" formatı
     m = re.search(r'(\d{1,2})\s*-\s*(\d{1,2})\s+([A-Za-zÇĞİÖŞÜçğıöşü]+)', name)
     if m:
         return (m.group(1), m.group(2), normalize_month(m.group(3)))
