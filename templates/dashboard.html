@@ -335,7 +335,7 @@
                         {% if 'Yemeksepeti İade' in columns %}
                         <div class="detail-item">
                             <span class="detail-label">Yemeksepeti İade</span>
-                            <span class="detail-value negative">-{{ "%.2f"|format(row[columns.index('Yemeksepeti İade')]) }} ₺</span>
+                            <span class="detail-value positive">+{{ "%.2f"|format(row[columns.index('Yemeksepeti İade')]) }} ₺</span>
                         </div>
                         {% endif %}
                         </div>
