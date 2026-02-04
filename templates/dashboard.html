@@ -16,10 +16,9 @@
             </div>
             <div class="header-right">
                 <div class="theme-toggle-container">
-                    <button type="button" class="theme-toggle theme-toggle--ghost" aria-pressed="false" data-theme-toggle>
-                        <span class="icon sun">☀️</span>
-                        <span class="icon moon">🌙</span>
-                        <span data-theme-text>Dark Mod</span>
+                    <button type="button" class="theme-switch theme-switch--ghost" aria-pressed="false" data-theme-toggle aria-label="Tema değiştir">
+                        <span class="theme-switch__icon theme-switch__icon--sun">☀️</span>
+                        <span class="theme-switch__icon theme-switch__icon--moon">🌙</span>
                     </button>
                 </div>
                 <a href="/" class="btn-logout">
@@ -128,13 +127,20 @@
                 <!-- KAZANÇLAR BÖLÜMÜ -->
                 <div class="details-section">
                     <div class="section-header earnings-header">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="12" y1="1" x2="12" y2="23"/>
-                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                        </svg>
-                        <h2>Kazançlar</h2>
+                        <button type="button" class="section-toggle" data-section-toggle aria-expanded="true">
+                            <span class="sr-only">Kazançlar detayını aç/kapat</span>
+                            <span aria-hidden="true" data-toggle-icon>−</span>
+                        </button>
+                        <div class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="1" x2="12" y2="23"/>
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                            </svg>
+                            <h2>Kazançlar</h2>
+                        </div>
                     </div>
-                    <div class="detail-grid">
+                    <div class="section-content" data-section-content>
+                        <div class="detail-grid">
                         {% if 'Pickup Tutar' in columns %}
                         <div class="detail-item">
                             <span class="detail-label">Pickup Tutar</span>
@@ -204,19 +210,27 @@
                             <span class="detail-value positive">+{{ "%.2f"|format(row[columns.index('Bahşiş Tutar')]) }} ₺</span>
                         </div>
                         {% endif %}
+                        </div>
                     </div>
                 </div>
                 
                 <!-- KESİNTİLER BÖLÜMÜ -->
                 <div class="details-section">
                     <div class="section-header deductions-header">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <line x1="8" y1="12" x2="16" y2="12"/>
-                        </svg>
-                        <h2>Kesintiler</h2>
+                        <button type="button" class="section-toggle" data-section-toggle aria-expanded="true">
+                            <span class="sr-only">Kesintiler detayını aç/kapat</span>
+                            <span aria-hidden="true" data-toggle-icon>−</span>
+                        </button>
+                        <div class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="8" y1="12" x2="16" y2="12"/>
+                            </svg>
+                            <h2>Kesintiler</h2>
+                        </div>
                     </div>
-                    <div class="detail-grid">
+                    <div class="section-content" data-section-content>
+                        <div class="detail-grid">
                         {% if 'Tevkifat Tutar' in columns %}
                         <div class="detail-item">
                             <span class="detail-label">Tevkifat Tutar</span>
@@ -279,6 +293,7 @@
                             <span class="detail-value negative">-{{ "%.2f"|format(row[columns.index('Yemeksepeti İade')]) }} ₺</span>
                         </div>
                         {% endif %}
+                        </div>
                     </div>
                 </div>
                 
