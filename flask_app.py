@@ -503,6 +503,11 @@ DEDUCTION_CATEGORIES = {
 
 
 def build_financial_summary(columns: List[str], row: List) -> Dict:
+    if not columns or not row:
+        return {
+            'total_earnings': 0.0, 'total_deductions': 0.0, 'total_deductions_display': 0.0,
+            'net_balance': 0.0, 'status': 'neutral', 'deduction_breakdown': []
+        }
     total_earnings = get_row_value(columns, row, 'Toplam Hakediş')
     total_deductions = get_row_value(columns, row, 'Toplam Kesinti Tutarı')
     yemeksepeti_iade = get_row_value(columns, row, 'Yemeksepeti İade')
@@ -531,8 +536,9 @@ def build_financial_summary(columns: List[str], row: List) -> Dict:
             breakdown.append({'label': label, 'amount': total})
 
     other_total = 0.0
+    row_len = len(row) if row is not None else 0
     for idx, column_name in enumerate(columns):
-        if column_name in used_columns or idx == 0:
+        if idx >= row_len or column_name in used_columns or idx == 0:
             continue
         if any(keyword in column_name for keyword in ['Kesinti', 'İade', 'Tutar']) or column_name in ['Nakit', 'Kredi Kartı']:
             value = to_numeric(row[idx])
@@ -642,17 +648,22 @@ def login():
         if columns is None:
             flash('Bu isimde bir kurye bulunamadı!', 'error')
             return redirect(url_for('login'))
-        
-        selected_display = selected_file.replace('.xlsx', '')
-        payment_reminder = get_payment_reminder(selected_display)
-        financial_summary = build_financial_summary(columns, data[0] if data else [])
-        return render_template('dashboard.html', 
-                             kurye_adi=kurye_adi, 
-                             columns=columns, 
-                             data=data,
-                             selected_week=selected_display,
-                             payment_reminder=payment_reminder,
-                             financial_summary=financial_summary)
+
+        try:
+            selected_display = selected_file.replace('.xlsx', '').replace('.xls', '')
+            payment_reminder = get_payment_reminder(selected_display)
+            first_row = list(data[0]) if data and len(data) > 0 else []
+            financial_summary = build_financial_summary(columns, first_row)
+            return render_template('dashboard.html',
+                                 kurye_adi=kurye_adi,
+                                 columns=columns,
+                                 data=data,
+                                 selected_week=selected_display,
+                                 payment_reminder=payment_reminder,
+                                 financial_summary=financial_summary)
+        except Exception as e:
+            flash('Hakediş sayfası yüklenirken hata oluştu. Excel yapısı beklenenden farklı olabilir.', 'error')
+            return redirect(url_for('login'))
     
     return render_template('login.html', excel_files=excel_files, top5_data=top5_data, odeme_takvimi=ODEME_TAKVIMI)
 
