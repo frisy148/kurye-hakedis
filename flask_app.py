@@ -408,15 +408,7 @@ def get_payment_reminder(selected_week: str) -> Optional[Dict]:
             break
 
     if not matched_entry:
-        first_token = normalized_week.split(' ')[0] if normalized_week else ''
-        for entry in ODEME_TAKVIMI:
-            normalized_entry = normalize_text(entry.get('calisma', ''))
-            if first_token and first_token in normalized_entry:
-                matched_entry = entry
-                break
-
-    if not matched_entry:
-        matched_entry = ODEME_TAKVIMI[0]
+        return None
 
     payment_text = matched_entry.get('odeme', '')
     payment_date = parse_turkish_date(payment_text)
@@ -425,7 +417,7 @@ def get_payment_reminder(selected_week: str) -> Optional[Dict]:
         days_remaining = (payment_date.date() - datetime.today().date()).days
 
     if days_remaining is None:
-        message = "Ödeme takvimi yakında paylaşılacak."
+        message = "Ödeme tarihi bu dönem için duyurulacak."
         status = 'pending'
     elif days_remaining < 0:
         message = f"Ödeme {abs(days_remaining)} gün gecikti."
