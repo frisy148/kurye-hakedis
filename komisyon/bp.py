@@ -46,15 +46,45 @@ def index():
     excel_files = logic.get_excel_files()
     summary = None
     selected_file = None
+    selected_file_2 = None
 
-    rel = request.args.get('excel')
-    if rel:
-        full = logic.resolve_excel_path(rel)
-        if full:
-            summary = logic.compute_period_summary(full, my_couriers)
-            selected_file = rel
-        else:
-            flash('Seçilen dosya bulunamadı.', 'error')
+    # 1 hafta: excel=... veya excel1=...  |  2 hafta: excel1=... & excel2=...
+    rel1 = request.args.get('excel1')
+    rel2 = request.args.get('excel2')
+    if rel1 and rel2:
+        # 2 haftalık toplam
+        summaries = []
+        labels = []
+        for rel in (rel1, rel2):
+            full = logic.resolve_excel_path(rel)
+            if full:
+                s = logic.compute_period_summary(full, my_couriers)
+                if s:
+                    summaries.append(s)
+                    labels.append(next((f['display_label'] for f in excel_files if f['rel'] == rel), rel))
+            else:
+                flash(f'Dosya bulunamadı: {rel}', 'error')
+        if len(summaries) >= 2:
+            summary = logic.merge_period_summaries(summaries, labels)
+            selected_file = rel1
+            selected_file_2 = rel2
+        elif len(summaries) == 1:
+            summary = summaries[0]
+            summary['week_count'] = 1
+            summary['week_labels'] = labels
+            selected_file = rel1
+    else:
+        rel = rel1 or request.args.get('excel')
+        if rel:
+            full = logic.resolve_excel_path(rel)
+            if full:
+                summary = logic.compute_period_summary(full, my_couriers)
+                if summary:
+                    summary['week_count'] = 1
+                    summary['week_labels'] = [next((f['display_label'] for f in excel_files if f['rel'] == rel), rel)]
+                selected_file = rel
+            else:
+                flash('Seçilen dosya bulunamadı.', 'error')
 
     return render_template(
         'komisyon_index.html',
@@ -62,6 +92,7 @@ def index():
         excel_files=excel_files,
         summary=summary,
         selected_file=selected_file,
+        selected_file_2=selected_file_2,
     )
 
 

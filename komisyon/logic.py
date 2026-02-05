@@ -191,6 +191,53 @@ def compute_period_summary(excel_path: str, my_couriers: Set[str]) -> Optional[D
     }
 
 
+def merge_period_summaries(summaries: List[Dict], week_labels: Optional[List[str]] = None) -> Dict:
+    """İki veya daha fazla haftanın özetini tek 2 haftalık özet olarak birleştirir."""
+    if not summaries:
+        return {}
+    if len(summaries) == 1:
+        out = dict(summaries[0])
+        if week_labels:
+            out['week_labels'] = week_labels
+        return out
+
+    toplam_hakedis = sum(s.get('toplam_hakedis', 0) for s in summaries)
+    odenecek_ekside = sum(s.get('odenecek_ekside', 0) for s in summaries)
+    komisyon_matrah = toplam_hakedis + odenecek_ekside
+    komisyon_tutar = komisyon_matrah * KOMISYON_ORANI
+
+    # Ekside listesini isme göre birleştir (aynı kurye iki haftada da eksi olabilir)
+    ekside_by_key: Dict[str, Dict] = {}
+    for s in summaries:
+        for item in s.get('ekside_listesi', []):
+            ad = item.get('ad_soyad', '')
+            key = normalize_name(ad)
+            t = float(item.get('tutar', 0))
+            if key not in ekside_by_key:
+                ekside_by_key[key] = {'ad_soyad': ad, 'tutar': 0.0}
+            ekside_by_key[key]['tutar'] += t
+    ekside_listesi = [{'ad_soyad': v['ad_soyad'], 'tutar': round(v['tutar'], 2)} for v in ekside_by_key.values()]
+
+    matched_set = set()
+    for s in summaries:
+        matched_set.update(s.get('matched_names', []))
+    row_count = sum(s.get('row_count', 0) for s in summaries)
+
+    out = {
+        'row_count': row_count,
+        'matched_names': sorted(matched_set),
+        'toplam_hakedis': round(toplam_hakedis, 2),
+        'odenecek_ekside': round(odenecek_ekside, 2),
+        'komisyon_matrah': round(komisyon_matrah, 2),
+        'komisyon_yuzde': KOMISYON_ORANI * 100,
+        'komisyon_tutar': round(komisyon_tutar, 2),
+        'ekside_listesi': ekside_listesi,
+        'week_count': len(summaries),
+        'week_labels': week_labels or [],
+    }
+    return out
+
+
 def resolve_excel_path(rel: str) -> Optional[str]:
     """rel (dropdown değeri) -> tam dosya yolu. uploads/, excel_files veya proje kökünde aranır."""
     if not rel:

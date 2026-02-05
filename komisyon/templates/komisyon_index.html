@@ -41,14 +41,24 @@
         <p class="sub">Listede <strong>{{ my_couriers_count }}</strong> kurye var. <a href="{{ url_for('komisyon_bp.kuryeler') }}">Kurye listesini düzenle</a>.</p>
 
         <div class="card-k">
-            <h2>Hafta / Dönem Seçin</h2>
-            <form method="get" action="{{ url_for('komisyon_bp.index') }}">
-                <select name="excel" class="excel-select" onchange="this.form.submit()">
-                    <option value="">-- Excel dosyası seçin --</option>
+            <h2>1 veya 2 hafta seçin</h2>
+            <p style="font-size:0.9rem; color:var(--lumen-text-light); margin-bottom:12px;">Tek hafta için sadece 1. haftayı seçin. <strong>2 haftalık toplam</strong> için her iki haftayı da seçin; hesaplama iki Excel’in toplamına göre yapılır.</p>
+            <form method="get" action="{{ url_for('komisyon_bp.index') }}" id="excel-form">
+                <label style="display:block; margin-bottom:4px; font-size:0.9rem;">1. Hafta</label>
+                <select name="excel1" class="excel-select" style="margin-bottom:12px;">
+                    <option value="">-- Seçin (opsiyonel) --</option>
                     {% for f in excel_files %}
                     <option value="{{ f.rel }}" {% if selected_file == f.rel %}selected{% endif %}>{{ f.display_label }}</option>
                     {% endfor %}
                 </select>
+                <label style="display:block; margin-bottom:4px; font-size:0.9rem;">2. Hafta (2 haftalık için)</label>
+                <select name="excel2" class="excel-select" style="margin-bottom:12px;">
+                    <option value="">-- Seçin (opsiyonel) --</option>
+                    {% for f in excel_files %}
+                    <option value="{{ f.rel }}" {% if selected_file_2 == f.rel %}selected{% endif %}>{{ f.display_label }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-primary">Hesapla</button>
             </form>
         </div>
 
@@ -62,8 +72,11 @@
 
         {% if summary %}
         <div class="card-k">
-            <h2>Özet</h2>
-            <p class="sub">{{ summary.row_count }} kurye eşleşti.</p>
+            <h2>{% if summary.week_count >= 2 %}2 haftalık toplam{% else %}Özet{% endif %}</h2>
+            {% if summary.week_labels %}
+            <p class="sub" style="margin-bottom:6px;">Dönem: {{ summary.week_labels | join(' + ') }}</p>
+            {% endif %}
+            <p class="sub">{% if summary.week_count >= 2 %}{{ summary.matched_names | length }} kurye (2 haftada eşleşen).{% else %}{{ summary.row_count }} kurye eşleşti.{% endif %}</p>
             <div class="summary-grid">
                 <div class="summary-item">
                     <div class="label">Toplam Hakediş (listendekilerin toplamı)</div>
