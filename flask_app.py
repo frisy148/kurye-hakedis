@@ -545,21 +545,23 @@ def build_financial_summary(columns: List[str], row: List) -> Dict:
     breakdown = []
     used_columns = set()
 
+    # Yemeksepeti İade kuryeye geri yatan para; toplam kesintiye EKLENMEZ, sadece gösterimde düşülür (+ olarak yansır)
+    YEMEKSEPETI_IADE_COLUMN = 'Yemeksepeti İade'
+
     for label, names in DEDUCTION_CATEGORIES.items():
         total = 0.0
         for name in names:
             value = get_row_value(columns, row, name)
-            if value:
+            if value and name != YEMEKSEPETI_IADE_COLUMN:
                 total += value
-                used_columns.add(name)
+            used_columns.add(name)
         if total:
             breakdown.append({'label': label, 'amount': total})
 
-    # Toplam kesinti SADECE yukarıdaki kalemlerin toplamı (Tevkifat, Nakit, SSK, Sigorta, Saha, Ekipman, İade vb.)
-    # Başka sütunlara bakma; "Ödenecek Tutar", "Toplam Kesinti Tutarı" gibi özet sütunlar dahil edilmez
+    # Toplam kesinti = sadece gerçek kesintiler (Yemeksepeti İade dahil değil)
     calculated_deductions = sum(float(b.get('amount') or 0) for b in breakdown)
     total_deductions = calculated_deductions
-    # Yemeksepeti İade kuryeye geri yatan para; toplam kesinti gösteriminden düşülür
+    # Yemeksepeti İade kuryeye iade; net kesinti = toplam kesinti - Yemeksepeti İade (böylece + olarak yansır)
     total_deductions_display = total_deductions - yemeksepeti_iade
 
     # Toplam hakedişi detaylardan hesapla (Excel sütunu 0 olsa bile)
