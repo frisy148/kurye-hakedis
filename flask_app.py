@@ -515,11 +515,13 @@ def get_row_value(columns: List[str], row: List, column_name: str) -> float:
         return 0.0
 
 
+# Sadece bu kesinti kalemleri toplam kesintiye dahil edilir (Excel "Toplam Kesinti Tutarı" kullanılmaz)
 DEDUCTION_CATEGORIES = {
     'Vergi & Sigorta': ['Tevkifat Tutar', 'Sigorta Kesintisi', 'Ssk, İş Güvenlik Kesintisi'],
     'Tahsilat Farkı': ['Nakit', 'Kredi Kartı'],
     'İadeler': ['İade Edilmesi Gereken Maaş Tutarı', 'Yemeksepeti İade'],
     'Ekipman': ['Ekipman Kesintisi'],
+    'Saha': ['Saha Kesintileri'],
 }
 
 # Kazanç kalemleri (Excel'de toplam 0 olsa bile satırlardan hesaplanabilsin)
@@ -553,21 +555,8 @@ def build_financial_summary(columns: List[str], row: List) -> Dict:
         if total:
             breakdown.append({'label': label, 'amount': total})
 
-    other_total = 0.0
-    row_len = len(row) if row is not None else 0
-    for idx, column_name in enumerate(columns):
-        if idx >= row_len or column_name in used_columns or idx == 0:
-            continue
-        if any(keyword in column_name for keyword in ['Kesinti', 'İade', 'Tutar']) or column_name in ['Nakit', 'Kredi Kartı']:
-            value = to_numeric(row[idx])
-            if value:
-                other_total += value
-
-    if other_total:
-        breakdown.append({'label': 'Diğer', 'amount': other_total})
-
-    # Toplam kesintiyi her zaman detaylardan hesapla (SSK, Tevkifat, Nakit, İade vb. hepsi dahil)
-    # Excel "Toplam Kesinti Tutarı" yanlış/eksik olabildiği için sadece satır toplamına güven
+    # Toplam kesinti SADECE yukarıdaki kalemlerin toplamı (Tevkifat, Nakit, SSK, Sigorta, Saha, Ekipman, İade vb.)
+    # Başka sütunlara bakma; "Ödenecek Tutar", "Toplam Kesinti Tutarı" gibi özet sütunlar dahil edilmez
     calculated_deductions = sum(float(b.get('amount') or 0) for b in breakdown)
     total_deductions = calculated_deductions
     # Yemeksepeti İade kuryeye geri yatan para; toplam kesinti gösteriminden düşülür
