@@ -78,6 +78,7 @@ Detay: `DEPLOY.md`
 - WSGI’da `flask_app.py` kullanılmalı (`from flask_app import app`). `app.py` (manage_couriers vb.) bu projede kullanılmıyor.
 - Upload parolası: varsayılan `kurye2026!`; production’da `UPLOAD_PASSWORD` env ile değiştirilmeli.
 - Ödeme takvimi `ODEME_TAKVIMI` listesi `flask_app.py` içinde; yeni yıl/dönemde güncellenmeli.
+- **Site bozulursa:** Komisyonu tamamen kaldırıp ana haline dönmek için proje kökünde `python revert_komisyon.py` çalıştır (sonra Commit + Push ve PythonAnywhere Reload).
 
 ---
 

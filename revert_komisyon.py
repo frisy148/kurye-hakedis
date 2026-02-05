@@ -27,33 +27,24 @@ def main():
     else:
         print("  [--] komisyon/ zaten yok.")
 
-    # 2. flask_app.py'den komisyon satırlarını kaldır
+    # 2. flask_app.py'den komisyon satırlarını kaldır (tek blok)
     with open(FLASK_APP, 'r', encoding='utf-8') as f:
-        lines = f.readlines()
+        content = f.read()
 
-    new_lines = []
-    skip_until_blank = False
-    i = 0
-    while i < len(lines):
-        line = lines[i]
-        # KOMISYON_PASSWORD satırı
-        if "app.config['KOMISYON_PASSWORD']" in line or 'KOMISYON_PASSWORD' in line and 'config' in line:
-            i += 1
-            continue
-        # Açıklama ve import satırları (hemen sonrası)
-        if '# Sorumlu komisyon' in line or 'from komisyon.bp import' in line or 'app.register_blueprint(komisyon_bp)' in line:
-            i += 1
-            continue
-        # Önceki satır boştu ve bu satır boşsa bir boş satır bırak (tek boşluk)
-        if line.strip() == '' and new_lines and new_lines[-1].strip() == '':
-            i += 1
-            continue
-        new_lines.append(line)
-        i += 1
+    block = """app.config['KOMISYON_PASSWORD'] = os.environ.get('KOMISYON_PASSWORD', 'komisyon2026')
 
-    with open(FLASK_APP, 'w', encoding='utf-8') as f:
-        f.writelines(new_lines)
-    print("  [OK] flask_app.py komisyon satirlari kaldirildi.")
+# Sorumlu komisyon: /komisyon – şifre ile giriş (ana projeyi bozmaz)
+from komisyon.bp import komisyon_bp
+app.register_blueprint(komisyon_bp)
+
+"""
+    if block in content:
+        content = content.replace(block, '')
+        with open(FLASK_APP, 'w', encoding='utf-8') as f:
+            f.write(content)
+        print("  [OK] flask_app.py komisyon satirlari kaldirildi.")
+    else:
+        print("  [--] flask_app.py'de beklenen komisyon blogu bulunamadi (zaten kaldirilmis olabilir).")
 
     # 3. PROJE-OZET.md'den komisyon kısımlarını kaldır
     with open(PROJE_OZET, 'r', encoding='utf-8') as f:
