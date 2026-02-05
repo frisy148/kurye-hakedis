@@ -80,7 +80,7 @@
                         {% for group, weeks in excel_files|groupby('group') %}
                             <optgroup label="{{ group }}">
                                 {% for ef in weeks %}
-                                    <option value="{{ ef.filename }}">{{ ef.display_name }}</option>
+                                    <option value="{{ ef.filename }}">{{ ef.display_label or ef.display_name }}</option>
                                 {% endfor %}
                             </optgroup>
                         {% endfor %}

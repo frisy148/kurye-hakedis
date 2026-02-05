@@ -75,6 +75,15 @@ def get_excel_files():
     """mysite ve mysite/excel_files klasörlerindeki tüm Excel dosyalarını listeler"""
     excel_files = []
     # Ana klasör
+    def clean_week_label(name: str) -> str:
+        """19-25_Ocak_2026_Hakedis_Tablosu -> 19-25 Ocak 2026"""
+        s = name.replace('_', ' ')
+        for suffix in (' Hakedis Tablosu', ' Hakediş Tablosu', ' Hakedis', ' Hakediş'):
+            if s.endswith(suffix):
+                s = s[:-len(suffix)].strip()
+                break
+        return s
+
     if os.path.exists(EXCEL_FOLDER):
         for file in os.listdir(EXCEL_FOLDER):
             if file.endswith('.xlsx') and not file.startswith('~'):
@@ -82,6 +91,7 @@ def get_excel_files():
                 excel_files.append({
                     'filename': file,
                     'display_name': display_name,
+                    'display_label': clean_week_label(display_name),
                     'group': extract_month_group(display_name)
                 })
     # excel_files alt klasörü (PythonAnywhere'de Excel'ler burada olabilir)
@@ -93,6 +103,7 @@ def get_excel_files():
                 excel_files.append({
                     'filename': os.path.join('excel_files', file),
                     'display_name': display_name,
+                    'display_label': clean_week_label(display_name),
                     'group': extract_month_group(display_name)
                 })
     excel_files.sort(key=lambda x: x['display_name'], reverse=True)
