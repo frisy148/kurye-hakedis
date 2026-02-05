@@ -30,18 +30,40 @@ EARNING_COLUMNS = [
 ]
 
 
+BENIM_KURYELERIM_FILE = os.path.join(DATA_DIR, 'benim_kuryelerim.txt')
+
+
 def load_my_couriers() -> Set[str]:
-    path = os.path.join(DATA_DIR, 'benim_kuryelerim.txt')
+    """Eşleştirme için: küçük harf seti."""
     names = set()
+    for line in load_my_couriers_list():
+        names.add(line.lower().strip())
+    return names
+
+
+def load_my_couriers_list() -> List[str]:
+    """Düzenleme için: dosyadaki isimler (satır sırası, boş ve # atlanır)."""
+    path = BENIM_KURYELERIM_FILE
+    out = []
     if not os.path.exists(path):
-        return names
+        return out
     with open(path, 'r', encoding='utf-8') as f:
         for line in f:
             line = line.strip()
             if not line or line.startswith('#'):
                 continue
-            names.add(line.lower().strip())
-    return names
+            out.append(line)
+    return out
+
+
+def save_my_couriers(names: List[str]) -> None:
+    """Kurye listesini dosyaya yazar (boş satırlar atlanır)."""
+    path = BENIM_KURYELERIM_FILE
+    lines = [s.strip() for s in names if s and s.strip()]
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write('# Benim kuryelerim – her satıra bir isim (Excel Ad-Soyad ile eşleşir)\n')
+        for line in lines:
+            f.write(line.strip() + '\n')
 
 
 def normalize_name(name: str) -> str:

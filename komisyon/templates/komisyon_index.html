@@ -32,12 +32,13 @@
 <body>
     <div class="komisyon-wrap">
         <div class="nav-links">
-            <a href="{{ url_for('komisyon_bp.upload') }}" class="btn btn-secondary">📤 Excel Yükle</a>
+            <a href="{{ url_for('komisyon_bp.kuryeler') }}" class="btn btn-secondary">📋 Kurye listesini düzenle</a>
+            <a href="{{ url_for('komisyon_bp.upload') }}" class="btn btn-secondary">📤 Excel yükle</a>
             <a href="{{ url_for('komisyon_bp.cikis') }}" class="btn btn-secondary">Çıkış</a>
         </div>
         <h1>Sorumlu Komisyon</h1>
-        <p class="sub">Kendi kuryelerinizin toplam hakedişinden + / − hesaplanır; toplamın %8.5'i sizin komisyonunuz.</p>
-        <p class="sub">Listede <strong>{{ my_couriers_count }}</strong> kurye tanımlı (data/benim_kuryelerim.txt).</p>
+        <p class="sub">Seçtiğin kuryelerin <strong>toplam hakedişi</strong> (artı ve eksi) toplanır; toplamın <strong>%8.5</strong>’i senin komisyonun. Negatif hakedişi olan kurye toplamdan otomatik düşülür.</p>
+        <p class="sub">Listede <strong>{{ my_couriers_count }}</strong> kurye var. İsim ekleyip çıkarmak için <a href="{{ url_for('komisyon_bp.kuryeler') }}">Kurye listesini düzenle</a>.</p>
 
         <div class="card-k">
             <h2>Hafta / Dönem Seçin</h2>

@@ -65,6 +65,22 @@ def index():
     )
 
 
+@komisyon_bp.route('/kuryeler', methods=['GET', 'POST'])
+def kuryeler():
+    """Kurye listesini düzenle – ekle/sil, kaydet. Excel atmadan buradan yönetirsin."""
+    if request.method == 'POST':
+        raw = request.form.get('isimler', '')
+        names = [s.strip() for s in raw.splitlines() if s.strip()]
+        try:
+            logic.save_my_couriers(names)
+            flash(f'Liste kaydedildi. {len(names)} kurye.', 'success')
+            return redirect(url_for('komisyon_bp.kuryeler'))
+        except Exception as e:
+            flash(f'Kayıt hatası: {e}', 'error')
+    isimler = logic.load_my_couriers_list()
+    return render_template('komisyon_kuryeler.html', isimler=isimler)
+
+
 @komisyon_bp.route('/upload', methods=['GET', 'POST'])
 def upload():
     if request.method == 'POST':
