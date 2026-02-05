@@ -682,6 +682,12 @@ def login():
 
         try:
             selected_display = selected_file.replace('.xlsx', '').replace('.xls', '')
+            # Dönem etiketi: excel_files/19-25_Ocak_2026_Hakedis_Tablosu → 19-25 Ocak 2026
+            week_label = selected_display.split('/')[-1].replace('_', ' ')
+            for suffix in (' Hakedis Tablosu', ' Hakediş Tablosu', ' Hakedis', ' Hakediş'):
+                if week_label.endswith(suffix):
+                    week_label = week_label[:-len(suffix)].strip()
+                    break
             payment_reminder = get_payment_reminder(selected_display)
             first_row = list(data[0]) if data and len(data) > 0 else []
             financial_summary = build_financial_summary(columns, first_row)
@@ -689,7 +695,7 @@ def login():
                                  kurye_adi=kurye_adi,
                                  columns=columns,
                                  data=data,
-                                 selected_week=selected_display,
+                                 selected_week=week_label or selected_display,
                                  payment_reminder=payment_reminder,
                                  financial_summary=financial_summary)
         except Exception as e:
