@@ -522,6 +522,13 @@ DEDUCTION_CATEGORIES = {
     'Ekipman': ['Ekipman Kesintisi'],
 }
 
+# Kazanç kalemleri (Excel'de toplam 0 olsa bile satırlardan hesaplanabilsin)
+EARNING_COLUMNS = [
+    'Pickup Tutar', 'Dropoff Tutar', 'Mesafe Tutarı', 'Garanti Bölge Tutarı',
+    'Gece Mesaisi Tutarı', 'Bölge Kampanya Tutarı', 'Haftalık Ek Paket Tutarı',
+    'Günlük Bonus', 'Hakediş Zam Ödemesi KDV Dahil', 'Bahşiş Tutar'
+]
+
 
 def build_financial_summary(columns: List[str], row: List) -> Dict:
     if not columns or not row:
@@ -532,17 +539,6 @@ def build_financial_summary(columns: List[str], row: List) -> Dict:
     total_earnings = get_row_value(columns, row, 'Toplam Hakediş')
     total_deductions = get_row_value(columns, row, 'Toplam Kesinti Tutarı')
     yemeksepeti_iade = get_row_value(columns, row, 'Yemeksepeti İade')
-    # Yemeksepeti İade kuryeye geri yatan para; toplam kesinti gösteriminden düşülür
-    total_deductions_display = total_deductions - yemeksepeti_iade
-    # Ödenecek tutarı hesapla (Excel sütununa güvenme; Toplam Hakediş - Kesinti)
-    net_balance = total_earnings - total_deductions_display
-
-    if net_balance > 0:
-        status = 'positive'
-    elif net_balance < 0:
-        status = 'negative'
-    else:
-        status = 'neutral'
 
     breakdown = []
     used_columns = set()
@@ -569,6 +565,28 @@ def build_financial_summary(columns: List[str], row: List) -> Dict:
 
     if other_total:
         breakdown.append({'label': 'Diğer', 'amount': other_total})
+
+    # Toplam kesintiyi detaylardan hesapla (Excel sütunu 0 olsa bile eksi bakiye doğru çıksın)
+    calculated_deductions = sum(float(b.get('amount') or 0) for b in breakdown) + other_total
+    if total_deductions == 0 and calculated_deductions != 0:
+        total_deductions = calculated_deductions
+    # Yemeksepeti İade kuryeye geri yatan para; toplam kesinti gösteriminden düşülür
+    total_deductions_display = total_deductions - yemeksepeti_iade
+
+    # Toplam hakedişi detaylardan hesapla (Excel sütunu 0 olsa bile)
+    calculated_earnings = sum(get_row_value(columns, row, col) for col in EARNING_COLUMNS if col in columns)
+    if total_earnings == 0 and calculated_earnings != 0:
+        total_earnings = calculated_earnings
+
+    # Ödenecek tutar = Toplam Hakediş - Kesinti (eksi bakiye olabilir)
+    net_balance = total_earnings - total_deductions_display
+
+    if net_balance > 0:
+        status = 'positive'
+    elif net_balance < 0:
+        status = 'negative'
+    else:
+        status = 'neutral'
 
     breakdown.sort(key=lambda item: float(item.get('amount') or 0), reverse=True)
 
