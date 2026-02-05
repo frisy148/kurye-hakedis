@@ -37,8 +37,8 @@
             <a href="{{ url_for('komisyon_bp.cikis') }}" class="btn btn-secondary">Çıkış</a>
         </div>
         <h1>Sorumlu Komisyon</h1>
-        <p class="sub">Seçtiğin kuryelerin <strong>toplam hakedişi</strong> (artı ve eksi) toplanır; toplamın <strong>%8.5</strong>’i senin komisyonun. Negatif hakedişi olan kurye toplamdan otomatik düşülür.</p>
-        <p class="sub">Listede <strong>{{ my_couriers_count }}</strong> kurye var. İsim ekleyip çıkarmak için <a href="{{ url_for('komisyon_bp.kuryeler') }}">Kurye listesini düzenle</a>.</p>
+        <p class="sub">Listendeki kuryelerin <strong>Toplam Hakediş</strong> toplamı alınır; <strong>Ödenecek Tutar</strong> eksi olanlar (kurye borcu) senden düşülür. Kalan tutarın <strong>%8.5</strong>’i senin komisyonun.</p>
+        <p class="sub">Listede <strong>{{ my_couriers_count }}</strong> kurye var. <a href="{{ url_for('komisyon_bp.kuryeler') }}">Kurye listesini düzenle</a>.</p>
 
         <div class="card-k">
             <h2>Hafta / Dönem Seçin</h2>
@@ -62,44 +62,26 @@
 
         {% if summary %}
         <div class="card-k">
-            <h2>Özet (sadece benim kuryelerim)</h2>
-            <p class="sub">Eşleşen kurye sayısı: <strong>{{ summary.row_count }}</strong></p>
+            <h2>Özet</h2>
+            <p class="sub">{{ summary.row_count }} kurye eşleşti.</p>
             <div class="summary-grid">
                 <div class="summary-item">
-                    <div class="label">Toplam Hakediş (+)</div>
+                    <div class="label">Toplam Hakediş (listendekilerin toplamı)</div>
                     <div class="value positive">{{ "%.2f"|format(summary.toplam_hakedis) }} ₺</div>
                 </div>
                 <div class="summary-item">
-                    <div class="label">Toplam Kesinti (−)</div>
-                    <div class="value negative">{{ "%.2f"|format(summary.toplam_kesinti) }} ₺</div>
+                    <div class="label">Ekside ödenecek (senden düşülecek)</div>
+                    <div class="value negative">{{ "%.2f"|format(summary.odenecek_ekside) }} ₺</div>
                 </div>
                 <div class="summary-item">
-                    <div class="label">Yemeksepeti İade (+)</div>
-                    <div class="value positive">{{ "%.2f"|format(summary.yemeksepeti_iade) }} ₺</div>
-                </div>
-                <div class="summary-item">
-                    <div class="label">Net Kesinti (gösterim)</div>
-                    <div class="value">{{ "%.2f"|format(summary.net_kesinti_gosterim) }} ₺</div>
-                </div>
-                <div class="summary-item">
-                    <div class="label">Ödenecek (net)</div>
-                    <div class="value">{{ "%.2f"|format(summary.odenecek_net) }} ₺</div>
+                    <div class="label">Komisyon matrahı</div>
+                    <div class="value">{{ "%.2f"|format(summary.komisyon_matrah) }} ₺</div>
                 </div>
                 <div class="summary-item komisyon">
-                    <div class="label">Komisyon (%{{ "%.1f"|format(summary.komisyon_yuzde) }})</div>
+                    <div class="label">Senin komisyonun (%{{ "%.1f"|format(summary.komisyon_yuzde) }})</div>
                     <div class="value">{{ "%.2f"|format(summary.komisyon_tutar) }} ₺</div>
                 </div>
             </div>
-
-            {% if summary.breakdown %}
-            <h3 style="margin-top:16px; font-size:1rem;">Kesinti dağılımı</h3>
-            <ul class="breakdown-list">
-                {% for label, amount in summary.breakdown.items() %}
-                <li><span>{{ label }}</span><span>{{ "%.2f"|format(amount) }} ₺</span></li>
-                {% endfor %}
-            </ul>
-            {% endif %}
-
             {% if summary.matched_names %}
             <details style="margin-top:16px;">
                 <summary>Eşleşen kurye isimleri ({{ summary.matched_names|length }})</summary>

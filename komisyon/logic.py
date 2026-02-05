@@ -136,13 +136,10 @@ def compute_period_summary(excel_path: str, my_couriers: Set[str]) -> Optional[D
         name_col = columns[0]
 
     total_hakedis_col = find_column(columns, ['Toplam Hakediş', 'Toplam Hakediş Tutarı'], 14)
-    yemek_iade_col = YEMEKSEPETI_IADE_COL if YEMEKSEPETI_IADE_COL in columns else None
+    odenecek_col = find_column(columns, ['Ödenecek Tutar', 'Odenecek Tutar', 'Net Ödeme'], None)
 
     toplam_hakedis = 0.0
-    toplam_kesinti = 0.0
-    yemeksepeti_iade = 0.0
-    breakdown = {label: 0.0 for label in DEDUCTION_CATEGORIES}
-    kazanim_detay = {col: 0.0 for col in EARNING_COLUMNS if col in columns}
+    odenecek_ekside = 0.0  # Ödenecek Tutar < 0 olanların toplamı (negatif, senden düşülecek)
     matched_names = []
     row_count = 0
 
@@ -156,40 +153,23 @@ def compute_period_summary(excel_path: str, my_couriers: Set[str]) -> Optional[D
         matched_names.append(str(name_raw).strip())
 
         h = to_num(row.get(total_hakedis_col)) if total_hakedis_col else 0
-        if h == 0 and total_hakedis_col is None:
-            for col in EARNING_COLUMNS:
-                if col in row.index:
-                    h += to_num(row.get(col))
         toplam_hakedis += h
 
-        if yemek_iade_col and yemek_iade_col in row.index:
-            yemeksepeti_iade += to_num(row.get(yemek_iade_col))
+        odenecek = to_num(row.get(odenecek_col)) if odenecek_col else 0
+        if odenecek < 0:
+            odenecek_ekside += odenecek
 
-        for label, col_names in DEDUCTION_CATEGORIES.items():
-            for col in col_names:
-                if col in row.index:
-                    val = to_num(row.get(col))
-                    breakdown[label] += val
-                    toplam_kesinti += val
-
-        for col in kazanim_detay:
-            kazanim_detay[col] += to_num(row.get(col))
-
-    net_kesinti_gosterim = toplam_kesinti - yemeksepeti_iade
-    komisyon = toplam_hakedis * KOMISYON_ORANI
+    komisyon_matrah = toplam_hakedis + odenecek_ekside
+    komisyon = komisyon_matrah * KOMISYON_ORANI
 
     return {
         'row_count': row_count,
         'matched_names': sorted(set(matched_names)),
         'toplam_hakedis': round(toplam_hakedis, 2),
-        'toplam_kesinti': round(toplam_kesinti, 2),
-        'yemeksepeti_iade': round(yemeksepeti_iade, 2),
-        'net_kesinti_gosterim': round(net_kesinti_gosterim, 2),
-        'odenecek_net': round(toplam_hakedis - net_kesinti_gosterim, 2),
+        'odenecek_ekside': round(odenecek_ekside, 2),
+        'komisyon_matrah': round(komisyon_matrah, 2),
         'komisyon_yuzde': KOMISYON_ORANI * 100,
         'komisyon_tutar': round(komisyon, 2),
-        'breakdown': {k: round(v, 2) for k, v in breakdown.items() if v},
-        'kazanim_detay': {k: round(v, 2) for k, v in kazanim_detay.items() if v},
     }
 
 
