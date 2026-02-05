@@ -68,17 +68,18 @@ def save_my_couriers(names: List[str]) -> None:
 
 def normalize_name(name: str) -> str:
     """
-    Excel ile eşleştirme için: Türkçe İ/I/ı farkını giderir, boşlukları birleştirir.
-    PDF/liste: İBRAHİM, KAMİL | Excel: IBRAHIM, KAMIL → aynı anahtara düşer.
+    Excel ile eşleştirme: Türkçe karakterleri tek forma getirir (İ/I/ı, Ğ, Ş, Ü, Ö, Ç).
+    PDF: YİĞİT BARAN MECAN | Excel: YIGIT BARAN MECAN → aynı anahtara düşer.
     """
     s = (name or '').strip()
     if not s:
         return ''
-    # Türkçe İ/I/ı: hepsini tek forma (küçük i) getir ki Excel (ASCII I) ile eşleşsin
-    s = s.replace('\u0130', 'i').replace('İ', 'i')   # İ (U+0130 ve Türkçe İ)
-    s = s.replace('ı', 'i').replace('I', 'i')         # ı ve ASCII I
+    # Türkçe İ/I/ı
+    s = s.replace('\u0130', 'i').replace('İ', 'i').replace('ı', 'i').replace('I', 'i')
     s = s.lower()
-    # Çift boşlukları tek yap (Ad  Soyad → Ad Soyad)
+    # Excel bazen Ğ→G, Ş→S, Ü→U, Ö→O, Ç→C yazar; hepsini ortak forma getir
+    for tr, ascii_ in [('ğ', 'g'), ('ş', 's'), ('ü', 'u'), ('ö', 'o'), ('ç', 'c')]:
+        s = s.replace(tr, ascii_)
     s = ' '.join(s.split())
     return s
 
