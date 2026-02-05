@@ -566,10 +566,10 @@ def build_financial_summary(columns: List[str], row: List) -> Dict:
     if other_total:
         breakdown.append({'label': 'Diğer', 'amount': other_total})
 
-    # Toplam kesintiyi detaylardan hesapla (Excel sütunu 0 olsa bile eksi bakiye doğru çıksın)
-    calculated_deductions = sum(float(b.get('amount') or 0) for b in breakdown) + other_total
-    if total_deductions == 0 and calculated_deductions != 0:
-        total_deductions = calculated_deductions
+    # Toplam kesintiyi her zaman detaylardan hesapla (SSK, Tevkifat, Nakit, İade vb. hepsi dahil)
+    # Excel "Toplam Kesinti Tutarı" yanlış/eksik olabildiği için sadece satır toplamına güven
+    calculated_deductions = sum(float(b.get('amount') or 0) for b in breakdown)
+    total_deductions = calculated_deductions
     # Yemeksepeti İade kuryeye geri yatan para; toplam kesinti gösteriminden düşülür
     total_deductions_display = total_deductions - yemeksepeti_iade
 
