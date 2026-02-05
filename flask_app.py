@@ -22,6 +22,11 @@ _cache = {'excel_files': (0, None), 'top5': (0, None, None)}
 EXCEL_FOLDER = "/home/Savasky148/mysite"
 UPLOAD_HISTORY_FILE = os.path.join(app.instance_path, 'uploads.json')
 UPLOAD_PASSWORD = os.environ.get('UPLOAD_PASSWORD', 'kurye2026!')
+app.config['KOMISYON_PASSWORD'] = os.environ.get('KOMISYON_PASSWORD', 'komisyon2026')
+
+# Sorumlu komisyon: /komisyon – şifre ile giriş (ana projeyi bozmaz)
+from komisyon.bp import komisyon_bp
+app.register_blueprint(komisyon_bp)
 
 # Ödeme Takvimi 2026
 ODEME_TAKVIMI = [

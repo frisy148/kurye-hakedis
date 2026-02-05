@@ -10,6 +10,7 @@ Bu dosya, projeyi bırakıp yeni agent/projeye geçerken veya geri dönüldüğ�
 - **Ödeme takvimi** ile “Sıradaki ödeme” / “Bu tarihte ödendi” bilgisi gösterilir.
 - **Liderlik** (son 2 haftanın top 5) login sayfasında listelenir.
 - **Admin** `/upload` ile parola girip Excel yükleyebilir; dosyalar `excel_files/` altına kaydedilir.
+- **Sorumlu komisyon** `/komisyon` – Şifre ile giriş; kendi kurye listesine göre toplam hakediş, +/− ve %8.5 komisyon hesaplanır (ana projeden bağımsız, aynı sitede).
 
 ---
 
@@ -33,6 +34,15 @@ Bu dosya, projeyi bırakıp yeni agent/projeye geçerken veya geri dönüldüğ�
 | `static/style.css` | Tüm stiller (login, dashboard, dark mode) |
 | `static/theme.js` | Tema (localStorage + data-theme) |
 | `DEPLOY.md` | PythonAnywhere deploy adımları |
+| `komisyon/` | Sorumlu komisyon: `bp.py` (blueprint), `logic.py`, `data/benim_kuryelerim.txt` |
+
+---
+
+## /komisyon (sorumlu komisyon)
+
+- Adres: **https://savasky148.pythonanywhere.com/komisyon** (veya sitenin `/komisyon` yolu).
+- **Şifre:** Varsayılan `komisyon2026`; production’da `KOMISYON_PASSWORD` env ile değiştirilmeli.
+- Kendi kurye listesi `komisyon/data/benim_kuryelerim.txt`; Excel’ler ana sitedekiyle aynı (proje kökü + excel_files + komisyon/uploads). Komisyon = toplam hakediş × %8.5.
 
 ---
 
@@ -71,4 +81,4 @@ Detay: `DEPLOY.md`
 
 ---
 
-*Son güncelleme: Şubat 2026 – cache, kesinti hesapları, Yemeksepeti İade, dönem etiketi, hafta dropdown temizliği tamamlandı.*
+*Son güncelleme: Şubat 2026 – /komisyon blueprint eklendi (şifreli); cache, kesinti hesapları, Yemeksepeti İade, dönem etiketi, hafta dropdown temizliği tamamlandı.*

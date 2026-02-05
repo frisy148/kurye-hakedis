@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Komisyon – Giriş</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .komisyon-wrap { max-width: 400px; margin: 4rem auto; padding: 24px; }
+        .card-k { background: var(--surface-card, #fff); border-radius: 12px; padding: 24px; box-shadow: 0 2px 12px var(--shadow-soft, rgba(0,0,0,.08)); }
+        .card-k h1 { font-size: 1.25rem; margin-bottom: 8px; }
+        .card-k p { color: var(--lumen-text-light); margin-bottom: 20px; font-size: 0.95rem; }
+        input[type="password"] { width: 100%; padding: 12px; border: 1px solid var(--surface-border); border-radius: 8px; font-size: 1rem; margin-bottom: 12px; }
+        .btn { display: inline-block; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 1rem; background: var(--lumen-gold, #c9a227); color: #1a2744; }
+    </style>
+</head>
+<body>
+    <div class="komisyon-wrap">
+        <div class="card-k">
+            <h1>Sorumlu Komisyon</h1>
+            <p>Devam etmek için şifreyi girin.</p>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            <form method="post" action="{{ url_for('komisyon_bp.giris') }}">
+                <input type="password" name="sifre" placeholder="Şifre" required autofocus>
+                <button type="submit" class="btn">Giriş</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
