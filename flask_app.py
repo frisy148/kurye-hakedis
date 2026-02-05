@@ -5,6 +5,7 @@ import os
 import re
 import json
 import io
+import time
 from datetime import datetime
 from typing import List, Dict, Optional
 from werkzeug.utils import secure_filename
@@ -12,6 +13,10 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.secret_key = 'kurye-hakedis-secret-key'
 os.makedirs(app.instance_path, exist_ok=True)
+
+# Önbellek: yoğun trafikte disk/Excel okumayı azaltır (TTL saniye)
+_CACHE_TTL = 90
+_cache = {'excel_files': (0, None), 'top5': (0, None, None)}
 
 # Excel dosyalarının bulunduğu klasör (PythonAnywhere)
 EXCEL_FOLDER = "/home/Savasky148/mysite"
@@ -226,6 +231,34 @@ def get_top5_couriers_3weeks(excel_files):
         }
     except Exception:
         return None
+
+
+def get_excel_files_cached() -> List[Dict]:
+    """Excel listesini TTL süre cache'ler; yoğun trafikte disk okumayı azaltır."""
+    now = time.time()
+    if _cache['excel_files'][1] is not None and (now - _cache['excel_files'][0]) < _CACHE_TTL:
+        return _cache['excel_files'][1]
+    data = get_excel_files()
+    _cache['excel_files'] = (now, data)
+    return data
+
+
+def get_top5_couriers_3weeks_cached(excel_files: List[Dict]):
+    """Liderlik verisini TTL süre cache'ler (aynı dosya listesi için)."""
+    now = time.time()
+    key = tuple(ef['filename'] for ef in excel_files) if excel_files else ()
+    cached_ts, cached_key, cached_val = _cache['top5']
+    if cached_val is not None and cached_key == key and (now - cached_ts) < _CACHE_TTL:
+        return cached_val
+    data = get_top5_couriers_3weeks(excel_files)
+    _cache['top5'] = (now, key, data)
+    return data
+
+
+def invalidate_cache() -> None:
+    """Excel yükleme sonrası cache'i temizler; yeni dosya listesi hemen görünsün."""
+    _cache['excel_files'] = (0, None)
+    _cache['top5'] = (0, None, None)
 
 
 def find_column(columns: List[str], candidates: List[str], fallback_index: Optional[int] = None) -> Optional[str]:
@@ -658,12 +691,8 @@ def api_kuryeler(excel_file):
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
-    excel_files = get_excel_files()
-    
-    # Son 3 haftanın en iyi 5 kuryesini bul
-    top5_data = None
-    if excel_files:
-        top5_data = get_top5_couriers_3weeks(excel_files)
+    excel_files = get_excel_files_cached()
+    top5_data = get_top5_couriers_3weeks_cached(excel_files) if excel_files else None
     
     if request.method == 'POST':
         kurye_adi = request.form.get('kurye_adi', '').strip()
@@ -772,6 +801,7 @@ def upload_excel():
         })
 
         flash('Dosya başarıyla yüklendi ve doğrulandı.', 'success')
+        invalidate_cache()
         history = load_upload_history()
 
     return render_template('upload.html', history=history, summary=summary)
