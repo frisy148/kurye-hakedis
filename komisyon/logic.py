@@ -34,10 +34,10 @@ BENIM_KURYELERIM_FILE = os.path.join(DATA_DIR, 'benim_kuryelerim.txt')
 
 
 def load_my_couriers() -> Set[str]:
-    """Eşleştirme için: küçük harf seti."""
+    """Eşleştirme için: normalize edilmiş isim seti (Türkçe İ/I/ı uyumlu)."""
     names = set()
     for line in load_my_couriers_list():
-        names.add(line.lower().strip())
+        names.add(normalize_name(line))
     return names
 
 
@@ -67,7 +67,20 @@ def save_my_couriers(names: List[str]) -> None:
 
 
 def normalize_name(name: str) -> str:
-    return (name or '').lower().strip()
+    """
+    Excel ile eşleştirme için: Türkçe İ/I/ı farkını giderir, boşlukları birleştirir.
+    PDF/liste: İBRAHİM, KAMİL | Excel: IBRAHIM, KAMIL → aynı anahtara düşer.
+    """
+    s = (name or '').strip()
+    if not s:
+        return ''
+    # Türkçe İ/I/ı: hepsini tek forma (küçük i) getir ki Excel (ASCII I) ile eşleşsin
+    s = s.replace('\u0130', 'i').replace('İ', 'i')   # İ (U+0130 ve Türkçe İ)
+    s = s.replace('ı', 'i').replace('I', 'i')         # ı ve ASCII I
+    s = s.lower()
+    # Çift boşlukları tek yap (Ad  Soyad → Ad Soyad)
+    s = ' '.join(s.split())
+    return s
 
 
 def find_column(columns: List[str], candidates: List[str], fallback_index: Optional[int] = None) -> Optional[str]:

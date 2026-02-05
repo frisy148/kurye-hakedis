@@ -32,7 +32,7 @@ def giris():
     """Şifre ile giriş; doğruysa session['komisyon_auth'] = True."""
     if request.method == 'POST':
         password = request.form.get('sifre', '').strip()
-        expected = current_app.config.get('KOMISYON_PASSWORD', 'komisyon2026')
+        expected = current_app.config.get('KOMISYON_PASSWORD', '186081')
         if password == expected:
             session['komisyon_auth'] = True
             return redirect(url_for('komisyon_bp.index'))

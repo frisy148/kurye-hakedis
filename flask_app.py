@@ -21,8 +21,8 @@ _cache = {'excel_files': (0, None), 'top5': (0, None, None)}
 # Excel dosyalarının bulunduğu klasör (PythonAnywhere)
 EXCEL_FOLDER = "/home/Savasky148/mysite"
 UPLOAD_HISTORY_FILE = os.path.join(app.instance_path, 'uploads.json')
-UPLOAD_PASSWORD = os.environ.get('UPLOAD_PASSWORD', 'kurye2026!')
-app.config['KOMISYON_PASSWORD'] = os.environ.get('KOMISYON_PASSWORD', 'komisyon2026')
+UPLOAD_PASSWORD = os.environ.get('UPLOAD_PASSWORD', '186081')
+app.config['KOMISYON_PASSWORD'] = os.environ.get('KOMISYON_PASSWORD', '186081')
 
 # Sorumlu komisyon: /komisyon – şifre ile giriş (ana projeyi bozmaz)
 from komisyon.bp import komisyon_bp

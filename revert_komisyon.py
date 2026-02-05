@@ -31,7 +31,7 @@ def main():
     with open(FLASK_APP, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    block = """app.config['KOMISYON_PASSWORD'] = os.environ.get('KOMISYON_PASSWORD', 'komisyon2026')
+    block = """app.config['KOMISYON_PASSWORD'] = os.environ.get('KOMISYON_PASSWORD', '186081')
 
 # Sorumlu komisyon: /komisyon – şifre ile giriş (ana projeyi bozmaz)
 from komisyon.bp import komisyon_bp
@@ -54,7 +54,7 @@ app.register_blueprint(komisyon_bp)
     to_remove = [
         "- **Sorumlu komisyon** `/komisyon` – Şifre ile giriş; kendi kurye listesine göre toplam hakediş, +/− ve %8.5 komisyon hesaplanır (ana projeden bağımsız, aynı sitede).\n\n",
         "| `komisyon/` | Sorumlu komisyon: `bp.py` (blueprint), `logic.py`, `data/benim_kuryelerim.txt` |\n",
-        "\n---\n\n## /komisyon (sorumlu komisyon)\n\n- Adres: **https://savasky148.pythonanywhere.com/komisyon** (veya sitenin `/komisyon` yolu).\n- **Şifre:** Varsayılan `komisyon2026`; production'da `KOMISYON_PASSWORD` env ile değiştirilmeli.\n- Kendi kurye listesi `komisyon/data/benim_kuryelerim.txt`; Excel'ler ana sitedekiyle aynı (proje kökü + excel_files + komisyon/uploads). Komisyon = toplam hakediş × %8.5.\n\n",
+        "\n---\n\n## /komisyon (sorumlu komisyon)\n\n- Adres: **https://savasky148.pythonanywhere.com/komisyon** (veya sitenin `/komisyon` yolu).\n- **Şifre:** Varsayılan `186081`; production'da `KOMISYON_PASSWORD` env ile değiştirilebilir.\n- Kendi kurye listesi `komisyon/data/benim_kuryelerim.txt`; Excel'ler ana sitedekiyle aynı (proje kökü + excel_files + komisyon/uploads). Komisyon = toplam hakediş × %8.5.\n\n",
         " – /komisyon blueprint eklendi (şifreli); ",
     ]
     for s in to_remove:

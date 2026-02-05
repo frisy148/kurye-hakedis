@@ -41,7 +41,7 @@ Bu dosya, projeyi bırakıp yeni agent/projeye geçerken veya geri dönüldüğ�
 ## /komisyon (sorumlu komisyon)
 
 - Adres: **https://savasky148.pythonanywhere.com/komisyon** (veya sitenin `/komisyon` yolu).
-- **Şifre:** Varsayılan `komisyon2026`; production’da `KOMISYON_PASSWORD` env ile değiştirilmeli.
+- **Şifre:** Varsayılan `186081`; production’da `KOMISYON_PASSWORD` env ile değiştirilmeli.
 - Kendi kurye listesi `komisyon/data/benim_kuryelerim.txt`; Excel’ler ana sitedekiyle aynı (proje kökü + excel_files + komisyon/uploads). Komisyon = toplam hakediş × %8.5.
 
 ---
@@ -76,7 +76,7 @@ Detay: `DEPLOY.md`
 ## Notlar
 
 - WSGI’da `flask_app.py` kullanılmalı (`from flask_app import app`). `app.py` (manage_couriers vb.) bu projede kullanılmıyor.
-- Upload parolası: varsayılan `kurye2026!`; production’da `UPLOAD_PASSWORD` env ile değiştirilmeli.
+- Upload parolası ve komisyon girişi: varsayılan `186081`; production’da `UPLOAD_PASSWORD` env ile değiştirilmeli.
 - Ödeme takvimi `ODEME_TAKVIMI` listesi `flask_app.py` içinde; yeni yıl/dönemde güncellenmeli.
 - **Site bozulursa:** Komisyonu tamamen kaldırıp ana haline dönmek için proje kökünde `python revert_komisyon.py` çalıştır (sonra Commit + Push ve PythonAnywhere Reload).
 
