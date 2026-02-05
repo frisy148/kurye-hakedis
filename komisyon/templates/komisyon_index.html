@@ -88,6 +88,29 @@
                 <div class="matched-names">{{ summary.matched_names|join(', ') }}</div>
             </details>
             {% endif %}
+
+            {% if summary.ekside_listesi %}
+            <div class="ekside-box" style="margin-top:20px; padding:16px; background:var(--surface-muted,#f5f7fa); border-radius:8px; border-left:4px solid #b91c1c;">
+                <h3 style="font-size:1rem; margin-bottom:8px; color:#b91c1c;">Ekside olan kuryeler – bu tutarlar senden geri alınacak</h3>
+                <p style="font-size:0.9rem; color:var(--lumen-text-light); margin-bottom:12px;">Ödenecek Tutar eksi olan listendeki kuryeler. Toplam {{ "%.2f"|format(summary.odenecek_ekside) }} ₺ komisyon matrahından düşülüyor.</p>
+                <table class="ekside-tablo" style="width:100%; border-collapse:collapse; font-size:0.95rem;">
+                    <thead>
+                        <tr style="border-bottom:1px solid var(--surface-border); text-align:left;">
+                            <th style="padding:8px 12px;">Kurye</th>
+                            <th style="padding:8px 12px; text-align:right;">Ödenecek (eksi)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in summary.ekside_listesi %}
+                        <tr style="border-bottom:1px solid var(--surface-border);">
+                            <td style="padding:8px 12px;">{{ item.ad_soyad }}</td>
+                            <td style="padding:8px 12px; text-align:right; color:#b91c1c;">{{ "%.2f"|format(item.tutar) }} ₺</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
         </div>
         {% endif %}
     </div>

@@ -139,8 +139,9 @@ def compute_period_summary(excel_path: str, my_couriers: Set[str]) -> Optional[D
     odenecek_col = find_column(columns, ['Ödenecek Tutar', 'Odenecek Tutar', 'Net Ödeme'], None)
 
     toplam_hakedis = 0.0
-    odenecek_ekside = 0.0  # Ödenecek Tutar < 0 olanların toplamı (negatif, senden düşülecek)
+    odenecek_ekside = 0.0
     matched_names = []
+    ekside_listesi = []  # Ödenecek Tutar < 0 olanlar: isim + tutar (bu tutarlar senden geri alınacak)
     row_count = 0
 
     for _, row in df.iterrows():
@@ -150,7 +151,8 @@ def compute_period_summary(excel_path: str, my_couriers: Set[str]) -> Optional[D
             continue
 
         row_count += 1
-        matched_names.append(str(name_raw).strip())
+        ad_soyad = str(name_raw).strip() if name_raw is not None else ''
+        matched_names.append(ad_soyad)
 
         h = to_num(row.get(total_hakedis_col)) if total_hakedis_col else 0
         toplam_hakedis += h
@@ -158,6 +160,7 @@ def compute_period_summary(excel_path: str, my_couriers: Set[str]) -> Optional[D
         odenecek = to_num(row.get(odenecek_col)) if odenecek_col else 0
         if odenecek < 0:
             odenecek_ekside += odenecek
+            ekside_listesi.append({'ad_soyad': ad_soyad, 'tutar': round(odenecek, 2)})
 
     komisyon_matrah = toplam_hakedis + odenecek_ekside
     komisyon = komisyon_matrah * KOMISYON_ORANI
@@ -170,6 +173,7 @@ def compute_period_summary(excel_path: str, my_couriers: Set[str]) -> Optional[D
         'komisyon_matrah': round(komisyon_matrah, 2),
         'komisyon_yuzde': KOMISYON_ORANI * 100,
         'komisyon_tutar': round(komisyon, 2),
+        'ekside_listesi': ekside_listesi,
     }
 
 
