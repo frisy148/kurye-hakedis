@@ -928,8 +928,6 @@ def upload_excel():
             'rows': summary['row_count'],
             'columns': summary['column_count']
         })
-        # En fazla 2 Excel dosyası tutulur (eski haftalar otomatik temizlenir)
-        enforce_excel_file_limit(max_files=2)
 
         flash('Dosya başarıyla yüklendi ve doğrulandı.', 'success')
         invalidate_cache()
