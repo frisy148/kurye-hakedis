@@ -283,31 +283,55 @@
                         </div>
                         {% endif %}
                         
+                        {# Nakit #}
                         {% if 'Nakit' in columns %}
                         <div class="detail-item">
                             <span class="detail-label">Nakit</span>
                             <span class="detail-value negative">-{{ "%.2f"|format((row[columns.index('Nakit')]|to_float)) }} ₺</span>
                         </div>
+                        {% elif 'Alınan Nakit' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Alınan Nakit</span>
+                            <span class="detail-value negative">-{{ "%.2f"|format((row[columns.index('Alınan Nakit')]|to_float)) }} ₺</span>
+                        </div>
                         {% endif %}
                         
+                        {# Kredi Kartı #}
                         {% if 'Kredi Kartı' in columns %}
                         <div class="detail-item">
                             <span class="detail-label">Kredi Kartı</span>
                             <span class="detail-value negative">-{{ "%.2f"|format((row[columns.index('Kredi Kartı')]|to_float)) }} ₺</span>
                         </div>
+                        {% elif 'Kredi Kartı    (Nakite Çevirme)' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Kredi Kartı (Nakite Çevirme)</span>
+                            <span class="detail-value negative">-{{ "%.2f"|format((row[columns.index('Kredi Kartı    (Nakite Çevirme)')]|to_float)) }} ₺</span>
+                        </div>
                         {% endif %}
                         
+                        {# Sigorta Kesintisi #}
                         {% if 'Sigorta Kesintisi' in columns %}
                         <div class="detail-item">
                             <span class="detail-label">Sigorta Kesintisi</span>
                             <span class="detail-value negative">-{{ "%.2f"|format((row[columns.index('Sigorta Kesintisi')]|to_float)) }} ₺</span>
                         </div>
+                        {% elif 'Yemeksepeti Sigorta Kesintisi' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Yemeksepeti Sigorta Kesintisi</span>
+                            <span class="detail-value negative">-{{ "%.2f"|format((row[columns.index('Yemeksepeti Sigorta Kesintisi')]|to_float)) }} ₺</span>
+                        </div>
                         {% endif %}
                         
+                        {# SSK, İş Güvenliği #}
                         {% if 'Ssk, İş Güvenlik Kesintisi' in columns %}
                         <div class="detail-item">
                             <span class="detail-label">SSK, İş Güvenlik Kesintisi</span>
                             <span class="detail-value negative">-{{ "%.2f"|format((row[columns.index('Ssk, İş Güvenlik Kesintisi')]|to_float)) }} ₺</span>
+                        </div>
+                        {% elif 'Ssk Ve İş Güvenliği Kesintisi' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">SSK ve İş Güvenliği Kesintisi</span>
+                            <span class="detail-value negative">-{{ "%.2f"|format((row[columns.index('Ssk Ve İş Güvenliği Kesintisi')]|to_float)) }} ₺</span>
                         </div>
                         {% endif %}
                         
@@ -332,10 +356,24 @@
                         </div>
                         {% endif %}
                         
+                        {# Yemeksepeti İade #}
                         {% if 'Yemeksepeti İade' in columns %}
                         <div class="detail-item">
                             <span class="detail-label">Yemeksepeti İade</span>
                             <span class="detail-value positive">+{{ "%.2f"|format((row[columns.index('Yemeksepeti İade')]|to_float)) }} ₺</span>
+                        </div>
+                        {% elif 'Yemeksepeti İade (YapıKredi)' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Yemeksepeti İade (YapıKredi)</span>
+                            <span class="detail-value positive">+{{ "%.2f"|format((row[columns.index('Yemeksepeti İade (YapıKredi)')]|to_float)) }} ₺</span>
+                        </div>
+                        {% endif %}
+
+                        {# Nakit + KK + Sigorta toplam kolonu (varsa ayrıca göster) #}
+                        {% if 'Nakit, Kredi Kartı Ve Sigorta Kesintisi Toplamı' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Nakit + KK + Sigorta Toplamı</span>
+                            <span class="detail-value negative">-{{ "%.2f"|format((row[columns.index('Nakit, Kredi Kartı Ve Sigorta Kesintisi Toplamı')]|to_float)) }} ₺</span>
                         </div>
                         {% endif %}
                         </div>
