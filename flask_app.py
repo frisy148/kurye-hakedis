@@ -200,7 +200,12 @@ def get_top5_couriers_3weeks(excel_files):
             # Sütunları isimle bul (Excel yapısı değişse de doğru sütun okunur)
             ad_soyad_column = find_column(columns, ['Ad-Soyad', 'Ad Soyad', 'Kurye'], 0)
             bolge_column = find_column(columns, ['Bölge', 'Bolge'], 1)
-            dropoff_column = find_column(columns, ['Dropoff', 'Dropoff Sayısı', 'Dropoff Adedi'], 3)
+            # Eski dosyalarda: "Dropoff", yeni formatta: "Çoklu Paket"
+            dropoff_column = find_column(
+                columns,
+                ['Dropoff', 'Dropoff Sayısı', 'Dropoff Adedi', 'Çoklu Paket', 'Coklu Paket'],
+                3
+            )
             hakedis_column = find_column(columns, ['Toplam Hakediş', 'Toplam Hakediş Tutarı'], 14)
 
             if not ad_soyad_column or not dropoff_column:
