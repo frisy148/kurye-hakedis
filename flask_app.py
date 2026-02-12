@@ -719,6 +719,38 @@ def enforce_excel_file_limit(max_files: int = 2) -> None:
             continue
 
 
+def get_uploaded_excels() -> List[Dict]:
+    """
+    upload sayfası için excel_files klasöründeki mevcut Excel dosyalarını
+    (isim, boyut, tarih) ile birlikte döndürür.
+    """
+    excel_dir = os.path.join(EXCEL_FOLDER, 'excel_files')
+    if not os.path.exists(excel_dir):
+        return []
+
+    entries: List[Dict] = []
+    try:
+        for name in os.listdir(excel_dir):
+            if not name.lower().endswith(('.xlsx', '.xls')):
+                continue
+            path = os.path.join(excel_dir, name)
+            try:
+                stat = os.stat(path)
+            except OSError:
+                continue
+            entries.append({
+                'name': name,
+                'size_kb': round(stat.st_size / 1024, 1),
+                'mtime': datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M')
+            })
+    except OSError:
+        return []
+
+    # Yeni dosyalar üstte görünsün
+    entries.sort(key=lambda e: e['mtime'], reverse=True)
+    return entries
+
+
 def inspect_excel_dataframe(df: pd.DataFrame) -> Dict:
     columns = df.columns.tolist()
     row_count = len(df)
@@ -804,22 +836,23 @@ def login():
 def upload_excel():
     history = load_upload_history()
     summary = None
+    excels = get_uploaded_excels()
 
     if request.method == 'POST':
         password = request.form.get('password', '').strip()
         if password != UPLOAD_PASSWORD:
             flash('Geçersiz parola! Yükleme yapılamadı.', 'error')
-            return render_template('upload.html', history=history, summary=summary)
+            return render_template('upload.html', history=history, summary=summary, excels=excels)
 
         uploaded_file = request.files.get('file')
         if not uploaded_file or uploaded_file.filename == '':
             flash('Lütfen yüklemek için bir Excel dosyası seçin.', 'error')
-            return render_template('upload.html', history=history, summary=summary)
+            return render_template('upload.html', history=history, summary=summary, excels=excels)
 
         filename = secure_filename(uploaded_file.filename)
         if not filename.lower().endswith(('.xlsx', '.xls')):
             flash('Yalnızca .xlsx veya .xls uzantılı dosyalar kabul edilir.', 'error')
-            return render_template('upload.html', history=history, summary=summary)
+            return render_template('upload.html', history=history, summary=summary, excels=excels)
 
         file_bytes = uploaded_file.read()
         excel_stream = io.BytesIO(file_bytes)
@@ -828,7 +861,7 @@ def upload_excel():
             df = pd.read_excel(excel_stream)
         except Exception:
             flash('Excel dosyası okunamadı. Dosyanın bozulmadığından emin olun.', 'error')
-            return render_template('upload.html', history=history, summary=summary)
+            return render_template('upload.html', history=history, summary=summary, excels=excels)
 
         summary = inspect_excel_dataframe(df)
         summary['filename'] = filename
@@ -836,7 +869,7 @@ def upload_excel():
         if summary['missing_columns']:
             missing_text = ', '.join(summary['missing_columns'])
             flash(f"Excel dosyasında eksik sütunlar var: {missing_text}", 'error')
-            return render_template('upload.html', history=history, summary=summary)
+            return render_template('upload.html', history=history, summary=summary, excels=excels)
 
         excel_dir = os.path.join(EXCEL_FOLDER, 'excel_files')
         os.makedirs(excel_dir, exist_ok=True)
@@ -847,7 +880,7 @@ def upload_excel():
                 destination_file.write(file_bytes)
         except OSError:
             flash('Dosya diske kaydedilirken hata oluştu.', 'error')
-            return render_template('upload.html', history=history, summary=summary)
+            return render_template('upload.html', history=history, summary=summary, excels=excels)
 
         append_upload_history({
             'filename': filename,
@@ -861,8 +894,42 @@ def upload_excel():
         flash('Dosya başarıyla yüklendi ve doğrulandı.', 'success')
         invalidate_cache()
         history = load_upload_history()
+        excels = get_uploaded_excels()
 
-    return render_template('upload.html', history=history, summary=summary)
+    return render_template('upload.html', history=history, summary=summary, excels=excels)
+
+@app.route('/upload/delete', methods=['POST'])
+def delete_excel():
+    """Upload ekranından seçilen Excel dosyasını siler ve geçmişi günceller."""
+    filename = request.form.get('filename', '').strip()
+    if not filename:
+        flash('Silinecek dosya bulunamadı.', 'error')
+        return redirect(url_for('upload_excel'))
+
+    # Güvenlik: sadece excel_files altındaki .xlsx/.xls dosyalarına izin ver
+    if '/' in filename or '\\' in filename or not filename.lower().endswith(('.xlsx', '.xls')):
+        flash('Geçersiz dosya adı.', 'error')
+        return redirect(url_for('upload_excel'))
+
+    excel_dir = os.path.join(EXCEL_FOLDER, 'excel_files')
+    path = os.path.join(excel_dir, filename)
+
+    if os.path.exists(path):
+        try:
+            os.remove(path)
+        except OSError:
+            flash('Dosya silinirken hata oluştu.', 'error')
+            return redirect(url_for('upload_excel'))
+
+    # Yükleme geçmişinden de kaldır
+    history = load_upload_history()
+    history = [h for h in history if h.get('filename') != filename]
+    save_upload_history(history)
+
+    flash('Dosya ve geçmiş kaydı silindi.', 'success')
+    invalidate_cache()
+
+    return redirect(url_for('upload_excel'))
 
 @app.route('/dashboard')
 def dashboard():

@@ -164,7 +164,52 @@
             </ul>
         </div>
         {% endif %}
+
+        {% if excels %}
+        <div class="upload-history" style="margin-top: 24px;">
+            <h2>Yüklü Excel Dosyaları</h2>
+            <input id="excel-filter" type="text" placeholder="İsim / ay / tarih ara..." style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--surface-border);margin-bottom:12px;">
+            <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                <thead>
+                    <tr style="text-align:left;border-bottom:1px solid var(--surface-border);">
+                        <th style="padding:8px 4px;">Dosya</th>
+                        <th style="padding:8px 4px;white-space:nowrap;">Boyut (KB)</th>
+                        <th style="padding:8px 4px;white-space:nowrap;">Tarih</th>
+                        <th style="padding:8px 4px;white-space:nowrap;">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody id="excel-table-body">
+                    {% for excel in excels %}
+                    <tr data-filter-text="{{ excel.name }} {{ excel.mtime }}">
+                        <td style="padding:6px 4px;">{{ excel.name }}</td>
+                        <td style="padding:6px 4px;">{{ excel.size_kb }}</td>
+                        <td style="padding:6px 4px;">{{ excel.mtime }}</td>
+                        <td style="padding:6px 4px;">
+                            <form method="POST" action="{{ url_for('delete_excel') }}" style="display:inline;" onsubmit="return confirm('Bu Excel dosyasını silmek istediğinize emin misiniz?');">
+                                <input type="hidden" name="filename" value="{{ excel.name }}">
+                                <button type="submit" style="padding:6px 10px;border-radius:8px;border:none;background:#e94560;color:#fff;font-size:12px;cursor:pointer;">Sil</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
     </div>
+    <script>
+        const filterInput = document.getElementById('excel-filter');
+        if (filterInput) {
+            filterInput.addEventListener('input', function () {
+                const val = this.value.toLowerCase();
+                const rows = document.querySelectorAll('#excel-table-body tr');
+                rows.forEach(row => {
+                    const text = row.getAttribute('data-filter-text') || '';
+                    row.style.display = text.toLowerCase().includes(val) ? '' : 'none';
+                });
+            });
+        }
+    </script>
     <script src="{{ url_for('static', filename='theme.js') }}?v=1"></script>
 </body>
 </html>
