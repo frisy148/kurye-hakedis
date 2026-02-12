@@ -641,16 +641,27 @@ def build_financial_summary(columns: List[str], row: List) -> Dict:
 
 
 def load_upload_history() -> List[Dict]:
+    """Yükleme geçmişini döndürür; artık var olmayan Excel dosyalarını filtreler."""
     if not os.path.exists(UPLOAD_HISTORY_FILE):
         return []
     try:
         with open(UPLOAD_HISTORY_FILE, 'r', encoding='utf-8') as history_file:
             data = json.load(history_file)
-            if isinstance(data, list):
-                return data
+            if not isinstance(data, list):
+                return []
+
+            excel_dir = os.path.join(EXCEL_FOLDER, 'excel_files')
+            entries: List[Dict] = []
+            for entry in data:
+                filename = entry.get('filename')
+                if not filename:
+                    continue
+                excel_path = os.path.join(excel_dir, filename)
+                if os.path.exists(excel_path):
+                    entries.append(entry)
+            return entries
     except (OSError, ValueError):
-        pass
-    return []
+        return []
 
 
 def save_upload_history(entries: List[Dict]) -> None:
@@ -666,6 +677,46 @@ def append_upload_history(entry: Dict) -> None:
     history.insert(0, entry)
     history = history[:20]
     save_upload_history(history)
+
+
+def enforce_excel_file_limit(max_files: int = 2) -> None:
+    """
+    excel_files klasöründe en fazla max_files adet Excel dosyası tutulur.
+    En yeni dosyalar kalır, eskiler sessizce silinir.
+    """
+    excel_dir = os.path.join(EXCEL_FOLDER, 'excel_files')
+    if not os.path.exists(excel_dir):
+        return
+
+    try:
+        files = [
+            f for f in os.listdir(excel_dir)
+            if f.lower().endswith(('.xlsx', '.xls'))
+        ]
+    except OSError:
+        return
+
+    if len(files) <= max_files:
+        return
+
+    # Dosyaları son değiştirilme zamanına göre sırala (yeni → eski)
+    files_with_mtime = []
+    for name in files:
+        path = os.path.join(excel_dir, name)
+        try:
+            mtime = os.path.getmtime(path)
+        except OSError:
+            mtime = 0
+        files_with_mtime.append((mtime, name))
+
+    files_with_mtime.sort(reverse=True)  # en yeni başta
+
+    # max_files adetten fazlasını sil
+    for _, old_name in files_with_mtime[max_files:]:
+        try:
+            os.remove(os.path.join(excel_dir, old_name))
+        except OSError:
+            continue
 
 
 def inspect_excel_dataframe(df: pd.DataFrame) -> Dict:
@@ -804,6 +855,8 @@ def upload_excel():
             'rows': summary['row_count'],
             'columns': summary['column_count']
         })
+        # En fazla 2 Excel dosyası tutulur (eski haftalar otomatik temizlenir)
+        enforce_excel_file_limit(max_files=2)
 
         flash('Dosya başarıyla yüklendi ve doğrulandı.', 'success')
         invalidate_cache()
