@@ -588,10 +588,25 @@ def get_row_value(columns: List[str], row: List, column_name: str) -> float:
 
 
 # Sadece bu kesinti kalemleri toplam kesintiye dahil edilir (Excel "Toplam Kesinti Tutarı" kullanılmaz)
+# Eski format kolonları + yeni format kolonları birlikte desteklenir.
 DEDUCTION_CATEGORIES = {
-    'Vergi & Sigorta': ['Tevkifat Tutar', 'Sigorta Kesintisi', 'Ssk, İş Güvenlik Kesintisi'],
-    'Tahsilat Farkı': ['Nakit', 'Kredi Kartı'],
-    'İadeler': ['İade Edilmesi Gereken Maaş Tutarı', 'Yemeksepeti İade'],
+    'Vergi & Sigorta': [
+        'Tevkifat Tutar',
+        'Sigorta Kesintisi',
+        'Ssk, İş Güvenlik Kesintisi',
+        'Ssk Ve İş Güvenliği Kesintisi',
+        'Yemeksepeti Sigorta Kesintisi',
+    ],
+    'Tahsilat Farkı': [
+        'Nakit',
+        'Kredi Kartı',
+        'Nakit, Kredi Kartı Ve Sigorta Kesintisi Toplamı',
+    ],
+    'İadeler': [
+        'İade Edilmesi Gereken Maaş Tutarı',
+        'Yemeksepeti İade',
+        'Yemeksepeti İade (YapıKredi)',
+    ],
     'Ekipman': ['Ekipman Kesintisi'],
     'Saha': ['Saha Kesintileri'],
 }
@@ -612,7 +627,8 @@ def build_financial_summary(columns: List[str], row: List) -> Dict:
         }
     total_earnings = get_row_value(columns, row, 'Toplam Hakediş')
     total_deductions = get_row_value(columns, row, 'Toplam Kesinti Tutarı')
-    yemeksepeti_iade = get_row_value(columns, row, 'Yemeksepeti İade')
+    yemeksepeti_iade = get_row_value(columns, row, 'Yemeksepeti İade') or \
+        get_row_value(columns, row, 'Yemeksepeti İade (YapıKredi)')
 
     breakdown = []
     used_columns = set()
@@ -620,29 +636,43 @@ def build_financial_summary(columns: List[str], row: List) -> Dict:
     # Yemeksepeti İade kuryeye geri yatan para; toplam kesintiye EKLENMEZ, sadece gösterimde düşülür (+ olarak yansır)
     YEMEKSEPETI_IADE_COLUMN = 'Yemeksepeti İade'
 
-    for label, names in DEDUCTION_CATEGORIES.items():
-        total = 0.0
-        for name in names:
-            value = get_row_value(columns, row, name)
-            if value and name != YEMEKSEPETI_IADE_COLUMN:
-                total += value
-            used_columns.add(name)
-        if total:
-            breakdown.append({'label': label, 'amount': total})
+    # 1) Önce Excel'den doğrudan "Ödenecek Tutar" kolonu varsa onu baz alalım (yeni format desteği)
+    net_from_excel = get_row_value(columns, row, 'Ödenecek Tutar')
+    if net_from_excel:
+        # Toplam hakediş boşsa detaylardan hesaplamayı dene
+        calculated_earnings = sum(get_row_value(columns, row, col) for col in EARNING_COLUMNS if col in columns)
+        if total_earnings == 0 and calculated_earnings != 0:
+            total_earnings = calculated_earnings
 
-    # Toplam kesinti = sadece gerçek kesintiler (Yemeksepeti İade dahil değil)
-    calculated_deductions = sum(float(b.get('amount') or 0) for b in breakdown)
-    total_deductions = calculated_deductions
-    # Yemeksepeti İade kuryeye iade; net kesinti = toplam kesinti - Yemeksepeti İade (böylece + olarak yansır)
-    total_deductions_display = total_deductions - yemeksepeti_iade
+        net_balance = net_from_excel
+        total_deductions_display = max(0.0, total_earnings - net_balance)
+        total_deductions = total_deductions_display
+        breakdown = []  # Yeni tabloda kesintiler toplu olduğundan detayı boş bırakıyoruz
+    else:
+        # 2) Eski format: tek tek kesinti kolonlarından hesapla
+        for label, names in DEDUCTION_CATEGORIES.items():
+            total = 0.0
+            for name in names:
+                value = get_row_value(columns, row, name)
+                if value and name != YEMEKSEPETI_IADE_COLUMN:
+                    total += value
+                used_columns.add(name)
+            if total:
+                breakdown.append({'label': label, 'amount': total})
 
-    # Toplam hakedişi detaylardan hesapla (Excel sütunu 0 olsa bile)
-    calculated_earnings = sum(get_row_value(columns, row, col) for col in EARNING_COLUMNS if col in columns)
-    if total_earnings == 0 and calculated_earnings != 0:
-        total_earnings = calculated_earnings
+        # Toplam kesinti = sadece gerçek kesintiler (Yemeksepeti İade dahil değil)
+        calculated_deductions = sum(float(b.get('amount') or 0) for b in breakdown)
+        total_deductions = calculated_deductions
+        # Yemeksepeti İade kuryeye iade; net kesinti = toplam kesinti - Yemeksepeti İade (böylece + olarak yansır)
+        total_deductions_display = total_deductions - yemeksepeti_iade
 
-    # Ödenecek tutar = Toplam Hakediş - Kesinti (eksi bakiye olabilir)
-    net_balance = total_earnings - total_deductions_display
+        # Toplam hakedişi detaylardan hesapla (Excel sütunu 0 olsa bile)
+        calculated_earnings = sum(get_row_value(columns, row, col) for col in EARNING_COLUMNS if col in columns)
+        if total_earnings == 0 and calculated_earnings != 0:
+            total_earnings = calculated_earnings
+
+        # Ödenecek tutar = Toplam Hakediş - Kesinti (eksi bakiye olabilir)
+        net_balance = total_earnings - total_deductions_display
 
     if net_balance > 0:
         status = 'positive'
