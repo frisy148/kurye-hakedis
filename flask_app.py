@@ -22,6 +22,7 @@ _cache = {'excel_files': (0, None), 'top5': (0, None, None)}
 EXCEL_FOLDER = "/home/Savasky148/mysite"
 UPLOAD_HISTORY_FILE = os.path.join(app.instance_path, 'uploads.json')
 ACTIVE_WEEK_FILE = os.path.join(app.instance_path, 'active_week.json')
+HIDDEN_WEEKS_FILE = os.path.join(app.instance_path, 'hidden_weeks.json')
 UPLOAD_PASSWORD = os.environ.get('UPLOAD_PASSWORD', '186081')
 app.config['KOMISYON_PASSWORD'] = os.environ.get('KOMISYON_PASSWORD', '186081')
 
@@ -82,10 +83,13 @@ MONTHS_TR = {
     'aralık': 12,
 }
 
-def get_excel_files():
-    """mysite ve mysite/excel_files klasörlerindeki tüm Excel dosyalarını listeler"""
-    excel_files = []
+def get_excel_files(include_hidden: bool = False) -> List[Dict]:
+    """mysite ve mysite/excel_files klasörlerindeki tüm Excel dosyalarını listeler.
+    include_hidden=False iken gizlenen haftalar döndürülmez (kuryelerden saklanır).
+    """
+    excel_files: List[Dict] = []
     active_rel = get_active_week()
+    hidden_set = set(get_hidden_weeks())
     # Ana klasör
     def clean_week_label(name: str) -> str:
         """19-25_Ocak_2026_Hakedis_Tablosu -> 19-25 Ocak 2026"""
@@ -101,12 +105,16 @@ def get_excel_files():
             if file.endswith('.xlsx') and not file.startswith('~'):
                 display_name = file.replace('.xlsx', '')
                 rel = file
+                is_hidden = rel in hidden_set
+                if not include_hidden and is_hidden:
+                    continue
                 excel_files.append({
                     'filename': file,
                     'display_name': display_name,
                     'display_label': clean_week_label(display_name),
                     'group': extract_month_group(display_name),
-                    'is_active': (rel == active_rel)
+                    'is_active': (rel == active_rel),
+                    'is_hidden': is_hidden
                 })
     # excel_files alt klasörü (PythonAnywhere'de Excel'ler burada olabilir)
     excel_sub = os.path.join(EXCEL_FOLDER, 'excel_files')
@@ -115,12 +123,16 @@ def get_excel_files():
             if file.endswith('.xlsx') and not file.startswith('~'):
                 display_name = file.replace('.xlsx', '')
                 rel = os.path.join('excel_files', file)
+                is_hidden = rel in hidden_set
+                if not include_hidden and is_hidden:
+                    continue
                 excel_files.append({
                     'filename': rel,
                     'display_name': display_name,
                     'display_label': clean_week_label(display_name),
                     'group': extract_month_group(display_name),
-                    'is_active': (rel == active_rel)
+                    'is_active': (rel == active_rel),
+                    'is_hidden': is_hidden
                 })
     excel_files.sort(key=lambda x: x['display_name'], reverse=True)
     return excel_files
@@ -249,7 +261,7 @@ def get_excel_files_cached() -> List[Dict]:
     now = time.time()
     if _cache['excel_files'][1] is not None and (now - _cache['excel_files'][0]) < _CACHE_TTL:
         return _cache['excel_files'][1]
-    data = get_excel_files()
+    data = get_excel_files(include_hidden=False)
     _cache['excel_files'] = (now, data)
     return data
 
@@ -748,6 +760,29 @@ def set_active_week(filename: str) -> None:
         pass
 
 
+def get_hidden_weeks() -> List[str]:
+    """Gizlenen (kuryelerden saklanan) Excel dosyalarının relative yol listesini döndürür."""
+    if not os.path.exists(HIDDEN_WEEKS_FILE):
+        return []
+    try:
+        with open(HIDDEN_WEEKS_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            if isinstance(data, list):
+                return [str(x) for x in data]
+    except (OSError, ValueError):
+        return []
+    return []
+
+
+def set_hidden_weeks(weeks: List[str]) -> None:
+    """Gizlenen haftaların listesini kaydeder."""
+    try:
+        with open(HIDDEN_WEEKS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(weeks, f, ensure_ascii=False, indent=2)
+    except OSError:
+        pass
+
+
 def get_uploaded_excels() -> List[Dict]:
     """
     upload sayfası için excel_files klasöründeki mevcut Excel dosyalarını
@@ -759,6 +794,7 @@ def get_uploaded_excels() -> List[Dict]:
 
     entries: List[Dict] = []
     active_rel = get_active_week()  # ör: excel_files/5-11 Ocak...xlsx
+    hidden_set = set(get_hidden_weeks())
     try:
         for name in os.listdir(excel_dir):
             if not name.lower().endswith(('.xlsx', '.xls')):
@@ -771,12 +807,14 @@ def get_uploaded_excels() -> List[Dict]:
             base = os.path.splitext(name)[0]
             group = extract_month_group(base)
             full_rel = os.path.join('excel_files', name)
+            is_hidden = rel in hidden_set
             entries.append({
                 'name': name,
                 'size_kb': round(stat.st_size / 1024, 1),
                 'mtime': datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M'),
                 'group': group,
-                'is_active': (full_rel == active_rel)
+                'is_active': (full_rel == active_rel),
+                'is_hidden': is_hidden
             })
     except OSError:
         return []
@@ -966,6 +1004,12 @@ def delete_excel():
     if active_rel and active_rel == rel:
         set_active_week('')
 
+    # Gizli listesinde varsa çıkar
+    hidden = set(get_hidden_weeks())
+    if rel in hidden:
+        hidden.remove(rel)
+        set_hidden_weeks(sorted(hidden))
+
     # Yükleme geçmişinden de kaldır
     history = load_upload_history()
     history = [h for h in history if h.get('filename') != filename]
@@ -998,6 +1042,39 @@ def set_active_excel():
     rel = os.path.join('excel_files', filename)
     set_active_week(rel)
     flash('Aktif hafta olarak işaretlendi.', 'success')
+    invalidate_cache()
+    return redirect(url_for('upload_excel'))
+
+
+@app.route('/upload/toggle-hidden', methods=['POST'])
+def toggle_hidden_excel():
+    """Seçilen Excel dosyasını kuryelerden gizler veya tekrar görünür yapar."""
+    filename = request.form.get('filename', '').strip()
+    if not filename:
+        flash('Gizlenecek/gösterilecek dosya bulunamadı.', 'error')
+        return redirect(url_for('upload_excel'))
+
+    if '/' in filename or '\\' in filename or not filename.lower().endswith(('.xlsx', '.xls')):
+        flash('Geçersiz dosya adı.', 'error')
+        return redirect(url_for('upload_excel'))
+
+    excel_dir = os.path.join(EXCEL_FOLDER, 'excel_files')
+    path = os.path.join(excel_dir, filename)
+    if not os.path.exists(path):
+        flash('Dosya bulunamadı.', 'error')
+        return redirect(url_for('upload_excel'))
+
+    rel = os.path.join('excel_files', filename)
+    hidden = set(get_hidden_weeks())
+
+    if rel in hidden:
+        hidden.remove(rel)
+        flash('Hafta artık kuryelere GÖRÜNÜR.', 'success')
+    else:
+        hidden.add(rel)
+        flash('Hafta kuryelerden GİZLENDİ.', 'success')
+
+    set_hidden_weeks(sorted(hidden))
     invalidate_cache()
     return redirect(url_for('upload_excel'))
 
@@ -1069,12 +1146,18 @@ def rename_excel():
             h['filename'] = new_name
     save_upload_history(history)
 
-    # Aktif hafta dosya adını güncelle
+    # Aktif hafta / gizli hafta dosya adını güncelle
     active_rel = get_active_week()
     old_rel = os.path.join('excel_files', old_name)
     new_rel = os.path.join('excel_files', new_name)
     if active_rel and active_rel == old_rel:
         set_active_week(new_rel)
+
+    hidden = set(get_hidden_weeks())
+    if old_rel in hidden:
+        hidden.remove(old_rel)
+        hidden.add(new_rel)
+        set_hidden_weeks(sorted(hidden))
 
     flash('Dosya adı güncellendi.', 'success')
     invalidate_cache()

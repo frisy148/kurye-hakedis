@@ -204,12 +204,15 @@
                 <tbody id="excel-table-body">
                     {% for excel in excels %}
                     <tr data-filter-text="{{ excel.name }} {{ excel.mtime }} {{ excel.group }}" data-group="{{ excel.group }}">
-                        <td style="padding:6px 4px;word-break:break-all;color:var(--lumen-text);">
-                            <a href="{{ url_for('download_excel', filename=excel.name) }}" style="text-decoration:none;color:var(--lumen-dark);">
+                        <td style="padding:6px 4px;word-break:break-all;">
+                            <a href="{{ url_for('download_excel', filename=excel.name) }}" style="text-decoration:none;color:#ffffff;font-weight:600;">
                                 {{ excel.name }}
                             </a>
                             {% if excel.is_active %}
                                 <span style="font-size:11px;color:#2e7d32;font-weight:600;margin-left:4px;">(Aktif)</span>
+                            {% endif %}
+                            {% if excel.is_hidden %}
+                                <span style="font-size:11px;color:#ffb300;font-weight:600;margin-left:4px;">(Gizli)</span>
                             {% endif %}
                         </td>
                         <td style="padding:6px 4px;">{{ excel.size_kb }}</td>
@@ -224,6 +227,12 @@
                             <form method="POST" action="{{ url_for('delete_excel') }}" style="display:inline;" onsubmit="return confirm('Bu Excel dosyasını silmek istediğinize emin misiniz?');">
                                 <input type="hidden" name="filename" value="{{ excel.name }}">
                                 <button type="submit" style="padding:6px 10px;border-radius:8px;border:none;background:#e94560;color:#fff;font-size:12px;cursor:pointer;">Sil</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('toggle_hidden_excel') }}" style="display:inline;margin-left:4px;">
+                                <input type="hidden" name="filename" value="{{ excel.name }}">
+                                <button type="submit" style="padding:6px 10px;border-radius:8px;border:none;background:#6b7280;color:#fff;font-size:12px;cursor:pointer;">
+                                    {% if excel.is_hidden %}Göster{% else %}Gizle{% endif %}
+                                </button>
                             </form>
                             <button type="button" class="rename-btn" data-filename="{{ excel.name }}" style="padding:6px 10px;border-radius:8px;border:1px solid var(--surface-border);background:#fff;color:var(--lumen-text);font-size:12px;cursor:pointer;margin-left:4px;">
                                 Yeniden adlandır
