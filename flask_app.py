@@ -636,7 +636,22 @@ def build_financial_summary(columns: List[str], row: List) -> Dict:
     # Yemeksepeti İade kuryeye geri yatan para; toplam kesintiye EKLENMEZ, sadece gösterimde düşülür (+ olarak yansır)
     YEMEKSEPETI_IADE_COLUMN = 'Yemeksepeti İade'
 
-    # 1) Önce Excel'den doğrudan "Ödenecek Tutar" kolonu varsa onu baz alalım (yeni format desteği)
+    # 1) Tüm kesinti kalemlerinin detayını her formatta hesapla
+    for label, names in DEDUCTION_CATEGORIES.items():
+        total = 0.0
+        for name in names:
+            value = get_row_value(columns, row, name)
+            if value and name != YEMEKSEPETI_IADE_COLUMN:
+                total += value
+            used_columns.add(name)
+        if total:
+            breakdown.append({'label': label, 'amount': total})
+
+    # Toplam kesinti = sadece gerçek kesintiler (Yemeksepeti İade dahil değil)
+    calculated_deductions = sum(float(b.get('amount') or 0) for b in breakdown)
+    total_deductions = calculated_deductions
+
+    # 2) Eğer Excel'de "Ödenecek Tutar" varsa net bakiyeyi doğrudan ondan al
     net_from_excel = get_row_value(columns, row, 'Ödenecek Tutar')
     if net_from_excel:
         # Toplam hakediş boşsa detaylardan hesaplamayı dene
@@ -646,23 +661,7 @@ def build_financial_summary(columns: List[str], row: List) -> Dict:
 
         net_balance = net_from_excel
         total_deductions_display = max(0.0, total_earnings - net_balance)
-        total_deductions = total_deductions_display
-        breakdown = []  # Yeni tabloda kesintiler toplu olduğundan detayı boş bırakıyoruz
     else:
-        # 2) Eski format: tek tek kesinti kolonlarından hesapla
-        for label, names in DEDUCTION_CATEGORIES.items():
-            total = 0.0
-            for name in names:
-                value = get_row_value(columns, row, name)
-                if value and name != YEMEKSEPETI_IADE_COLUMN:
-                    total += value
-                used_columns.add(name)
-            if total:
-                breakdown.append({'label': label, 'amount': total})
-
-        # Toplam kesinti = sadece gerçek kesintiler (Yemeksepeti İade dahil değil)
-        calculated_deductions = sum(float(b.get('amount') or 0) for b in breakdown)
-        total_deductions = calculated_deductions
         # Yemeksepeti İade kuryeye iade; net kesinti = toplam kesinti - Yemeksepeti İade (böylece + olarak yansır)
         total_deductions_display = total_deductions - yemeksepeti_iade
 
