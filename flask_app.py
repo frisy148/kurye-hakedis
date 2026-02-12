@@ -807,7 +807,7 @@ def get_uploaded_excels() -> List[Dict]:
             base = os.path.splitext(name)[0]
             group = extract_month_group(base)
             full_rel = os.path.join('excel_files', name)
-            is_hidden = rel in hidden_set
+            is_hidden = full_rel in hidden_set
             entries.append({
                 'name': name,
                 'size_kb': round(stat.st_size / 1024, 1),
