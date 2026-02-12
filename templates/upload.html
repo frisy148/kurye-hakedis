@@ -168,7 +168,15 @@
         {% if excels %}
         <div class="upload-history" style="margin-top: 24px;">
             <h2>Yüklü Excel Dosyaları</h2>
-            <input id="excel-filter" type="text" placeholder="İsim / ay / tarih ara..." style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--surface-border);margin-bottom:12px;">
+            <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+                <input id="excel-filter" type="text" placeholder="İsim / ay / tarih ara..." style="flex:1;min-width:180px;padding:10px;border-radius:10px;border:1px solid var(--surface-border);">
+                <select id="excel-group-filter" style="min-width:160px;padding:10px;border-radius:10px;border:1px solid var(--surface-border);">
+                    <option value="">Tüm aylar</option>
+                    {% for g in groups %}
+                    <option value="{{ g }}">{{ g }}</option>
+                    {% endfor %}
+                </select>
+            </div>
             <table style="width:100%;border-collapse:collapse;font-size:13px;">
                 <thead>
                     <tr style="text-align:left;border-bottom:1px solid var(--surface-border);">
@@ -180,15 +188,31 @@
                 </thead>
                 <tbody id="excel-table-body">
                     {% for excel in excels %}
-                    <tr data-filter-text="{{ excel.name }} {{ excel.mtime }}">
-                        <td style="padding:6px 4px;">{{ excel.name }}</td>
+                    <tr data-filter-text="{{ excel.name }} {{ excel.mtime }} {{ excel.group }}" data-group="{{ excel.group }}">
+                        <td style="padding:6px 4px;">
+                            <a href="{{ url_for('download_excel', filename=excel.name) }}" style="text-decoration:none;color:var(--lumen-dark);">
+                                {{ excel.name }}
+                            </a>
+                            {% if excel.is_active %}
+                                <span style="font-size:11px;color:#2e7d32;font-weight:600;margin-left:4px;">(Aktif)</span>
+                            {% endif %}
+                        </td>
                         <td style="padding:6px 4px;">{{ excel.size_kb }}</td>
                         <td style="padding:6px 4px;">{{ excel.mtime }}</td>
-                        <td style="padding:6px 4px;">
+                        <td style="padding:6px 4px;white-space:nowrap;">
+                            <form method="POST" action="{{ url_for('set_active_excel') }}" style="display:inline;margin-right:4px;">
+                                <input type="hidden" name="filename" value="{{ excel.name }}">
+                                <button type="submit" style="padding:6px 10px;border-radius:8px;border:none;background:#1565c0;color:#fff;font-size:12px;cursor:pointer;">
+                                    {% if excel.is_active %}Aktif{% else %}Aktif yap{% endif %}
+                                </button>
+                            </form>
                             <form method="POST" action="{{ url_for('delete_excel') }}" style="display:inline;" onsubmit="return confirm('Bu Excel dosyasını silmek istediğinize emin misiniz?');">
                                 <input type="hidden" name="filename" value="{{ excel.name }}">
                                 <button type="submit" style="padding:6px 10px;border-radius:8px;border:none;background:#e94560;color:#fff;font-size:12px;cursor:pointer;">Sil</button>
                             </form>
+                            <button type="button" class="rename-btn" data-filename="{{ excel.name }}" style="padding:6px 10px;border-radius:8px;border:1px solid var(--surface-border);background:#fff;color:var(--lumen-text);font-size:12px;cursor:pointer;margin-left:4px;">
+                                Yeniden adlandır
+                            </button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -199,16 +223,45 @@
     </div>
     <script>
         const filterInput = document.getElementById('excel-filter');
-        if (filterInput) {
-            filterInput.addEventListener('input', function () {
-                const val = this.value.toLowerCase();
-                const rows = document.querySelectorAll('#excel-table-body tr');
-                rows.forEach(row => {
-                    const text = row.getAttribute('data-filter-text') || '';
-                    row.style.display = text.toLowerCase().includes(val) ? '' : 'none';
-                });
+        const groupSelect = document.getElementById('excel-group-filter');
+        function applyExcelFilters() {
+            const txt = (filterInput?.value || '').toLowerCase();
+            const group = groupSelect?.value || '';
+            const rows = document.querySelectorAll('#excel-table-body tr');
+            rows.forEach(row => {
+                const text = (row.getAttribute('data-filter-text') || '').toLowerCase();
+                const rowGroup = row.getAttribute('data-group') || '';
+                const matchText = !txt || text.includes(txt);
+                const matchGroup = !group || rowGroup === group;
+                row.style.display = (matchText && matchGroup) ? '' : 'none';
             });
         }
+        if (filterInput) filterInput.addEventListener('input', applyExcelFilters);
+        if (groupSelect) groupSelect.addEventListener('change', applyExcelFilters);
+
+        // Yeniden adlandırma
+        document.querySelectorAll('.rename-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const oldName = btn.getAttribute('data-filename');
+                const yeni = prompt('Yeni dosya adını girin (uzantı dahil):', oldName);
+                if (!yeni || yeni === oldName) return;
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ url_for("rename_excel") }}';
+                const inpOld = document.createElement('input');
+                inpOld.type = 'hidden';
+                inpOld.name = 'old_name';
+                inpOld.value = oldName;
+                const inpNew = document.createElement('input');
+                inpNew.type = 'hidden';
+                inpNew.name = 'new_name';
+                inpNew.value = yeni;
+                form.appendChild(inpOld);
+                form.appendChild(inpNew);
+                document.body.appendChild(form);
+                form.submit();
+            });
+        });
     </script>
     <script src="{{ url_for('static', filename='theme.js') }}?v=1"></script>
 </body>

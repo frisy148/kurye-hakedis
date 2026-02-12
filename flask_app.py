@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file
 import pandas as pd
 import os
 import re
@@ -21,6 +21,7 @@ _cache = {'excel_files': (0, None), 'top5': (0, None, None)}
 # Excel dosyalarının bulunduğu klasör (PythonAnywhere)
 EXCEL_FOLDER = "/home/Savasky148/mysite"
 UPLOAD_HISTORY_FILE = os.path.join(app.instance_path, 'uploads.json')
+ACTIVE_WEEK_FILE = os.path.join(app.instance_path, 'active_week.json')
 UPLOAD_PASSWORD = os.environ.get('UPLOAD_PASSWORD', '186081')
 app.config['KOMISYON_PASSWORD'] = os.environ.get('KOMISYON_PASSWORD', '186081')
 
@@ -719,6 +720,29 @@ def enforce_excel_file_limit(max_files: int = 2) -> None:
             continue
 
 
+def get_active_week() -> Optional[str]:
+    """Aktif hafta olarak işaretlenen Excel'in relative yolunu döndürür (ör. excel_files/5-11...)."""
+    if not os.path.exists(ACTIVE_WEEK_FILE):
+        return None
+    try:
+        with open(ACTIVE_WEEK_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            if isinstance(data, dict):
+                return data.get('filename') or None
+    except (OSError, ValueError):
+        return None
+    return None
+
+
+def set_active_week(filename: str) -> None:
+    """Aktif haftayı kaydeder (relative path)."""
+    try:
+        with open(ACTIVE_WEEK_FILE, 'w', encoding='utf-8') as f:
+            json.dump({'filename': filename}, f, ensure_ascii=False)
+    except OSError:
+        pass
+
+
 def get_uploaded_excels() -> List[Dict]:
     """
     upload sayfası için excel_files klasöründeki mevcut Excel dosyalarını
@@ -729,6 +753,7 @@ def get_uploaded_excels() -> List[Dict]:
         return []
 
     entries: List[Dict] = []
+    active_rel = get_active_week()  # ör: excel_files/5-11 Ocak...xlsx
     try:
         for name in os.listdir(excel_dir):
             if not name.lower().endswith(('.xlsx', '.xls')):
@@ -738,10 +763,15 @@ def get_uploaded_excels() -> List[Dict]:
                 stat = os.stat(path)
             except OSError:
                 continue
+            base = os.path.splitext(name)[0]
+            group = extract_month_group(base)
+            full_rel = os.path.join('excel_files', name)
             entries.append({
                 'name': name,
                 'size_kb': round(stat.st_size / 1024, 1),
-                'mtime': datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M')
+                'mtime': datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M'),
+                'group': group,
+                'is_active': (full_rel == active_rel)
             })
     except OSError:
         return []
@@ -837,22 +867,23 @@ def upload_excel():
     history = load_upload_history()
     summary = None
     excels = get_uploaded_excels()
+    groups = sorted({e['group'] for e in excels if e.get('group')})
 
     if request.method == 'POST':
         password = request.form.get('password', '').strip()
         if password != UPLOAD_PASSWORD:
             flash('Geçersiz parola! Yükleme yapılamadı.', 'error')
-            return render_template('upload.html', history=history, summary=summary, excels=excels)
+            return render_template('upload.html', history=history, summary=summary, excels=excels, groups=groups)
 
         uploaded_file = request.files.get('file')
         if not uploaded_file or uploaded_file.filename == '':
             flash('Lütfen yüklemek için bir Excel dosyası seçin.', 'error')
-            return render_template('upload.html', history=history, summary=summary, excels=excels)
+            return render_template('upload.html', history=history, summary=summary, excels=excels, groups=groups)
 
         filename = secure_filename(uploaded_file.filename)
         if not filename.lower().endswith(('.xlsx', '.xls')):
             flash('Yalnızca .xlsx veya .xls uzantılı dosyalar kabul edilir.', 'error')
-            return render_template('upload.html', history=history, summary=summary, excels=excels)
+            return render_template('upload.html', history=history, summary=summary, excels=excels, groups=groups)
 
         file_bytes = uploaded_file.read()
         excel_stream = io.BytesIO(file_bytes)
@@ -861,7 +892,7 @@ def upload_excel():
             df = pd.read_excel(excel_stream)
         except Exception:
             flash('Excel dosyası okunamadı. Dosyanın bozulmadığından emin olun.', 'error')
-            return render_template('upload.html', history=history, summary=summary, excels=excels)
+            return render_template('upload.html', history=history, summary=summary, excels=excels, groups=groups)
 
         summary = inspect_excel_dataframe(df)
         summary['filename'] = filename
@@ -869,7 +900,7 @@ def upload_excel():
         if summary['missing_columns']:
             missing_text = ', '.join(summary['missing_columns'])
             flash(f"Excel dosyasında eksik sütunlar var: {missing_text}", 'error')
-            return render_template('upload.html', history=history, summary=summary, excels=excels)
+            return render_template('upload.html', history=history, summary=summary, excels=excels, groups=groups)
 
         excel_dir = os.path.join(EXCEL_FOLDER, 'excel_files')
         os.makedirs(excel_dir, exist_ok=True)
@@ -880,7 +911,7 @@ def upload_excel():
                 destination_file.write(file_bytes)
         except OSError:
             flash('Dosya diske kaydedilirken hata oluştu.', 'error')
-            return render_template('upload.html', history=history, summary=summary, excels=excels)
+            return render_template('upload.html', history=history, summary=summary, excels=excels, groups=groups)
 
         append_upload_history({
             'filename': filename,
@@ -895,8 +926,9 @@ def upload_excel():
         invalidate_cache()
         history = load_upload_history()
         excels = get_uploaded_excels()
+        groups = sorted({e['group'] for e in excels if e.get('group')})
 
-    return render_template('upload.html', history=history, summary=summary, excels=excels)
+    return render_template('upload.html', history=history, summary=summary, excels=excels, groups=groups)
 
 @app.route('/upload/delete', methods=['POST'])
 def delete_excel():
@@ -921,6 +953,12 @@ def delete_excel():
             flash('Dosya silinirken hata oluştu.', 'error')
             return redirect(url_for('upload_excel'))
 
+    # Aktif hafta ise, aktif bilgisini sıfırla
+    active_rel = get_active_week()
+    rel = os.path.join('excel_files', filename)
+    if active_rel and active_rel == rel:
+        set_active_week('')
+
     # Yükleme geçmişinden de kaldır
     history = load_upload_history()
     history = [h for h in history if h.get('filename') != filename]
@@ -930,6 +968,48 @@ def delete_excel():
     invalidate_cache()
 
     return redirect(url_for('upload_excel'))
+
+
+@app.route('/upload/set-active', methods=['POST'])
+def set_active_excel():
+    """Belirli bir Excel dosyasını aktif hafta olarak işaretler."""
+    filename = request.form.get('filename', '').strip()
+    if not filename:
+        flash('Aktif yapılacak dosya bulunamadı.', 'error')
+        return redirect(url_for('upload_excel'))
+
+    if '/' in filename or '\\' in filename or not filename.lower().endswith(('.xlsx', '.xls')):
+        flash('Geçersiz dosya adı.', 'error')
+        return redirect(url_for('upload_excel'))
+
+    excel_dir = os.path.join(EXCEL_FOLDER, 'excel_files')
+    path = os.path.join(excel_dir, filename)
+    if not os.path.exists(path):
+        flash('Dosya bulunamadı.', 'error')
+        return redirect(url_for('upload_excel'))
+
+    rel = os.path.join('excel_files', filename)
+    set_active_week(rel)
+    flash('Aktif hafta olarak işaretlendi.', 'success')
+    invalidate_cache()
+    return redirect(url_for('upload_excel'))
+
+
+@app.route('/download_excel/<path:filename>')
+def download_excel(filename):
+    """Yüklü Excel dosyasını indirmek için endpoint."""
+    # Sadece excel_files altındaki .xlsx/.xls dosyalarına izin ver
+    if '..' in filename or filename.startswith('/') or not filename.lower().endswith(('.xlsx', '.xls')):
+        flash('Geçersiz indirme isteği.', 'error')
+        return redirect(url_for('upload_excel'))
+
+    excel_dir = os.path.join(EXCEL_FOLDER, 'excel_files')
+    path = os.path.join(excel_dir, filename)
+    if not os.path.exists(path):
+        flash('Dosya bulunamadı.', 'error')
+        return redirect(url_for('upload_excel'))
+
+    return send_file(path, as_attachment=True)
 
 @app.route('/dashboard')
 def dashboard():
