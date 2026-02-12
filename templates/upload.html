@@ -106,6 +106,7 @@
         .upload-history li {
             font-size: 13px;
             color: var(--lumen-text-light);
+            line-height: 1.4;
         }
         @media (max-width: 768px) {
             .upload-container {
@@ -177,7 +178,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <table style="width:100%;border-collapse:collapse;font-size:13px;table-layout:auto;">
                 <thead>
                     <tr style="text-align:left;border-bottom:1px solid var(--surface-border);">
                         <th style="padding:8px 4px;">Dosya</th>
@@ -189,7 +190,7 @@
                 <tbody id="excel-table-body">
                     {% for excel in excels %}
                     <tr data-filter-text="{{ excel.name }} {{ excel.mtime }} {{ excel.group }}" data-group="{{ excel.group }}">
-                        <td style="padding:6px 4px;">
+                        <td style="padding:6px 4px;word-break:break-all;color:var(--lumen-text);">
                             <a href="{{ url_for('download_excel', filename=excel.name) }}" style="text-decoration:none;color:var(--lumen-dark);">
                                 {{ excel.name }}
                             </a>
