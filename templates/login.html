@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kurye Hakediş Sistemi</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=6">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=7">
     <style>
         .login-container .leaderboard-card,
         .login-container .login-box,
@@ -80,7 +80,10 @@
                         {% for group, weeks in excel_files|groupby('group') %}
                             <optgroup label="{{ group }}">
                                 {% for ef in weeks %}
-                                    <option value="{{ ef.filename }}">{{ ef.display_label or ef.display_name }}</option>
+                                    <option value="{{ ef.filename }}" {% if ef.filename == active_week %}selected{% endif %}>
+                                        {{ ef.display_label or ef.display_name }}
+                                        {% if ef.filename == active_week %} ★{% endif %}
+                                    </option>
                                 {% endfor %}
                             </optgroup>
                         {% endfor %}

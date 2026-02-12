@@ -85,6 +85,7 @@ MONTHS_TR = {
 def get_excel_files():
     """mysite ve mysite/excel_files klasörlerindeki tüm Excel dosyalarını listeler"""
     excel_files = []
+    active_rel = get_active_week()
     # Ana klasör
     def clean_week_label(name: str) -> str:
         """19-25_Ocak_2026_Hakedis_Tablosu -> 19-25 Ocak 2026"""
@@ -99,11 +100,13 @@ def get_excel_files():
         for file in os.listdir(EXCEL_FOLDER):
             if file.endswith('.xlsx') and not file.startswith('~'):
                 display_name = file.replace('.xlsx', '')
+                rel = file
                 excel_files.append({
                     'filename': file,
                     'display_name': display_name,
                     'display_label': clean_week_label(display_name),
-                    'group': extract_month_group(display_name)
+                    'group': extract_month_group(display_name),
+                    'is_active': (rel == active_rel)
                 })
     # excel_files alt klasörü (PythonAnywhere'de Excel'ler burada olabilir)
     excel_sub = os.path.join(EXCEL_FOLDER, 'excel_files')
@@ -111,11 +114,13 @@ def get_excel_files():
         for file in os.listdir(excel_sub):
             if file.endswith('.xlsx') and not file.startswith('~'):
                 display_name = file.replace('.xlsx', '')
+                rel = os.path.join('excel_files', file)
                 excel_files.append({
-                    'filename': os.path.join('excel_files', file),
+                    'filename': rel,
                     'display_name': display_name,
                     'display_label': clean_week_label(display_name),
-                    'group': extract_month_group(display_name)
+                    'group': extract_month_group(display_name),
+                    'is_active': (rel == active_rel)
                 })
     excel_files.sort(key=lambda x: x['display_name'], reverse=True)
     return excel_files
@@ -860,7 +865,11 @@ def login():
             flash('Hakediş sayfası yüklenirken hata oluştu. Excel yapısı beklenenden farklı olabilir.', 'error')
             return redirect(url_for('login'))
     
-    return render_template('login.html', excel_files=excel_files, top5_data=top5_data, odeme_takvimi=ODEME_TAKVIMI)
+    return render_template('login.html',
+                           excel_files=excel_files,
+                           top5_data=top5_data,
+                           odeme_takvimi=ODEME_TAKVIMI,
+                           active_week=get_active_week())
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_excel():
@@ -1010,6 +1019,68 @@ def download_excel(filename):
         return redirect(url_for('upload_excel'))
 
     return send_file(path, as_attachment=True)
+
+
+@app.route('/upload/rename', methods=['POST'])
+def rename_excel():
+    """Excel dosyasını yeniden adlandırır; geçmiş ve aktif hafta bilgisini günceller."""
+    old_name = request.form.get('old_name', '').strip()
+    new_name = request.form.get('new_name', '').strip()
+
+    if not old_name or not new_name:
+        flash('Yeniden adlandırmak için geçerli bir dosya adı girin.', 'error')
+        return redirect(url_for('upload_excel'))
+
+    if '/' in old_name or '\\' in old_name or '/' in new_name or '\\' in new_name:
+        flash('Geçersiz dosya adı.', 'error')
+        return redirect(url_for('upload_excel'))
+
+    # Uzantı kontrolü: yeni isimde yoksa eskisinin uzantısını ekle
+    root_old, ext_old = os.path.splitext(old_name)
+    root_new, ext_new = os.path.splitext(new_name)
+    if not ext_new:
+        ext_new = ext_old or '.xlsx'
+    new_name = root_new + ext_new
+
+    if not new_name.lower().endswith(('.xlsx', '.xls')):
+        flash('Yalnızca .xlsx veya .xls uzantılı isimlere izin verilir.', 'error')
+        return redirect(url_for('upload_excel'))
+
+    excel_dir = os.path.join(EXCEL_FOLDER, 'excel_files')
+    old_path = os.path.join(excel_dir, old_name)
+    new_path = os.path.join(excel_dir, new_name)
+
+    if not os.path.exists(old_path):
+        flash('Yeniden adlandırılacak dosya bulunamadı.', 'error')
+        return redirect(url_for('upload_excel'))
+
+    if os.path.exists(new_path):
+        flash('Bu isimde bir dosya zaten var.', 'error')
+        return redirect(url_for('upload_excel'))
+
+    try:
+        os.rename(old_path, new_path)
+    except OSError:
+        flash('Dosya yeniden adlandırılırken hata oluştu.', 'error')
+        return redirect(url_for('upload_excel'))
+
+    # Geçmişi güncelle
+    history = load_upload_history()
+    for h in history:
+        if h.get('filename') == old_name:
+            h['filename'] = new_name
+    save_upload_history(history)
+
+    # Aktif hafta dosya adını güncelle
+    active_rel = get_active_week()
+    old_rel = os.path.join('excel_files', old_name)
+    new_rel = os.path.join('excel_files', new_name)
+    if active_rel and active_rel == old_rel:
+        set_active_week(new_rel)
+
+    flash('Dosya adı güncellendi.', 'success')
+    invalidate_cache()
+    return redirect(url_for('upload_excel'))
 
 @app.route('/dashboard')
 def dashboard():
