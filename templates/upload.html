@@ -162,9 +162,19 @@
             <strong>{{ summary.filename }}</strong> dosyası analiz edildi.<br>
             Toplam satır sayısı: {{ summary.row_count }} • Sütun sayısı: {{ summary.column_count }}<br>
             {% if summary.missing_columns %}
-            <span style="color:#c62828;">Eksik sütunlar: {{ summary.missing_columns|join(', ') }}</span>
+            <div style="margin-top:8px;padding:10px;border-radius:10px;background:rgba(127,29,29,0.85);color:#fecaca;">
+                <div style="font-weight:600;margin-bottom:4px;">Eksik sütunlar:</div>
+                <ul style="margin:0;padding-left:18px;">
+                    {% for col in summary.missing_columns %}
+                    <li>{{ col }}</li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-top:6px;font-size:12px;color:#fecaca;">
+                    Bu başlıklar Excel üzerinde yoksa bazı alanlar yanlış hesaplanabilir veya boş görünebilir.
+                </p>
+            </div>
             {% else %}
-            <span style="color:#2e7d32;">Dosya yapısı doğrulandı.</span>
+            <span style="color:#2e7d32;">Dosya yapısı doğrulandı. Tüm kritik sütunlar mevcut.</span>
             {% endif %}
         </div>
         {% endif %}

@@ -15,6 +15,14 @@
                 <p class="week-info">Dönem: <strong>{{ selected_week }}</strong></p>
             </div>
             <div class="header-right">
+                <button type="button" class="btn-print" onclick="window.print()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 6 3 18 3 18 9"/>
+                        <rect x="6" y="13" width="12" height="8" rx="1" ry="1"/>
+                        <rect x="6" y="9" width="12" height="4"/>
+                    </svg>
+                    <span>Yazdır / PDF</span>
+                </button>
                 <div class="theme-toggle-container">
                     <button type="button" class="theme-switch theme-switch--ghost" aria-pressed="false" data-theme-toggle aria-label="Tema değiştir">
                         <span class="theme-switch__icon theme-switch__icon--sun">☀️</span>
