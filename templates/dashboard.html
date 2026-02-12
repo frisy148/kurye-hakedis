@@ -186,24 +186,47 @@
                     </div>
                     <div class="section-content" data-section-content>
                         <div class="detail-grid">
+                        {# Pickup / Tekli Paket Tutarı #}
                         {% if 'Pickup Tutar' in columns %}
                         <div class="detail-item">
                             <span class="detail-label">Pickup Tutar</span>
                             <span class="detail-value positive">+{{ "%.2f"|format((row[columns.index('Pickup Tutar')]|to_float)) }} ₺</span>
                         </div>
+                        {% elif 'Tekli Paket Tutarı' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Tekli Paket Tutarı</span>
+                            <span class="detail-value positive">+{{ "%.2f"|format((row[columns.index('Tekli Paket Tutarı')]|to_float)) }} ₺</span>
+                        </div>
                         {% endif %}
                         
+                        {# Dropoff / Çoklu Paket Tutarı #}
                         {% if 'Dropoff Tutar' in columns %}
                         <div class="detail-item">
                             <span class="detail-label">Dropoff Tutar</span>
                             <span class="detail-value positive">+{{ "%.2f"|format((row[columns.index('Dropoff Tutar')]|to_float)) }} ₺</span>
                         </div>
+                        {% elif 'Çoklu Paket Tutarı' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Çoklu Paket Tutarı</span>
+                            <span class="detail-value positive">+{{ "%.2f"|format((row[columns.index('Çoklu Paket Tutarı')]|to_float)) }} ₺</span>
+                        </div>
+                        {% elif 'Coklu Paket Tutarı' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Coklu Paket Tutarı</span>
+                            <span class="detail-value positive">+{{ "%.2f"|format((row[columns.index('Coklu Paket Tutarı')]|to_float)) }} ₺</span>
+                        </div>
                         {% endif %}
                         
+                        {# Mesafe #}
                         {% if 'Mesafe Tutarı' in columns %}
                         <div class="detail-item">
                             <span class="detail-label">Mesafe Tutarı</span>
                             <span class="detail-value positive">+{{ "%.2f"|format((row[columns.index('Mesafe Tutarı')]|to_float)) }} ₺</span>
+                        </div>
+                        {% elif 'Kilometre Mesafe Tutarı' in columns %}
+                        <div class="detail-item">
+                            <span class="detail-label">Kilometre Mesafe Tutarı</span>
+                            <span class="detail-value positive">+{{ "%.2f"|format((row[columns.index('Kilometre Mesafe Tutarı')]|to_float)) }} ₺</span>
                         </div>
                         {% endif %}
                         

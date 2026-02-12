@@ -612,10 +612,25 @@ DEDUCTION_CATEGORIES = {
 }
 
 # Kazanç kalemleri (Excel'de toplam 0 olsa bile satırlardan hesaplanabilsin)
+# Eski ve yeni format isimleri birlikte desteklenir.
 EARNING_COLUMNS = [
-    'Pickup Tutar', 'Dropoff Tutar', 'Mesafe Tutarı', 'Garanti Bölge Tutarı',
-    'Gece Mesaisi Tutarı', 'Bölge Kampanya Tutarı', 'Haftalık Ek Paket Tutarı',
-    'Günlük Bonus', 'Hakediş Zam Ödemesi KDV Dahil', 'Bahşiş Tutar'
+    # Eski format
+    'Pickup Tutar',
+    'Dropoff Tutar',
+    'Mesafe Tutarı',
+    # Yeni format
+    'Tekli Paket Tutarı',
+    'Çoklu Paket Tutarı',
+    'Coklu Paket Tutarı',
+    'Kilometre Mesafe Tutarı',
+    # Ortak / diğer
+    'Garanti Bölge Tutarı',
+    'Gece Mesaisi Tutarı',
+    'Bölge Kampanya Tutarı',
+    'Haftalık Ek Paket Tutarı',
+    'Günlük Bonus',
+    'Hakediş Zam Ödemesi KDV Dahil',
+    'Bahşiş Tutar',
 ]
 
 
