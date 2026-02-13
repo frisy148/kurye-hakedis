@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Komisyon hesaplama mantığı – Flask’tan bağımsız (blueprint ve standalone için)."""
 import os
+import json
 import pandas as pd
 from typing import List, Dict, Optional, Set
 
@@ -32,6 +33,7 @@ EARNING_COLUMNS = [
 
 BENIM_KURYELERIM_FILE = os.path.join(DATA_DIR, 'benim_kuryelerim.txt')
 ESKI_KURYELER_FILE = os.path.join(DATA_DIR, 'eski_kuryeler.txt')
+ALT_EKIPLER_FILE = os.path.join(DATA_DIR, 'alt_ekipler.json')
 
 
 def load_my_couriers() -> Set[str]:
@@ -65,6 +67,48 @@ def save_my_couriers(names: List[str]) -> None:
         f.write('# Benim kuryelerim – her satıra bir isim (Excel Ad-Soyad ile eşleşir)\n')
         for line in lines:
             f.write(line.strip() + '\n')
+
+
+def load_alt_ekipler() -> Dict[str, List[str]]:
+    """Alt ekip grupları: { "Barış": ["Ali Veli", ...], ... }. Her grupta o kişiye bağlı kurye isimleri."""
+    path = ALT_EKIPLER_FILE
+    if not os.path.exists(path):
+        return {}
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        if not isinstance(data, dict):
+            return {}
+        return {k: (v if isinstance(v, list) else []) for k, v in data.items()}
+    except (json.JSONDecodeError, IOError):
+        return {}
+
+
+def save_alt_ekipler(data: Dict[str, List[str]]) -> None:
+    """Alt ekipler JSON dosyasına yazılır."""
+    with open(ALT_EKIPLER_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def compute_alt_ekipler_ozet(kurye_detay: List[Dict], alt_ekipler: Dict[str, List[str]]) -> List[Dict]:
+    """
+    kurye_detay ve alt_ekipler ile her grup için bu dönemde eşleşen kuryeleri, toplamı ve %5'i hesaplar.
+    Dönen: [ {"grup_adi": "Barış", "kuryeler": [{"ad_soyad": "...", "toplam_hakedis": x}, ...], "toplam": y, "yuzde5": z}, ... ]
+    """
+    if not kurye_detay or not alt_ekipler:
+        return []
+    out = []
+    for grup_adi, grup_isimleri in alt_ekipler.items():
+        grup_norm = {normalize_name(n) for n in (grup_isimleri or [])}
+        matched = [k for k in kurye_detay if normalize_name(k.get('ad_soyad', '') or '') in grup_norm]
+        toplam = sum(m.get('toplam_hakedis', 0) or 0 for m in matched)
+        out.append({
+            'grup_adi': grup_adi,
+            'kuryeler': matched,
+            'toplam': toplam,
+            'yuzde5': round(toplam * 0.05, 2),
+        })
+    return out
 
 
 def normalize_name(name: str) -> str:

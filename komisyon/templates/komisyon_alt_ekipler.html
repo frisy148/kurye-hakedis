@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alt ekipler – Komisyon</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .komisyon-wrap { max-width: 720px; margin: 0 auto; padding: 24px; }
+        .card-k { background: var(--surface-card, #fff); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 12px var(--shadow-soft, rgba(0,0,0,.08)); }
+        .card-k h1 { font-size: 1.2rem; margin-bottom: 8px; color: var(--lumen-dark, #1a2744); }
+        .card-k h2 { font-size: 1rem; margin: 16px 0 8px; color: var(--lumen-dark, #1a2744); }
+        .card-k p { color: var(--lumen-text-light); margin-bottom: 16px; font-size: 0.95rem; }
+        .btn { display: inline-block; padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 1rem; text-decoration: none; margin-right: 8px; margin-top: 8px; }
+        .btn-primary { background: var(--lumen-gold, #c9a227); color: #1a2744; }
+        .btn-secondary { background: var(--lumen-gray, #e8ecf1); color: var(--lumen-text, #1a2744); }
+        .btn-danger { background: #fef2f2; color: #b91c1c; }
+        .nav-links { margin-bottom: 16px; }
+        .grup-kutu { border: 1px solid var(--surface-border, #ddd); border-radius: 10px; padding: 14px; margin-bottom: 14px; background: var(--surface-muted, #f8fafc); }
+        select[multiple] { width: 100%; min-height: 120px; padding: 8px; border-radius: 8px; font-size: 0.95rem; }
+        .grup-baslik { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+    <div class="komisyon-wrap">
+        <div class="nav-links">
+            <a href="{{ url_for('komisyon_bp.index') }}" class="btn btn-secondary">← Komisyon ana sayfa</a>
+            <a href="{{ url_for('komisyon_bp.kuryeler') }}" class="btn btn-secondary">Kurye listesi</a>
+        </div>
+        <div class="card-k">
+            <h1>Alt ekipler (%5)</h1>
+            <p>Altında çalışan kişilere (Barış vb.) kurye ataması yap. Ana sayfada hesapla dediğinde bu gruplara göre <strong>onlara göndermen gereken %5 tutarı</strong> hesaplanır. Sadece “benim kuryelerim” listesindeki isimleri seçebilirsin.</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="post" action="{{ url_for('komisyon_bp.alt_ekipler') }}" style="margin-bottom:20px;">
+                <input type="hidden" name="action" value="grup_ekle">
+                <label for="grup_adi" style="display:block; margin-bottom:6px; font-size:0.9rem;">Yeni grup (örn. Barış)</label>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <input type="text" id="grup_adi" name="grup_adi" placeholder="Grup / kişi adı" style="flex:1; min-width:160px; padding:10px 12px; border:1px solid var(--surface-border); border-radius:8px;">
+                    <button type="submit" class="btn btn-primary">Grup ekle</button>
+                </div>
+            </form>
+
+            {% if alt_ekipler %}
+            <form method="post" action="{{ url_for('komisyon_bp.alt_ekipler') }}">
+                <input type="hidden" name="action" value="kaydet">
+                {% for grup_adi, secili in alt_ekipler.items() %}
+                <div class="grup-kutu">
+                    <div class="grup-baslik">
+                        <h2 style="margin:0;">{{ grup_adi }}</h2>
+                        <form method="post" action="{{ url_for('komisyon_bp.alt_ekipler') }}" style="display:inline;" onsubmit="return confirm('Bu grubu silmek istediğine emin misin?');">
+                            <input type="hidden" name="action" value="grup_sil">
+                            <input type="hidden" name="grup_adi" value="{{ grup_adi }}">
+                            <button type="submit" class="btn btn-danger">Grubu sil</button>
+                        </form>
+                    </div>
+                    <label for="sel_{{ loop.index }}" style="font-size:0.9rem; color:var(--lumen-text-light);">Bu gruba ait kuryeler (Ctrl ile çoklu seç)</label>
+                    <select id="sel_{{ loop.index }}" name="kuryeler_{{ grup_adi }}" multiple style="width:100%; min-height:100px; margin-top:6px;">
+                        {% for isim in isimler %}
+                        <option value="{{ isim }}" {% if isim in secili %}selected{% endif %}>{{ isim }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary">Tüm atamaları kaydet</button>
+            </form>
+            {% else %}
+            <p style="color:var(--lumen-text-light);">Henüz grup yok. Yukarıdan bir grup adı yazıp “Grup ekle” de.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

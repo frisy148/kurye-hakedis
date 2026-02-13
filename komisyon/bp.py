@@ -86,6 +86,12 @@ def index():
             else:
                 flash('Seçilen dosya bulunamadı.', 'error')
 
+    alt_ekipler_ozet = []
+    if summary and summary.get('kurye_detay'):
+        alt_ekipler_ozet = logic.compute_alt_ekipler_ozet(
+            summary['kurye_detay'], logic.load_alt_ekipler()
+        )
+
     return render_template(
         'komisyon_index.html',
         my_couriers_count=len(my_couriers),
@@ -93,6 +99,7 @@ def index():
         summary=summary,
         selected_file=selected_file,
         selected_file_2=selected_file_2,
+        alt_ekipler_ozet=alt_ekipler_ozet,
     )
 
 
@@ -155,6 +162,40 @@ def eski_kuryeler():
         return redirect(url_for('komisyon_bp.eski_kuryeler'))
     isimler = logic.load_old_couriers_list()
     return render_template('komisyon_eski_kuryeler.html', isimler=isimler)
+
+
+@komisyon_bp.route('/alt-ekipler', methods=['GET', 'POST'])
+def alt_ekipler():
+    """Alt ekip gruplarını düzenle – her gruba (Barış vb.) kurye ataması, %5 hesaplaması için."""
+    isimler = logic.load_my_couriers_list()
+    data = logic.load_alt_ekipler()
+    if request.method == 'POST':
+        action = request.form.get('action', '')
+        if action == 'grup_ekle':
+            grup = request.form.get('grup_adi', '').strip()
+            if grup and grup not in data:
+                data[grup] = []
+                logic.save_alt_ekipler(data)
+                flash(f'Grup eklendi: {grup}', 'success')
+            elif grup in data:
+                flash('Bu grup adı zaten var.', 'info')
+            return redirect(url_for('komisyon_bp.alt_ekipler'))
+        if action == 'grup_sil':
+            grup = request.form.get('grup_adi', '').strip()
+            if grup in data:
+                del data[grup]
+                logic.save_alt_ekipler(data)
+                flash(f'Grup silindi: {grup}', 'success')
+            return redirect(url_for('komisyon_bp.alt_ekipler'))
+        if action == 'kaydet':
+            for grup_adi in list(data.keys()):
+                names = request.form.getlist('kuryeler_' + grup_adi)
+                valid = [n.strip() for n in names if n and n.strip() in isimler]
+                data[grup_adi] = valid
+            logic.save_alt_ekipler(data)
+            flash('Alt ekip atamaları kaydedildi.', 'success')
+            return redirect(url_for('komisyon_bp.alt_ekipler'))
+    return render_template('komisyon_alt_ekipler.html', isimler=isimler, alt_ekipler=data)
 
 
 @komisyon_bp.route('/upload', methods=['GET', 'POST'])

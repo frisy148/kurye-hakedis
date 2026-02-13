@@ -34,6 +34,7 @@
         <div class="nav-links">
             <a href="{{ url_for('komisyon_bp.kuryeler') }}" class="btn btn-secondary">📋 Kurye listesini düzenle</a>
             <a href="{{ url_for('komisyon_bp.eski_kuryeler') }}" class="btn btn-secondary">📋 Eski kuryeler</a>
+            <a href="{{ url_for('komisyon_bp.alt_ekipler') }}" class="btn btn-secondary">👥 Alt ekipler (%5)</a>
             <a href="{{ url_for('komisyon_bp.upload') }}" class="btn btn-secondary">📤 Excel yükle</a>
             <a href="{{ url_for('komisyon_bp.cikis') }}" class="btn btn-secondary">Çıkış</a>
         </div>
@@ -94,9 +95,9 @@
             </div>
 
             {% if summary.kurye_detay %}
-            <div class="kurye-tablo-wrap" style="margin-top:24px;">
-                <h3 style="font-size:1rem; margin-bottom:12px; color:var(--lumen-dark,#1a2744);">Benim kuryelerim – ne kazandı</h3>
-                <table class="kurye-tablo" style="width:100%; border-collapse:collapse; font-size:0.95rem; border:1px solid var(--surface-border); border-radius:10px; overflow:hidden;">
+            <details class="kurye-tablo-wrap" style="margin-top:24px;">
+                <summary style="cursor:pointer; font-size:1rem; font-weight:600; color:var(--lumen-dark,#1a2744); padding:8px 0;">Benim kuryelerim – kaç para kazandı (aç/kapa)</summary>
+                <table class="kurye-tablo" style="width:100%; border-collapse:collapse; font-size:0.95rem; border:1px solid var(--surface-border); border-radius:10px; overflow:hidden; margin-top:12px;">
                     <thead>
                         <tr style="background:var(--surface-muted,#f5f7fa); text-align:left;">
                             <th style="padding:12px 14px; border-bottom:1px solid var(--surface-border); font-weight:600;">Kurye</th>
@@ -112,8 +113,37 @@
                         {% endfor %}
                     </tbody>
                 </table>
-            </div>
+            </details>
             {% endif %}
+
+            <div class="alt-ekipler-wrap" style="margin-top:24px;">
+                <h3 style="font-size:1rem; margin-bottom:8px; color:var(--lumen-dark,#1a2744);">Alt ekipler – %5 göndermen gereken</h3>
+                <p class="sub" style="margin-bottom:12px;">Altında çalışan kişilere (Barış vb.) kurye ataması yapıp bu dönem onlara ne göndereceğini gör. Grupları <a href="{{ url_for('komisyon_bp.alt_ekipler') }}">buradan düzenle</a>.</p>
+                {% if alt_ekipler_ozet %}
+                <table class="alt-ekipler-tablo" style="width:100%; border-collapse:collapse; font-size:0.95rem; border:1px solid var(--surface-border); border-radius:10px; overflow:hidden;">
+                    <thead>
+                        <tr style="background:var(--surface-muted,#f5f7fa); text-align:left;">
+                            <th style="padding:12px 14px; border-bottom:1px solid var(--surface-border); font-weight:600;">Grup (kişi)</th>
+                            <th style="padding:12px 14px; border-bottom:1px solid var(--surface-border); font-weight:600;">Bu dönem kuryeleri</th>
+                            <th style="padding:12px 14px; border-bottom:1px solid var(--surface-border); font-weight:600; text-align:right;">Toplam (₺)</th>
+                            <th style="padding:12px 14px; border-bottom:1px solid var(--surface-border); font-weight:600; text-align:right;">Göndermen gereken (%5)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in alt_ekipler_ozet %}
+                        <tr style="border-bottom:1px solid var(--surface-border);">
+                            <td style="padding:10px 14px; font-weight:600;">{{ row.grup_adi }}</td>
+                            <td style="padding:10px 14px;">{% for k in row.kuryeler %}{{ k.ad_soyad }}{% if not loop.last %}, {% endif %}{% endfor %}{% if not row.kuryeler %}—{% endif %}</td>
+                            <td style="padding:10px 14px; text-align:right;">{{ row.toplam|tr_para }} ₺</td>
+                            <td style="padding:10px 14px; text-align:right; color:var(--lumen-gold,#c9a227); font-weight:700;">{{ row.yuzde5|tr_para }} ₺</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="sub">Henüz grup yok veya bu dönemde eşleşen yok. <a href="{{ url_for('komisyon_bp.alt_ekipler') }}">Alt ekipler</a> sayfasından grup ekleyip kurye atayabilirsin.</p>
+                {% endif %}
+            </div>
 
             {% if summary.ekside_listesi %}
             <div class="ekside-box" style="margin-top:20px; padding:16px; background:#fef2f2; border-radius:8px; border-left:4px solid #b91c1c;">
