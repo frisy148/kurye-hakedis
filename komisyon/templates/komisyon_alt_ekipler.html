@@ -10,43 +10,69 @@
         .theme-label-light { display: none; }
         :root[data-theme="dark"] .theme-label-dark { display: none; }
         :root[data-theme="dark"] .theme-label-light { display: inline; }
-        .komisyon-wrap { max-width: 720px; margin: 0 auto; padding: 24px; color: var(--lumen-text); }
-        .card-k { background: var(--surface-card); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 12px var(--shadow-soft); color: var(--lumen-text); }
-        .card-k h1, .card-k h2 { font-size: 1.2rem; margin-bottom: 8px; color: var(--lumen-text); }
-        .card-k h2 { font-size: 1rem; margin: 16px 0 8px; }
-        .card-k p { color: var(--lumen-text-light); margin-bottom: 16px; font-size: 0.95rem; }
-        .btn { display: inline-block; padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 1rem; text-decoration: none; margin-right: 8px; margin-top: 8px; color: var(--lumen-text); }
-        .btn-primary { background: var(--lumen-gold); color: #1a2744; }
+        .komisyon-wrap { max-width: 820px; margin: 0 auto; padding: 24px; color: var(--lumen-text); }
+        .nav-links { margin-bottom: 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .btn { display: inline-block; padding: 10px 18px; border-radius: 10px; border: none; cursor: pointer; font-size: 0.95rem; text-decoration: none; font-weight: 500; transition: opacity .2s; }
+        .btn:hover { opacity: 0.9; }
+        .btn-primary { background: linear-gradient(135deg, #c9a227 0%, #b8921f 100%); color: #1a2744; }
         .btn-secondary { background: var(--lumen-gray); color: var(--lumen-text); }
-        .btn-danger { background: #fef2f2; color: #b91c1c; }
-        .nav-links { margin-bottom: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-        .profil-ozet { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-        .profil-ozet-item { background: var(--surface-card); border: 1px solid var(--surface-border); border-radius: 10px; padding: 12px 16px; font-size: 0.95rem; color: var(--lumen-text); display: flex; align-items: center; gap: 8px; }
-        .profil-ozet-item strong { color: var(--lumen-text); }
+        .btn-danger { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color: #fff; padding: 8px 14px; font-size: 0.9rem; }
+        .btn-danger:hover { opacity: 1; filter: brightness(1.1); }
+        .komisyon-success { padding: 14px 20px; border-radius: 12px; margin-bottom: 20px; font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 10px; background: #166534; color: #fff; border: none; }
+        .komisyon-success.alert-info { background: #1e40af; }
+        .komisyon-success.alert-error { background: #b91c1c; }
+        .page-title { font-size: 1.5rem; font-weight: 700; color: var(--lumen-text); margin-bottom: 6px; }
+        .page-desc { color: var(--lumen-text-light); margin-bottom: 24px; font-size: 0.95rem; line-height: 1.5; }
+        .profil-ozet { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+        .profil-ozet-item { background: var(--surface-card); border: 2px solid var(--surface-border); border-radius: 12px; padding: 14px 18px; font-size: 0.95rem; color: var(--lumen-text); display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 8px var(--shadow-soft); }
+        .profil-ozet-item strong { color: var(--lumen-text); font-size: 1.05rem; }
         .profil-ozet-item span { color: var(--lumen-text-light); }
-        .grup-kutu { border: 1px solid var(--surface-border); border-radius: 10px; padding: 14px; margin-bottom: 14px; background: var(--surface-muted); color: var(--lumen-text); }
-        .kurye-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-        .kurye-chip { display: inline-flex; align-items: center; padding: 8px 14px; border-radius: 20px; border: 2px solid var(--surface-border); background: var(--surface-card); color: var(--lumen-text); cursor: pointer; font-size: 0.9rem; transition: background .15s, border-color .15s; }
-        .kurye-chip:hover { border-color: var(--lumen-gold); }
+        .add-profil-box { background: var(--surface-card); border: 2px dashed var(--surface-border); border-radius: 14px; padding: 20px; margin-bottom: 24px; }
+        .add-profil-box label { display: block; font-size: 0.9rem; color: var(--lumen-text-light); margin-bottom: 8px; }
+        .add-profil-box .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .add-profil-box input[type="text"] { flex: 1; min-width: 200px; padding: 12px 14px; border: 2px solid var(--surface-border); border-radius: 10px; font-size: 1rem; background: var(--surface-card); color: var(--lumen-text); }
+        .add-profil-box input:focus { outline: none; border-color: var(--lumen-gold); }
+        .profil-kart { background: var(--surface-card); border: 2px solid var(--surface-border); border-radius: 14px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 16px var(--shadow-soft); }
+        .profil-kart-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid var(--surface-border); }
+        .profil-kart-title { font-size: 1.25rem; font-weight: 700; color: var(--lumen-text); margin: 0; }
+        .profil-kart-meta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
+        .profil-kart-meta .yuzde-wrap { display: flex; align-items: center; gap: 6px; }
+        .profil-kart-meta .yuzde-wrap label { font-size: 0.85rem; color: var(--lumen-text-light); }
+        .yuzde-input { width: 4.5em; padding: 10px 12px; border: 2px solid var(--surface-border); border-radius: 8px; font-size: 1rem; font-weight: 600; background: var(--surface-card); color: var(--lumen-text); }
+        .yuzde-input:focus { outline: none; border-color: var(--lumen-gold); }
+        .profil-sil-btn { flex-shrink: 0; }
+        .kurye-baslik { font-size: 0.9rem; font-weight: 600; color: var(--lumen-text-light); margin-bottom: 12px; }
+        .kurye-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+        .kurye-chip { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--surface-border); background: var(--surface-muted); color: var(--lumen-text); cursor: pointer; font-size: 0.9rem; transition: all .2s; }
+        .kurye-chip:hover { border-color: var(--lumen-gold); background: var(--surface-hover, rgba(201,162,39,0.08)); }
         .kurye-chip.selected { background: var(--lumen-gold); border-color: var(--lumen-gold); color: #1a2744; font-weight: 600; }
-        .kurye-chip input { position: absolute; opacity: 0; pointer-events: none; }
-        .grup-baslik { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
-        .yuzde-input { width: 5em; padding: 8px 12px; border-radius: 8px; font-size: 1rem; border: 1px solid var(--surface-border); background: var(--surface-card); color: var(--lumen-text); }
-        .komisyon-success { padding: 14px 20px; border-radius: 10px; margin-bottom: 20px; font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 10px; background: #166534; color: #fff; border: 1px solid #15803d; }
-        .komisyon-success.alert-info { background: #1e40af; border-color: #2563eb; }
-        .komisyon-success.alert-error { background: #b91c1c; border-color: #dc2626; }
+        .kurye-chip input { width: 18px; height: 18px; margin: 0; cursor: pointer; accent-color: var(--lumen-gold); }
+        .kaydet-bar { position: sticky; bottom: 0; background: var(--surface-card); border-top: 2px solid var(--surface-border); padding: 20px 0; margin-top: 8px; }
+        .kaydet-bar .btn-primary { padding: 14px 28px; font-size: 1.05rem; }
     </style>
 </head>
 <body>
     <div class="komisyon-wrap">
         <div class="nav-links">
-            <a href="{{ url_for('komisyon_bp.index') }}" class="btn btn-secondary">← Komisyon ana sayfa</a>
+            <a href="{{ url_for('komisyon_bp.index') }}" class="btn btn-secondary">← Ana sayfa</a>
             <a href="{{ url_for('komisyon_bp.kuryeler') }}" class="btn btn-secondary">Kurye listesi</a>
             <button type="button" class="btn btn-secondary" data-theme-toggle title="Tema değiştir" style="margin-left:auto;">
                 <span class="theme-label-dark">🌙 Karanlık</span>
                 <span class="theme-label-light">☀️ Aydınlık</span>
             </button>
         </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="komisyon-success alert-{{ category }}" role="alert">
+                    <span aria-hidden="true">{% if category == 'success' %}✓{% elif category == 'error' %}✕{% else %}ℹ{% endif %}</span>
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
         {% if alt_ekipler %}
         <div class="profil-ozet">
             <p style="width:100%; margin:0 0 8px 0; font-size:0.9rem; color:var(--lumen-text-light);">Mevcut profiller</p>
@@ -59,70 +85,80 @@
             {% endfor %}
         </div>
         {% endif %}
-        <div class="card-k">
-            <h1>Profiller (alt ekipler)</h1>
-            <p>Barış vb. <strong>profil</strong> oluştur; her profilde o kişinin kuryelerini seç ve <strong>yüzdeyi</strong> (3, 5, 8…) kendin belirle. Ana sayfada hesapla dediğinde her profilin kurye kazançları toplanıp seçtiğin yüzdeyle “göndermen gereken” tutar çıkar.</p>
 
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                    <div class="komisyon-success alert-{{ category }}" role="alert">
-                        <span aria-hidden="true">{% if category == 'success' %}✓{% elif category == 'error' %}✕{% else %}ℹ{% endif %}</span>
-                        <span>{{ message }}</span>
-                    </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
+        <h1 class="page-title">Profiller</h1>
+        <p class="page-desc">Altında çalışan kişiler (Barış vb.) için profil oluştur. Her profilde kuryeleri işaretle ve vereceğin yüzdeyi yaz (örn. 5,5). Kaydet’e bastığında atamalar kaydedilir.</p>
 
-            <form method="post" action="{{ url_for('komisyon_bp.alt_ekipler') }}" style="margin-bottom:20px;">
+        <div class="add-profil-box">
+            <form method="post" action="{{ url_for('komisyon_bp.alt_ekipler') }}">
                 <input type="hidden" name="action" value="grup_ekle">
-                <label for="grup_adi" style="display:block; margin-bottom:6px; font-size:0.9rem;">Yeni profil (örn. Barış)</label>
-                <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                    <input type="text" id="grup_adi" name="grup_adi" placeholder="Profil / kişi adı" style="flex:1; min-width:160px; padding:10px 12px; border:1px solid var(--surface-border); border-radius:8px; background:var(--surface-card); color:var(--lumen-text);">
+                <label for="grup_adi">Yeni profil adı</label>
+                <div class="row">
+                    <input type="text" id="grup_adi" name="grup_adi" placeholder="Örn: Barış" required>
                     <button type="submit" class="btn btn-primary">Profil ekle</button>
                 </div>
             </form>
-
-            {% if alt_ekipler %}
-            <form method="post" action="{{ url_for('komisyon_bp.alt_ekipler') }}">
-                <input type="hidden" name="action" value="kaydet">
-                {% for grup_adi, profil in alt_ekipler.items() %}
-                <div class="grup-kutu">
-                    <div class="grup-baslik">
-                        <h2 style="margin:0;">{{ grup_adi }}’nın kuryeleri</h2>
-                        <form method="post" action="{{ url_for('komisyon_bp.alt_ekipler') }}" style="display:inline;" onsubmit="return confirm('Bu profili silmek istediğine emin misin?');">
-                            <input type="hidden" name="action" value="grup_sil">
-                            <input type="hidden" name="grup_adi" value="{{ grup_adi }}">
-                            <button type="submit" class="btn btn-danger">Profili sil</button>
-                        </form>
-                    </div>
-                    <div style="margin-bottom:12px;">
-                        <label for="yuzde_{{ loop.index }}" style="font-size:0.9rem; color:var(--lumen-text-light);">Verdiğin yüzde (virgül kullanabilirsin: 5,5)</label>
-                        <input type="text" id="yuzde_{{ loop.index }}" name="yuzde_{{ grup_adi }}" class="yuzde-input" value="{{ (profil.yuzde|round(1)|string)|replace('.', ',') }}" placeholder="5,5" inputmode="decimal" style="margin-left:8px;">
-                        <span style="font-size:0.9rem; color:var(--lumen-text-light);">%</span>
-                    </div>
-                    <p style="font-size:0.9rem; color:var(--lumen-text-light); margin-bottom:6px;">Listedeki kuryelere tıkla: seçili olanlar bu profilde. (Tekrar tıkla çıkarmak için.)</p>
-                    <div class="kurye-chips">
-                        {% for isim in isimler %}
-                        <label class="kurye-chip {% if isim in profil.kuryeler %}selected{% endif %}">
-                            <input type="checkbox" name="kuryeler_{{ grup_adi }}" value="{{ isim }}" {% if isim in profil.kuryeler %}checked{% endif %}>
-                            {{ isim }}
-                        </label>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endfor %}
-                <button type="submit" class="btn btn-primary">Tüm profilleri kaydet</button>
-            </form>
-            {% else %}
-            <p style="color:var(--lumen-text-light);">Henüz profil yok. Yukarıdan bir isim yazıp “Profil ekle” de.</p>
-            {% endif %}
         </div>
+
+        {% if alt_ekipler %}
+        <form method="post" action="{{ url_for('komisyon_bp.alt_ekipler') }}" id="profil-kaydet-form">
+            <input type="hidden" name="action" value="kaydet">
+            {% for grup_adi, profil in alt_ekipler.items() %}
+            <div class="profil-kart" data-grup="{{ grup_adi }}">
+                <div class="profil-kart-header">
+                    <div>
+                        <h2 class="profil-kart-title">{{ grup_adi }}’nın kuryeleri</h2>
+                        <div class="profil-kart-meta">
+                            <div class="yuzde-wrap">
+                                <label for="yuzde_{{ loop.index }}">Yüzde</label>
+                                <input type="text" id="yuzde_{{ loop.index }}" name="yuzde_{{ grup_adi }}" class="yuzde-input" value="{{ (profil.yuzde|round(1)|string)|replace('.', ',') }}" placeholder="5,5" inputmode="decimal"> <span style="color:var(--lumen-text-light);">%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-danger profil-sil-btn" data-grup="{{ grup_adi }}" title="Bu profili sil">🗑 Profili sil</button>
+                </div>
+                <p class="kurye-baslik">Bu profile eklemek istediğin kuryeleri işaretle (kutuya tıkla veya isme tıkla):</p>
+                <div class="kurye-grid">
+                    {% for isim in isimler %}
+                    <label class="kurye-chip {% if isim in profil.kuryeler %}selected{% endif %}">
+                        <input type="checkbox" name="kuryeler_{{ grup_adi }}" value="{{ isim }}" {% if isim in profil.kuryeler %}checked{% endif %}>
+                        <span>{{ isim }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+            <div class="kaydet-bar">
+                <button type="submit" class="btn btn-primary">Tüm profilleri kaydet</button>
+            </div>
+        </form>
+        {% else %}
+        <p style="color:var(--lumen-text-light); padding: 20px; background: var(--surface-muted); border-radius: 12px;">Henüz profil yok. Yukarıdaki kutuya bir isim yazıp «Profil ekle» de.</p>
+        {% endif %}
     </div>
     <script>
-        document.querySelectorAll('.kurye-chip input[type=checkbox]').forEach(function(cb) {
-            cb.addEventListener('change', function() { cb.closest('.kurye-chip').classList.toggle('selected', cb.checked); });
-        });
+        (function() {
+            var form = document.getElementById('profil-kaydet-form');
+            if (form) {
+                form.querySelectorAll('.kurye-chip input[type=checkbox]').forEach(function(cb) {
+                    cb.addEventListener('change', function() {
+                        cb.closest('.kurye-chip').classList.toggle('selected', cb.checked);
+                    });
+                });
+            }
+            document.querySelectorAll('.profil-sil-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var grup = this.getAttribute('data-grup');
+                    if (!grup || !confirm('«' + grup + '» profilini silmek istediğine emin misin? Bu işlem geri alınamaz.')) return;
+                    var f = document.createElement('form');
+                    f.method = 'POST';
+                    f.action = '{{ url_for("komisyon_bp.alt_ekipler") }}';
+                    f.innerHTML = '<input type="hidden" name="action" value="grup_sil"><input type="hidden" name="grup_adi" value="' + grup.replace(/"/g, '&quot;') + '">';
+                    document.body.appendChild(f);
+                    f.submit();
+                });
+            });
+        })();
     </script>
 </body>
 </html>
