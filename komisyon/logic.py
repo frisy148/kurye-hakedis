@@ -177,15 +177,13 @@ def compute_period_summary(excel_path: str, my_couriers: Set[str]) -> Optional[D
             odenecek_ekside += odenecek
             ekside_listesi.append({'ad_soyad': ad_soyad, 'tutar': round(odenecek, 2)})
 
-    komisyon_matrah = toplam_hakedis + odenecek_ekside
-    komisyon = komisyon_matrah * KOMISYON_ORANI
+    komisyon = toplam_hakedis * KOMISYON_ORANI
 
     return {
         'row_count': row_count,
         'matched_names': sorted(set(matched_names)),
         'toplam_hakedis': round(toplam_hakedis, 2),
         'odenecek_ekside': round(odenecek_ekside, 2),
-        'komisyon_matrah': round(komisyon_matrah, 2),
         'komisyon_yuzde': KOMISYON_ORANI * 100,
         'komisyon_tutar': round(komisyon, 2),
         'ekside_listesi': ekside_listesi,
@@ -204,8 +202,7 @@ def merge_period_summaries(summaries: List[Dict], week_labels: Optional[List[str
 
     toplam_hakedis = sum(s.get('toplam_hakedis', 0) for s in summaries)
     odenecek_ekside = sum(s.get('odenecek_ekside', 0) for s in summaries)
-    komisyon_matrah = toplam_hakedis + odenecek_ekside
-    komisyon_tutar = komisyon_matrah * KOMISYON_ORANI
+    komisyon_tutar = toplam_hakedis * KOMISYON_ORANI
 
     # Ekside listesini isme göre birleştir (aynı kurye iki haftada da eksi olabilir)
     ekside_by_key: Dict[str, Dict] = {}
@@ -229,7 +226,6 @@ def merge_period_summaries(summaries: List[Dict], week_labels: Optional[List[str
         'matched_names': sorted(matched_set),
         'toplam_hakedis': round(toplam_hakedis, 2),
         'odenecek_ekside': round(odenecek_ekside, 2),
-        'komisyon_matrah': round(komisyon_matrah, 2),
         'komisyon_yuzde': KOMISYON_ORANI * 100,
         'komisyon_tutar': round(komisyon_tutar, 2),
         'ekside_listesi': ekside_listesi,

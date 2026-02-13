@@ -38,7 +38,7 @@
             <a href="{{ url_for('komisyon_bp.cikis') }}" class="btn btn-secondary">Çıkış</a>
         </div>
         <h1>Sorumlu Komisyon</h1>
-        <p class="sub">Listendeki kuryelerin <strong>Toplam Hakediş</strong> toplamı alınır; <strong>Ödenecek Tutar</strong> eksi olanlar (kurye borcu) senden düşülür. Kalan tutarın <strong>%8.5</strong>’i senin komisyonun.</p>
+        <p class="sub">Listendeki kuryelerin <strong>Toplam Hakediş</strong> tutarları toplanır; bu toplamın <strong>%8.5</strong>’i senin komisyonun. Eksi bakiyeli kuryeler ayrıca gösterilir.</p>
         <p class="sub">Listede <strong>{{ my_couriers_count }}</strong> kurye var. <a href="{{ url_for('komisyon_bp.kuryeler') }}">Kurye listesini düzenle</a>.</p>
 
         <div class="card-k">
@@ -83,17 +83,13 @@
                     <div class="label">Toplam Hakediş (listendekilerin toplamı)</div>
                     <div class="value positive">{{ "%.2f"|format(summary.toplam_hakedis) }} ₺</div>
                 </div>
-                <div class="summary-item">
-                    <div class="label">Ekside ödenecek (senden düşülecek)</div>
-                    <div class="value negative">{{ "%.2f"|format(summary.odenecek_ekside) }} ₺</div>
-                </div>
-                <div class="summary-item">
-                    <div class="label">Komisyon matrahı</div>
-                    <div class="value">{{ "%.2f"|format(summary.komisyon_matrah) }} ₺</div>
-                </div>
                 <div class="summary-item komisyon">
                     <div class="label">Senin komisyonun (%{{ "%.1f"|format(summary.komisyon_yuzde) }})</div>
                     <div class="value">{{ "%.2f"|format(summary.komisyon_tutar) }} ₺</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Eksi bakiyeler toplamı</div>
+                    <div class="value negative">{{ "%.2f"|format(summary.odenecek_ekside) }} ₺</div>
                 </div>
             </div>
             {% if summary.matched_names %}
@@ -106,7 +102,7 @@
             {% if summary.ekside_listesi %}
             <div class="ekside-box" style="margin-top:20px; padding:16px; background:#fef2f2; border-radius:8px; border-left:4px solid #b91c1c;">
                 <h3 style="font-size:1rem; margin-bottom:6px; color:#b91c1c;">Ödenecek Tutar eksi olan kuryeler</h3>
-                <p style="font-size:0.9rem; color:#7f1d1d; margin-bottom:12px;">Aşağıdaki kişiler eksi bakiyede; <strong>bu tutarlar bu kuryelerden tahsil edilecek</strong>. Toplam {{ "%.2f"|format(summary.odenecek_ekside) }} ₺ komisyon matrahından düşülüyor.</p>
+                <p style="font-size:0.9rem; color:#7f1d1d; margin-bottom:12px;">Aşağıdaki kişiler eksi bakiyede; <strong>bu tutarlar bu kuryelerden tahsil edilecek</strong>. Toplam {{ "%.2f"|format(summary.odenecek_ekside) }} ₺.</p>
                 <table class="ekside-tablo" style="width:100%; border-collapse:collapse; font-size:0.95rem;">
                     <thead>
                         <tr style="border-bottom:2px solid #b91c1c; text-align:left;">
