@@ -23,6 +23,7 @@ EXCEL_FOLDER = "/home/Savasky148/mysite"
 UPLOAD_HISTORY_FILE = os.path.join(app.instance_path, 'uploads.json')
 ACTIVE_WEEK_FILE = os.path.join(app.instance_path, 'active_week.json')
 HIDDEN_WEEKS_FILE = os.path.join(app.instance_path, 'hidden_weeks.json')
+# Upload sayfası ve dosya yükleme için tek parola (sayfa girişi + form gönderimi)
 UPLOAD_PASSWORD = os.environ.get('UPLOAD_PASSWORD', '186081')
 app.config['KOMISYON_PASSWORD'] = os.environ.get('KOMISYON_PASSWORD', '186081')
 
@@ -960,12 +961,26 @@ def login():
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_excel():
+    # Sayfa girişi: parola girilmeden upload ekranı gösterilmez
+    if not session.get('upload_authenticated'):
+        if request.method == 'GET':
+            return render_template('upload_gate.html')
+        if request.method == 'POST' and request.form.get('gate') == '1':
+            password = request.form.get('password', '').strip()
+            if password == UPLOAD_PASSWORD:
+                session['upload_authenticated'] = True
+                return redirect(url_for('upload_excel'))
+            flash('Geçersiz parola. Tekrar deneyin.', 'error')
+            return redirect(url_for('upload_excel'))
+        return redirect(url_for('upload_excel'))
+
     history = load_upload_history()
     summary = None
     excels = get_uploaded_excels()
     groups = sorted({e['group'] for e in excels if e.get('group')})
 
     if request.method == 'POST':
+        # Dosya yükleme isteği (giriş yapılmış kullanıcı)
         password = request.form.get('password', '').strip()
         if password != UPLOAD_PASSWORD:
             flash('Geçersiz parola! Yükleme yapılamadı.', 'error')
@@ -1024,9 +1039,19 @@ def upload_excel():
 
     return render_template('upload.html', history=history, summary=summary, excels=excels, groups=groups)
 
+
+@app.route('/upload/logout')
+def upload_logout():
+    """Upload panelinden çıkış; tekrar parola ister."""
+    session.pop('upload_authenticated', None)
+    return redirect(url_for('upload_excel'))
+
+
 @app.route('/upload/delete', methods=['POST'])
 def delete_excel():
     """Upload ekranından seçilen Excel dosyasını siler ve geçmişi günceller."""
+    if not session.get('upload_authenticated'):
+        return redirect(url_for('upload_excel'))
     filename = request.form.get('filename', '').strip()
     if not filename:
         flash('Silinecek dosya bulunamadı.', 'error')
@@ -1073,6 +1098,8 @@ def delete_excel():
 @app.route('/upload/set-active', methods=['POST'])
 def set_active_excel():
     """Belirli bir Excel dosyasını aktif hafta olarak işaretler."""
+    if not session.get('upload_authenticated'):
+        return redirect(url_for('upload_excel'))
     filename = request.form.get('filename', '').strip()
     if not filename:
         flash('Aktif yapılacak dosya bulunamadı.', 'error')
@@ -1098,6 +1125,8 @@ def set_active_excel():
 @app.route('/upload/toggle-hidden', methods=['POST'])
 def toggle_hidden_excel():
     """Seçilen Excel dosyasını kuryelerden gizler veya tekrar görünür yapar."""
+    if not session.get('upload_authenticated'):
+        return redirect(url_for('upload_excel'))
     filename = request.form.get('filename', '').strip()
     if not filename:
         flash('Gizlenecek/gösterilecek dosya bulunamadı.', 'error')
@@ -1131,6 +1160,8 @@ def toggle_hidden_excel():
 @app.route('/download_excel/<path:filename>')
 def download_excel(filename):
     """Yüklü Excel dosyasını indirmek için endpoint."""
+    if not session.get('upload_authenticated'):
+        return redirect(url_for('upload_excel'))
     # Sadece excel_files altındaki .xlsx/.xls dosyalarına izin ver
     if '..' in filename or filename.startswith('/') or not filename.lower().endswith(('.xlsx', '.xls')):
         flash('Geçersiz indirme isteği.', 'error')
@@ -1148,6 +1179,8 @@ def download_excel(filename):
 @app.route('/upload/rename', methods=['POST'])
 def rename_excel():
     """Excel dosyasını yeniden adlandırır; geçmiş ve aktif hafta bilgisini günceller."""
+    if not session.get('upload_authenticated'):
+        return redirect(url_for('upload_excel'))
     old_name = request.form.get('old_name', '').strip()
     new_name = request.form.get('new_name', '').strip()
 

@@ -132,7 +132,10 @@
 </head>
 <body>
     <div class="upload-container">
-        <h1>Excel Yükleme Paneli</h1>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <h1 style="margin:0;">Excel Yükleme Paneli</h1>
+            <a href="{{ url_for('upload_logout') }}" style="font-size:13px;color:var(--lumen-text-light);text-decoration:none;">Çıkış</a>
+        </div>
         <p>Yeni haftanın hakediş tablosunu yüklemek için parolayı girin ve Excel dosyasını seçin.</p>
 
         <div class="flash-messages">
