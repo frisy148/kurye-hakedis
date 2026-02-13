@@ -45,6 +45,28 @@ body {
     background: var(--surface-muted) !important;
 }
 
+/* Komisyon sayfaları: dark modda yazı ve inputlar okunaklı */
+:root[data-theme="dark"] .komisyon-wrap,
+:root[data-theme="dark"] .komisyon-wrap .card-k {
+    color: var(--lumen-text);
+}
+:root[data-theme="dark"] .komisyon-wrap input,
+:root[data-theme="dark"] .komisyon-wrap select,
+:root[data-theme="dark"] .komisyon-wrap textarea {
+    background: var(--surface-card);
+    color: var(--lumen-text);
+    border-color: var(--surface-border);
+}
+:root[data-theme="dark"] .komisyon-wrap .btn-secondary {
+    color: var(--lumen-text);
+    background: var(--lumen-gray);
+}
+:root[data-theme="dark"] .alert-success {
+    background: #166534;
+    color: #fff;
+    border-color: #15803d;
+}
+
 .sr-only {
     position: absolute;
     width: 1px;

@@ -10,24 +10,31 @@
         .theme-label-light { display: none; }
         :root[data-theme="dark"] .theme-label-dark { display: none; }
         :root[data-theme="dark"] .theme-label-light { display: inline; }
-        .komisyon-wrap { max-width: 720px; margin: 0 auto; padding: 24px; }
-        .card-k { background: var(--surface-card, #fff); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 12px var(--shadow-soft, rgba(0,0,0,.08)); }
-        .card-k h1 { font-size: 1.2rem; margin-bottom: 8px; color: var(--lumen-dark, #1a2744); }
-        .card-k h2 { font-size: 1rem; margin: 16px 0 8px; color: var(--lumen-dark, #1a2744); }
+        .komisyon-wrap { max-width: 720px; margin: 0 auto; padding: 24px; color: var(--lumen-text); }
+        .card-k { background: var(--surface-card); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 12px var(--shadow-soft); color: var(--lumen-text); }
+        .card-k h1, .card-k h2 { font-size: 1.2rem; margin-bottom: 8px; color: var(--lumen-text); }
+        .card-k h2 { font-size: 1rem; margin: 16px 0 8px; }
         .card-k p { color: var(--lumen-text-light); margin-bottom: 16px; font-size: 0.95rem; }
-        .btn { display: inline-block; padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 1rem; text-decoration: none; margin-right: 8px; margin-top: 8px; }
-        .btn-primary { background: var(--lumen-gold, #c9a227); color: #1a2744; }
-        .btn-secondary { background: var(--lumen-gray, #e8ecf1); color: var(--lumen-text, #1a2744); }
+        .btn { display: inline-block; padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 1rem; text-decoration: none; margin-right: 8px; margin-top: 8px; color: var(--lumen-text); }
+        .btn-primary { background: var(--lumen-gold); color: #1a2744; }
+        .btn-secondary { background: var(--lumen-gray); color: var(--lumen-text); }
         .btn-danger { background: #fef2f2; color: #b91c1c; }
         .nav-links { margin-bottom: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-        .grup-kutu { border: 1px solid var(--surface-border, #ddd); border-radius: 10px; padding: 14px; margin-bottom: 14px; background: var(--surface-muted, #f8fafc); }
+        .profil-ozet { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .profil-ozet-item { background: var(--surface-card); border: 1px solid var(--surface-border); border-radius: 10px; padding: 12px 16px; font-size: 0.95rem; color: var(--lumen-text); display: flex; align-items: center; gap: 8px; }
+        .profil-ozet-item strong { color: var(--lumen-text); }
+        .profil-ozet-item span { color: var(--lumen-text-light); }
+        .grup-kutu { border: 1px solid var(--surface-border); border-radius: 10px; padding: 14px; margin-bottom: 14px; background: var(--surface-muted); color: var(--lumen-text); }
         .kurye-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-        .kurye-chip { display: inline-flex; align-items: center; padding: 8px 14px; border-radius: 20px; border: 2px solid var(--surface-border, #ddd); background: var(--surface-card, #fff); cursor: pointer; font-size: 0.9rem; transition: background .15s, border-color .15s; }
-        .kurye-chip:hover { border-color: var(--lumen-gold, #c9a227); }
-        .kurye-chip.selected { background: var(--lumen-gold, #c9a227); border-color: var(--lumen-gold, #c9a227); color: #1a2744; font-weight: 600; }
+        .kurye-chip { display: inline-flex; align-items: center; padding: 8px 14px; border-radius: 20px; border: 2px solid var(--surface-border); background: var(--surface-card); color: var(--lumen-text); cursor: pointer; font-size: 0.9rem; transition: background .15s, border-color .15s; }
+        .kurye-chip:hover { border-color: var(--lumen-gold); }
+        .kurye-chip.selected { background: var(--lumen-gold); border-color: var(--lumen-gold); color: #1a2744; font-weight: 600; }
         .kurye-chip input { position: absolute; opacity: 0; pointer-events: none; }
         .grup-baslik { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
-        .yuzde-input { width: 5em; padding: 8px 12px; border-radius: 8px; font-size: 1rem; border: 1px solid var(--surface-border); }
+        .yuzde-input { width: 5em; padding: 8px 12px; border-radius: 8px; font-size: 1rem; border: 1px solid var(--surface-border); background: var(--surface-card); color: var(--lumen-text); }
+        .komisyon-success { padding: 14px 20px; border-radius: 10px; margin-bottom: 20px; font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 10px; background: #166534; color: #fff; border: 1px solid #15803d; }
+        .komisyon-success.alert-info { background: #1e40af; border-color: #2563eb; }
+        .komisyon-success.alert-error { background: #b91c1c; border-color: #dc2626; }
     </style>
 </head>
 <body>
@@ -40,6 +47,18 @@
                 <span class="theme-label-light">☀️ Aydınlık</span>
             </button>
         </div>
+        {% if alt_ekipler %}
+        <div class="profil-ozet">
+            <p style="width:100%; margin:0 0 8px 0; font-size:0.9rem; color:var(--lumen-text-light);">Mevcut profiller</p>
+            {% for grup_adi, profil in alt_ekipler.items() %}
+            <div class="profil-ozet-item">
+                <strong>{{ grup_adi }}</strong>
+                <span>· {{ profil.kuryeler|length }} kurye</span>
+                <span>· %{{ (profil.yuzde|string)|replace('.', ',') }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
         <div class="card-k">
             <h1>Profiller (alt ekipler)</h1>
             <p>Barış vb. <strong>profil</strong> oluştur; her profilde o kişinin kuryelerini seç ve <strong>yüzdeyi</strong> (3, 5, 8…) kendin belirle. Ana sayfada hesapla dediğinde her profilin kurye kazançları toplanıp seçtiğin yüzdeyle “göndermen gereken” tutar çıkar.</p>
@@ -47,7 +66,10 @@
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                    <div class="komisyon-success alert-{{ category }}" role="alert">
+                        <span aria-hidden="true">{% if category == 'success' %}✓{% elif category == 'error' %}✕{% else %}ℹ{% endif %}</span>
+                        <span>{{ message }}</span>
+                    </div>
                     {% endfor %}
                 {% endif %}
             {% endwith %}
@@ -56,7 +78,7 @@
                 <input type="hidden" name="action" value="grup_ekle">
                 <label for="grup_adi" style="display:block; margin-bottom:6px; font-size:0.9rem;">Yeni profil (örn. Barış)</label>
                 <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                    <input type="text" id="grup_adi" name="grup_adi" placeholder="Profil / kişi adı" style="flex:1; min-width:160px; padding:10px 12px; border:1px solid var(--surface-border); border-radius:8px;">
+                    <input type="text" id="grup_adi" name="grup_adi" placeholder="Profil / kişi adı" style="flex:1; min-width:160px; padding:10px 12px; border:1px solid var(--surface-border); border-radius:8px; background:var(--surface-card); color:var(--lumen-text);">
                     <button type="submit" class="btn btn-primary">Profil ekle</button>
                 </div>
             </form>
