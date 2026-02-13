@@ -98,8 +98,20 @@ def index():
 
 @komisyon_bp.route('/kuryeler', methods=['GET', 'POST'])
 def kuryeler():
-    """Kurye listesini düzenle – ekle/sil, kaydet. Excel atmadan buradan yönetirsin."""
+    """Kurye listesini düzenle – tek tek ekle veya toplu kaydet."""
     if request.method == 'POST':
+        action = request.form.get('action', 'save')
+        if action == 'add':
+            yeni = request.form.get('yeni_isim', '').strip()
+            if yeni:
+                current = logic.load_my_couriers_list()
+                if yeni not in current:
+                    current.append(yeni)
+                    logic.save_my_couriers(current)
+                    flash(f'"{yeni}" eklendi.', 'success')
+                else:
+                    flash('Bu isim zaten listede.', 'info')
+            return redirect(url_for('komisyon_bp.kuryeler'))
         raw = request.form.get('isimler', '')
         names = [s.strip() for s in raw.splitlines() if s.strip()]
         try:
@@ -110,6 +122,39 @@ def kuryeler():
             flash(f'Kayıt hatası: {e}', 'error')
     isimler = logic.load_my_couriers_list()
     return render_template('komisyon_kuryeler.html', isimler=isimler)
+
+
+@komisyon_bp.route('/eski-kuryeler', methods=['GET', 'POST'])
+def eski_kuryeler():
+    """Eski / ayrılmış kurye listesi – aynı şifre ile erişilir."""
+    if request.method == 'POST':
+        action = request.form.get('action', '')
+        if action == 'add':
+            yeni = request.form.get('yeni_isim', '').strip()
+            if yeni:
+                current = logic.load_old_couriers_list()
+                if yeni not in current:
+                    current.append(yeni)
+                    logic.save_old_couriers(current)
+                    flash(f'"{yeni}" eski kurye listesine eklendi.', 'success')
+                else:
+                    flash('Bu isim zaten listede.', 'info')
+            return redirect(url_for('komisyon_bp.eski_kuryeler'))
+        if action == 'sil':
+            sil_isim = request.form.get('sil_isim', '').strip()
+            if sil_isim:
+                current = logic.load_old_couriers_list()
+                current = [n for n in current if n != sil_isim]
+                logic.save_old_couriers(current)
+                flash(f'"{sil_isim}" listeden çıkarıldı.', 'success')
+            return redirect(url_for('komisyon_bp.eski_kuryeler'))
+        raw = request.form.get('isimler', '')
+        names = [s.strip() for s in raw.splitlines() if s.strip()]
+        logic.save_old_couriers(names)
+        flash(f'Eski kurye listesi kaydedildi. {len(names)} isim.', 'success')
+        return redirect(url_for('komisyon_bp.eski_kuryeler'))
+    isimler = logic.load_old_couriers_list()
+    return render_template('komisyon_eski_kuryeler.html', isimler=isimler)
 
 
 @komisyon_bp.route('/upload', methods=['GET', 'POST'])

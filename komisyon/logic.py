@@ -31,6 +31,7 @@ EARNING_COLUMNS = [
 
 
 BENIM_KURYELERIM_FILE = os.path.join(DATA_DIR, 'benim_kuryelerim.txt')
+ESKI_KURYELER_FILE = os.path.join(DATA_DIR, 'eski_kuryeler.txt')
 
 
 def load_my_couriers() -> Set[str]:
@@ -121,7 +122,7 @@ def get_excel_files() -> List[Dict]:
                     rel = os.path.join('uploads', f)
                     full = os.path.join(UPLOAD_FOLDER, f)
                 elif folder == EXCEL_FOLDER:
-                    rel = f
+                    rel = os.path.join('excel_files', f)  # ana sitedeki excel_files/ ile aynı
                     full = os.path.join(EXCEL_FOLDER, f)
                 else:
                     rel = f
@@ -149,7 +150,7 @@ def compute_period_summary(excel_path: str, my_couriers: Set[str]) -> Optional[D
     if not name_col:
         name_col = columns[0]
 
-    total_hakedis_col = find_column(columns, ['Toplam Hakediş', 'Toplam Hakediş Tutarı'], 14)
+    total_hakedis_col = find_column(columns, ['Toplam Hakediş', 'Toplam Hakediş Tutarı'], 11)
     odenecek_col = find_column(columns, ['Ödenecek Tutar', 'Odenecek Tutar', 'Net Ödeme'], None)
 
     toplam_hakedis = 0.0
@@ -245,9 +246,36 @@ def resolve_excel_path(rel: str) -> Optional[str]:
     base = os.path.basename(rel)
     if rel.startswith('uploads/'):
         full = os.path.join(UPLOAD_FOLDER, base)
+    elif rel.startswith('excel_files/'):
+        full = os.path.join(EXCEL_FOLDER, base)
     else:
-        # Önce excel_files, yoksa proje kökü (ana sitedeki Excel'ler)
         full = os.path.join(EXCEL_FOLDER, base)
         if not os.path.exists(full):
             full = os.path.join(PARENT_DIR, base)
     return full if os.path.exists(full) else None
+
+
+# ---------- Eski kuryeler (listede sadece görüntüleme / yönetim) ----------
+def load_old_couriers_list() -> List[str]:
+    """Eski kurye listesini döndürür (her satır bir isim)."""
+    path = ESKI_KURYELER_FILE
+    out = []
+    if not os.path.exists(path):
+        return out
+    with open(path, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            out.append(line)
+    return out
+
+
+def save_old_couriers(names: List[str]) -> None:
+    """Eski kurye listesini dosyaya yazar."""
+    path = ESKI_KURYELER_FILE
+    lines = [s.strip() for s in names if s and s.strip()]
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write('# Eski / ayrılmış kuryeler – sadece liste\n')
+        for line in lines:
+            f.write(line.strip() + '\n')

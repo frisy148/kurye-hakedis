@@ -21,6 +21,7 @@
     <div class="komisyon-wrap">
         <div class="nav-links">
             <a href="{{ url_for('komisyon_bp.index') }}" class="btn btn-secondary">← Komisyon ana sayfa</a>
+            <a href="{{ url_for('komisyon_bp.eski_kuryeler') }}" class="btn btn-secondary">Eski kuryeler</a>
             <a href="{{ url_for('komisyon_bp.upload') }}" class="btn btn-secondary">Excel yükle</a>
         </div>
         <div class="card-k">
@@ -34,9 +35,17 @@
                 {% endif %}
             {% endwith %}
             <form method="post" action="{{ url_for('komisyon_bp.kuryeler') }}">
-                <label for="isimler">Kurye isimleri (her satıra bir isim)</label>
-                <textarea id="isimler" name="isimler" placeholder="Örn: Ahmet Yılmaz&#10;Mehmet Demir">{{ isimler | join('\n') }}</textarea>
-                <button type="submit" class="btn btn-primary">Kaydet</button>
+                <input type="hidden" name="action" value="add">
+                <label for="yeni_isim" style="display:block; margin-bottom:6px; font-size:0.9rem;">Tek tek ekle</label>
+                <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+                    <input type="text" id="yeni_isim" name="yeni_isim" placeholder="Ad Soyad" style="flex:1; min-width:180px; padding:10px 12px; border:1px solid var(--surface-border); border-radius:8px;">
+                    <button type="submit" class="btn btn-primary">Ekle</button>
+                </div>
+            </form>
+            <form method="post" action="{{ url_for('komisyon_bp.kuryeler') }}">
+                <label for="isimler">Tüm liste (her satıra bir isim)</label>
+                <textarea id="isimler" name="isimler" placeholder="Örn: Ahmet Yılmaz&#10;Mehmet Demir" style="width:100%; min-height:280px; padding:12px; border:1px solid var(--surface-border); border-radius:8px; font-size:0.95rem; margin-top:8px;">{{ isimler | join('\n') }}</textarea>
+                <button type="submit" class="btn btn-primary">Listeyi kaydet</button>
             </form>
         </div>
     </div>
