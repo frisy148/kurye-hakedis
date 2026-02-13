@@ -156,7 +156,8 @@ def compute_period_summary(excel_path: str, my_couriers: Set[str]) -> Optional[D
     toplam_hakedis = 0.0
     odenecek_ekside = 0.0
     matched_names = []
-    ekside_listesi = []  # Ödenecek Tutar < 0 olanlar: isim + tutar (bu tutarlar senden geri alınacak)
+    ekside_listesi = []
+    kurye_kazanci: Dict[str, float] = {}  # ad_soyad -> toplam hakediş (bir haftada aynı isim iki kez olursa toplanır)
     row_count = 0
 
     for _, row in df.iterrows():
@@ -171,6 +172,7 @@ def compute_period_summary(excel_path: str, my_couriers: Set[str]) -> Optional[D
 
         h = to_num(row.get(total_hakedis_col)) if total_hakedis_col else 0
         toplam_hakedis += h
+        kurye_kazanci[ad_soyad] = kurye_kazanci.get(ad_soyad, 0.0) + h
 
         odenecek = to_num(row.get(odenecek_col)) if odenecek_col else 0
         if odenecek < 0:
@@ -178,6 +180,7 @@ def compute_period_summary(excel_path: str, my_couriers: Set[str]) -> Optional[D
             ekside_listesi.append({'ad_soyad': ad_soyad, 'tutar': round(odenecek, 2)})
 
     komisyon = toplam_hakedis * KOMISYON_ORANI
+    kurye_detay = [{'ad_soyad': k, 'toplam_hakedis': round(v, 2)} for k, v in sorted(kurye_kazanci.items())]
 
     return {
         'row_count': row_count,
@@ -187,6 +190,7 @@ def compute_period_summary(excel_path: str, my_couriers: Set[str]) -> Optional[D
         'komisyon_yuzde': KOMISYON_ORANI * 100,
         'komisyon_tutar': round(komisyon, 2),
         'ekside_listesi': ekside_listesi,
+        'kurye_detay': kurye_detay,
     }
 
 
@@ -204,7 +208,7 @@ def merge_period_summaries(summaries: List[Dict], week_labels: Optional[List[str
     odenecek_ekside = sum(s.get('odenecek_ekside', 0) for s in summaries)
     komisyon_tutar = toplam_hakedis * KOMISYON_ORANI
 
-    # Ekside listesini isme göre birleştir (aynı kurye iki haftada da eksi olabilir)
+    # Ekside listesini isme göre birleştir
     ekside_by_key: Dict[str, Dict] = {}
     for s in summaries:
         for item in s.get('ekside_listesi', []):
@@ -215,6 +219,19 @@ def merge_period_summaries(summaries: List[Dict], week_labels: Optional[List[str
                 ekside_by_key[key] = {'ad_soyad': ad, 'tutar': 0.0}
             ekside_by_key[key]['tutar'] += t
     ekside_listesi = [{'ad_soyad': v['ad_soyad'], 'tutar': round(v['tutar'], 2)} for v in ekside_by_key.values()]
+
+    # Kurye bazında kazancı birleştir (2 haftada aynı isim toplanır)
+    kurye_by_key: Dict[str, Dict] = {}
+    for s in summaries:
+        for item in s.get('kurye_detay', []):
+            ad = item.get('ad_soyad', '')
+            key = normalize_name(ad)
+            t = float(item.get('toplam_hakedis', 0))
+            if key not in kurye_by_key:
+                kurye_by_key[key] = {'ad_soyad': ad, 'toplam_hakedis': 0.0}
+            kurye_by_key[key]['toplam_hakedis'] += t
+    kurye_detay = [{'ad_soyad': v['ad_soyad'], 'toplam_hakedis': round(v['toplam_hakedis'], 2)} for v in kurye_by_key.values()]
+    kurye_detay.sort(key=lambda x: x['ad_soyad'])
 
     matched_set = set()
     for s in summaries:
@@ -229,6 +246,7 @@ def merge_period_summaries(summaries: List[Dict], week_labels: Optional[List[str
         'komisyon_yuzde': KOMISYON_ORANI * 100,
         'komisyon_tutar': round(komisyon_tutar, 2),
         'ekside_listesi': ekside_listesi,
+        'kurye_detay': kurye_detay,
         'week_count': len(summaries),
         'week_labels': week_labels or [],
     }

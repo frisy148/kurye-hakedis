@@ -31,6 +31,18 @@ app.config['KOMISYON_PASSWORD'] = os.environ.get('KOMISYON_PASSWORD', '186081')
 from komisyon.bp import komisyon_bp
 app.register_blueprint(komisyon_bp)
 
+
+@app.template_filter('tr_para')
+def tr_para(value):
+    """Türkçe para formatı: 326761.88 -> 326.761,88"""
+    try:
+        n = float(value)
+        s = f"{n:,.2f}"
+        return s.replace(",", "\u2009").replace(".", ",").replace("\u2009", ".")
+    except (TypeError, ValueError):
+        return "0,00"
+
+
 # Ödeme Takvimi 2026
 ODEME_TAKVIMI = [
     {"calisma": "8 Aralık - 14 Aralık 2025 / 15 Aralık - 21 Aralık 2025", "odeme": "2 Ocak 2026 Cuma"},

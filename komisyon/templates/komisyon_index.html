@@ -81,28 +81,44 @@
             <div class="summary-grid">
                 <div class="summary-item">
                     <div class="label">Toplam Hakediş (listendekilerin toplamı)</div>
-                    <div class="value positive">{{ "%.2f"|format(summary.toplam_hakedis) }} ₺</div>
+                    <div class="value positive">{{ summary.toplam_hakedis|tr_para }} ₺</div>
                 </div>
                 <div class="summary-item komisyon">
                     <div class="label">Senin komisyonun (%{{ "%.1f"|format(summary.komisyon_yuzde) }})</div>
-                    <div class="value">{{ "%.2f"|format(summary.komisyon_tutar) }} ₺</div>
+                    <div class="value">{{ summary.komisyon_tutar|tr_para }} ₺</div>
                 </div>
                 <div class="summary-item">
                     <div class="label">Eksi bakiyeler toplamı</div>
-                    <div class="value negative">{{ "%.2f"|format(summary.odenecek_ekside) }} ₺</div>
+                    <div class="value negative">{{ summary.odenecek_ekside|tr_para }} ₺</div>
                 </div>
             </div>
-            {% if summary.matched_names %}
-            <details style="margin-top:16px;">
-                <summary>Eşleşen kurye isimleri ({{ summary.matched_names|length }})</summary>
-                <div class="matched-names">{{ summary.matched_names|join(', ') }}</div>
-            </details>
+
+            {% if summary.kurye_detay %}
+            <div class="kurye-tablo-wrap" style="margin-top:24px;">
+                <h3 style="font-size:1rem; margin-bottom:12px; color:var(--lumen-dark,#1a2744);">Benim kuryelerim – ne kazandı</h3>
+                <table class="kurye-tablo" style="width:100%; border-collapse:collapse; font-size:0.95rem; border:1px solid var(--surface-border); border-radius:10px; overflow:hidden;">
+                    <thead>
+                        <tr style="background:var(--surface-muted,#f5f7fa); text-align:left;">
+                            <th style="padding:12px 14px; border-bottom:1px solid var(--surface-border); font-weight:600;">Kurye</th>
+                            <th style="padding:12px 14px; border-bottom:1px solid var(--surface-border); font-weight:600; text-align:right;">Kazandığı (₺)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for k in summary.kurye_detay %}
+                        <tr style="border-bottom:1px solid var(--surface-border);">
+                            <td style="padding:10px 14px;">{{ k.ad_soyad }}</td>
+                            <td style="padding:10px 14px; text-align:right; font-weight:600;">{{ k.toplam_hakedis|tr_para }} ₺</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             {% endif %}
 
             {% if summary.ekside_listesi %}
             <div class="ekside-box" style="margin-top:20px; padding:16px; background:#fef2f2; border-radius:8px; border-left:4px solid #b91c1c;">
                 <h3 style="font-size:1rem; margin-bottom:6px; color:#b91c1c;">Ödenecek Tutar eksi olan kuryeler</h3>
-                <p style="font-size:0.9rem; color:#7f1d1d; margin-bottom:12px;">Aşağıdaki kişiler eksi bakiyede; <strong>bu tutarlar bu kuryelerden tahsil edilecek</strong>. Toplam {{ "%.2f"|format(summary.odenecek_ekside) }} ₺.</p>
+                <p style="font-size:0.9rem; color:#7f1d1d; margin-bottom:12px;">Aşağıdaki kişiler eksi bakiyede; <strong>bu tutarlar bu kuryelerden tahsil edilecek</strong>. Toplam {{ summary.odenecek_ekside|tr_para }} ₺.</p>
                 <table class="ekside-tablo" style="width:100%; border-collapse:collapse; font-size:0.95rem;">
                     <thead>
                         <tr style="border-bottom:2px solid #b91c1c; text-align:left;">
@@ -114,7 +130,7 @@
                         {% for item in summary.ekside_listesi %}
                         <tr style="border-bottom:1px solid var(--surface-border);">
                             <td style="padding:8px 12px;">{{ item.ad_soyad }}</td>
-                            <td style="padding:8px 12px; text-align:right; color:#b91c1c; font-weight:600;">{{ "%.2f"|format(item.tutar) }} ₺</td>
+                            <td style="padding:8px 12px; text-align:right; color:#b91c1c; font-weight:600;">{{ item.tutar|tr_para }} ₺</td>
                         </tr>
                         {% endfor %}
                     </tbody>
