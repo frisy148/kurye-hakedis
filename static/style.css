@@ -26,6 +26,7 @@
 :root[data-theme="dark"] {
     --lumen-text: #e4ebf7;
     --lumen-text-light: #9fb1cb;
+    --lumen-gray: #374151;
     --surface-card: #141f35;
     --surface-muted: #0b1526;
     --surface-border: #1f2c46;
@@ -60,6 +61,35 @@ body {
 :root[data-theme="dark"] .komisyon-wrap .btn-secondary {
     color: var(--lumen-text);
     background: var(--lumen-gray);
+    border: 1px solid var(--surface-border);
+}
+:root[data-theme="dark"] .komisyon-wrap details summary,
+:root[data-theme="dark"] .komisyon-wrap .card-k h2,
+:root[data-theme="dark"] .komisyon-wrap .card-k h3 {
+    color: var(--lumen-text);
+}
+.komisyon-wrap .ekside-box {
+    background: #fef2f2;
+}
+.komisyon-wrap .ekside-baslik { color: #b91c1c; }
+.komisyon-wrap .ekside-aciklama { color: #7f1d1d; }
+.komisyon-wrap .tutar-eksi { color: #b91c1c; }
+:root[data-theme="dark"] .komisyon-wrap .ekside-box {
+    background: rgba(185, 28, 28, 0.18);
+    border-left-color: #f87171;
+}
+:root[data-theme="dark"] .komisyon-wrap .ekside-baslik {
+    color: #fca5a5;
+}
+:root[data-theme="dark"] .komisyon-wrap .ekside-aciklama {
+    color: #fecaca;
+}
+:root[data-theme="dark"] .komisyon-wrap .ekside-tablo th,
+:root[data-theme="dark"] .komisyon-wrap .ekside-tablo td {
+    color: var(--lumen-text);
+}
+:root[data-theme="dark"] .komisyon-wrap .tutar-eksi {
+    color: #f87171;
 }
 :root[data-theme="dark"] .alert-success {
     background: #166534;

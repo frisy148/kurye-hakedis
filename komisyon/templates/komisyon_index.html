@@ -17,10 +17,10 @@
         .komisyon-wrap .sub { color: var(--lumen-text-light); margin-bottom: 24px; }
         .card-k { background: var(--surface-card); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 12px var(--shadow-soft); color: var(--lumen-text); }
         .card-k h2 { font-size: 1.1rem; margin-bottom: 12px; color: var(--lumen-text); }
-        .excel-select { width: 100%; padding: 10px 12px; border: 1px solid var(--surface-border); border-radius: 8px; font-size: 1rem; }
+        .excel-select { width: 100%; padding: 10px 12px; border: 1px solid var(--surface-border); border-radius: 8px; font-size: 1rem; background: var(--surface-card); color: var(--lumen-text); }
         .btn { display: inline-block; padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 1rem; text-decoration: none; }
         .btn-primary { background: var(--lumen-gold); color: #1a2744; }
-        .btn-secondary { background: var(--lumen-gray); color: var(--lumen-text); }
+        .btn-secondary { background: var(--lumen-gray); color: var(--lumen-text); border: 1px solid var(--surface-border); }
         .summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; }
         .summary-item { padding: 12px; border-radius: 8px; background: var(--surface-muted); }
         .summary-item .label { font-size: 0.85rem; color: var(--lumen-text-light); }
@@ -35,10 +35,8 @@
 <body>
     <div class="komisyon-wrap">
         <div class="nav-links" style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
-            <a href="{{ url_for('komisyon_bp.kuryeler') }}" class="btn btn-secondary">📋 Kurye listesini düzenle</a>
-            <a href="{{ url_for('komisyon_bp.eski_kuryeler') }}" class="btn btn-secondary">📋 Eski kuryeler</a>
+            <a href="{{ url_for('komisyon_bp.kuryeler') }}" class="btn btn-secondary">📋 Kurye listesi</a>
             <a href="{{ url_for('komisyon_bp.alt_ekipler') }}" class="btn btn-secondary">👥 Profiller</a>
-            <a href="{{ url_for('komisyon_bp.upload') }}" class="btn btn-secondary">📤 Excel yükle</a>
             <a href="{{ url_for('komisyon_bp.cikis') }}" class="btn btn-secondary">Çıkış</a>
             <button type="button" class="btn btn-secondary" data-theme-toggle title="Tema değiştir" style="margin-left:auto;">
                 <span class="theme-label-dark">🌙 Karanlık</span>
@@ -103,7 +101,7 @@
 
             {% if summary.kurye_detay %}
             <details class="kurye-tablo-wrap" style="margin-top:24px;">
-                <summary style="cursor:pointer; font-size:1rem; font-weight:600; color:var(--lumen-text); padding:8px 0;">Benim kuryelerim – kaç para kazandı (aç/kapa)</summary>
+                <summary style="cursor:pointer; font-size:1rem; font-weight:600; color:var(--lumen-text); padding:10px 0; list-style:none; display:flex; align-items:center; gap:8px;">▸ Benim kuryelerim – kaç para kazandı (büyükten küçüğe, aç/kapa)</summary>
                 <table class="kurye-tablo" style="width:100%; border-collapse:collapse; font-size:0.95rem; border:1px solid var(--surface-border); border-radius:10px; overflow:hidden; margin-top:12px;">
                     <thead>
                         <tr style="background:var(--surface-muted); text-align:left;">
@@ -153,21 +151,21 @@
             </div>
 
             {% if summary.ekside_listesi %}
-            <div class="ekside-box" style="margin-top:20px; padding:16px; background:#fef2f2; border-radius:8px; border-left:4px solid #b91c1c;">
-                <h3 style="font-size:1rem; margin-bottom:6px; color:#b91c1c;">Ödenecek Tutar eksi olan kuryeler</h3>
-                <p style="font-size:0.9rem; color:#7f1d1d; margin-bottom:12px;">Aşağıdaki kişiler eksi bakiyede; <strong>bu tutarlar bu kuryelerden tahsil edilecek</strong>. Toplam {{ summary.odenecek_ekside|tr_para }} ₺.</p>
+            <div class="ekside-box" style="margin-top:20px; padding:16px; border-radius:10px; border-left:4px solid #b91c1c;">
+                <h3 class="ekside-baslik" style="font-size:1rem; margin-bottom:6px;">Ödenecek Tutar eksi olan kuryeler</h3>
+                <p class="ekside-aciklama" style="font-size:0.9rem; margin-bottom:12px;">Aşağıdaki kişiler eksi bakiyede; <strong>bu tutarlar bu kuryelerden tahsil edilecek</strong>. Toplam {{ summary.odenecek_ekside|tr_para }} ₺.</p>
                 <table class="ekside-tablo" style="width:100%; border-collapse:collapse; font-size:0.95rem;">
                     <thead>
-                        <tr style="border-bottom:2px solid #b91c1c; text-align:left;">
-                            <th style="padding:8px 12px;">Kurye</th>
-                            <th style="padding:8px 12px; text-align:right;">Ekside – ondan alınacak</th>
+                        <tr style="border-bottom:2px solid var(--surface-border); text-align:left;">
+                            <th style="padding:10px 12px;">Kurye</th>
+                            <th style="padding:10px 12px; text-align:right;">Ekside – ondan alınacak</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for item in summary.ekside_listesi %}
                         <tr style="border-bottom:1px solid var(--surface-border);">
-                            <td style="padding:8px 12px;">{{ item.ad_soyad }}</td>
-                            <td style="padding:8px 12px; text-align:right; color:#b91c1c; font-weight:600;">{{ item.tutar|tr_para }} ₺</td>
+                            <td style="padding:10px 12px;">{{ item.ad_soyad }}</td>
+                            <td class="tutar-eksi" style="padding:10px 12px; text-align:right; font-weight:600;">{{ item.tutar|tr_para }} ₺</td>
                         </tr>
                         {% endfor %}
                     </tbody>
