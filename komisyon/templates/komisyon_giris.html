@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Komisyon – Giriş</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}" defer></script>
+    <style>
+        .theme-label-light { display: none; }
+        :root[data-theme="dark"] .theme-label-dark { display: none; }
+        :root[data-theme="dark"] .theme-label-light { display: inline; }
+    </style>
     <style>
         .komisyon-wrap { max-width: 400px; margin: 4rem auto; padding: 24px; }
         .card-k { background: var(--surface-card, #fff); border-radius: 12px; padding: 24px; box-shadow: 0 2px 12px var(--shadow-soft, rgba(0,0,0,.08)); }
@@ -16,6 +22,12 @@
 </head>
 <body>
     <div class="komisyon-wrap">
+        <p style="text-align:right; margin-bottom:12px;">
+            <button type="button" class="btn btn-secondary" data-theme-toggle title="Tema değiştir">
+                <span class="theme-label-dark">🌙 Karanlık</span>
+                <span class="theme-label-light">☀️ Aydınlık</span>
+            </button>
+        </p>
         <div class="card-k">
             <h1>Sorumlu Komisyon</h1>
             <p>Devam etmek için şifreyi girin.</p>

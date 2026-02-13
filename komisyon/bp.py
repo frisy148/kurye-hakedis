@@ -191,8 +191,9 @@ def alt_ekipler():
             for grup_adi in list(data.keys()):
                 names = request.form.getlist('kuryeler_' + grup_adi)
                 valid = [n.strip() for n in names if n and n.strip() in isimler]
+                raw_yuzde = (request.form.get('yuzde_' + grup_adi) or '5').strip().replace(',', '.')
                 try:
-                    yuzde = float(request.form.get('yuzde_' + grup_adi, 5) or 5)
+                    yuzde = float(raw_yuzde)
                     yuzde = max(0, min(100, yuzde))
                 except (TypeError, ValueError):
                     yuzde = data.get(grup_adi, {}).get('yuzde', 5)

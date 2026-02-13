@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sorumlu Komisyon – %8.5 Hesaplama</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}" defer></script>
+    <style>
+        .theme-label-light { display: none; }
+        :root[data-theme="dark"] .theme-label-dark { display: none; }
+        :root[data-theme="dark"] .theme-label-light { display: inline; }
+    </style>
     <style>
         .komisyon-wrap { max-width: 720px; margin: 0 auto; padding: 24px; }
         .komisyon-wrap h1 { margin-bottom: 8px; color: var(--lumen-dark, #1a2744); }
@@ -31,12 +37,16 @@
 </head>
 <body>
     <div class="komisyon-wrap">
-        <div class="nav-links">
+        <div class="nav-links" style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
             <a href="{{ url_for('komisyon_bp.kuryeler') }}" class="btn btn-secondary">📋 Kurye listesini düzenle</a>
             <a href="{{ url_for('komisyon_bp.eski_kuryeler') }}" class="btn btn-secondary">📋 Eski kuryeler</a>
             <a href="{{ url_for('komisyon_bp.alt_ekipler') }}" class="btn btn-secondary">👥 Profiller</a>
             <a href="{{ url_for('komisyon_bp.upload') }}" class="btn btn-secondary">📤 Excel yükle</a>
             <a href="{{ url_for('komisyon_bp.cikis') }}" class="btn btn-secondary">Çıkış</a>
+            <button type="button" class="btn btn-secondary" data-theme-toggle title="Tema değiştir" style="margin-left:auto;">
+                <span class="theme-label-dark">🌙 Karanlık</span>
+                <span class="theme-label-light">☀️ Aydınlık</span>
+            </button>
         </div>
         <h1>Sorumlu Komisyon</h1>
         <p class="sub">Listendeki kuryelerin <strong>Toplam Hakediş</strong> tutarları toplanır; bu toplamın <strong>%8.5</strong>’i senin komisyonun. Eksi bakiyeli kuryeler ayrıca gösterilir.</p>
@@ -135,7 +145,7 @@
                             <td style="padding:10px 14px; font-weight:600;">{{ row.grup_adi }}</td>
                             <td style="padding:10px 14px;">{% for k in row.kuryeler %}{{ k.ad_soyad }} ({{ k.toplam_hakedis|tr_para }} ₺){% if not loop.last %}; {% endif %}{% endfor %}{% if not row.kuryeler %}—{% endif %}</td>
                             <td style="padding:10px 14px; text-align:right;">{{ row.toplam|tr_para }} ₺</td>
-                            <td style="padding:10px 14px; text-align:right; color:var(--lumen-gold,#c9a227); font-weight:700;">%{{ row.yuzde|int }} → {{ row.tutar|tr_para }} ₺</td>
+                            <td style="padding:10px 14px; text-align:right; color:var(--lumen-gold,#c9a227); font-weight:700;">%{{ (row.yuzde|string)|replace('.', ',') }} → {{ row.tutar|tr_para }} ₺</td>
                         </tr>
                         {% endfor %}
                     </tbody>

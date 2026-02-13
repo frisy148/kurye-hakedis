@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kurye listesi – Komisyon</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}" defer></script>
+    <style>
+        .theme-label-light { display: none; }
+        :root[data-theme="dark"] .theme-label-dark { display: none; }
+        :root[data-theme="dark"] .theme-label-light { display: inline; }
+        .nav-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 16px; }
+    </style>
     <style>
         .komisyon-wrap { max-width: 640px; margin: 0 auto; padding: 24px; }
         .card-k { background: var(--surface-card, #fff); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 12px var(--shadow-soft, rgba(0,0,0,.08)); }
@@ -23,6 +30,10 @@
             <a href="{{ url_for('komisyon_bp.index') }}" class="btn btn-secondary">← Komisyon ana sayfa</a>
             <a href="{{ url_for('komisyon_bp.eski_kuryeler') }}" class="btn btn-secondary">Eski kuryeler</a>
             <a href="{{ url_for('komisyon_bp.upload') }}" class="btn btn-secondary">Excel yükle</a>
+            <button type="button" class="btn btn-secondary" data-theme-toggle title="Tema değiştir" style="margin-left:auto;">
+                <span class="theme-label-dark">🌙 Karanlık</span>
+                <span class="theme-label-light">☀️ Aydınlık</span>
+            </button>
         </div>
         <div class="card-k">
             <h1>Benim kurye listem</h1>

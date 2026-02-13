@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profiller – Komisyon</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}" defer></script>
     <style>
+        .theme-label-light { display: none; }
+        :root[data-theme="dark"] .theme-label-dark { display: none; }
+        :root[data-theme="dark"] .theme-label-light { display: inline; }
         .komisyon-wrap { max-width: 720px; margin: 0 auto; padding: 24px; }
         .card-k { background: var(--surface-card, #fff); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 12px var(--shadow-soft, rgba(0,0,0,.08)); }
         .card-k h1 { font-size: 1.2rem; margin-bottom: 8px; color: var(--lumen-dark, #1a2744); }
@@ -15,10 +19,15 @@
         .btn-primary { background: var(--lumen-gold, #c9a227); color: #1a2744; }
         .btn-secondary { background: var(--lumen-gray, #e8ecf1); color: var(--lumen-text, #1a2744); }
         .btn-danger { background: #fef2f2; color: #b91c1c; }
-        .nav-links { margin-bottom: 16px; }
+        .nav-links { margin-bottom: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
         .grup-kutu { border: 1px solid var(--surface-border, #ddd); border-radius: 10px; padding: 14px; margin-bottom: 14px; background: var(--surface-muted, #f8fafc); }
-        select[multiple] { width: 100%; min-height: 120px; padding: 8px; border-radius: 8px; font-size: 0.95rem; }
+        .kurye-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .kurye-chip { display: inline-flex; align-items: center; padding: 8px 14px; border-radius: 20px; border: 2px solid var(--surface-border, #ddd); background: var(--surface-card, #fff); cursor: pointer; font-size: 0.9rem; transition: background .15s, border-color .15s; }
+        .kurye-chip:hover { border-color: var(--lumen-gold, #c9a227); }
+        .kurye-chip.selected { background: var(--lumen-gold, #c9a227); border-color: var(--lumen-gold, #c9a227); color: #1a2744; font-weight: 600; }
+        .kurye-chip input { position: absolute; opacity: 0; pointer-events: none; }
         .grup-baslik { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+        .yuzde-input { width: 5em; padding: 8px 12px; border-radius: 8px; font-size: 1rem; border: 1px solid var(--surface-border); }
     </style>
 </head>
 <body>
@@ -26,6 +35,10 @@
         <div class="nav-links">
             <a href="{{ url_for('komisyon_bp.index') }}" class="btn btn-secondary">← Komisyon ana sayfa</a>
             <a href="{{ url_for('komisyon_bp.kuryeler') }}" class="btn btn-secondary">Kurye listesi</a>
+            <button type="button" class="btn btn-secondary" data-theme-toggle title="Tema değiştir" style="margin-left:auto;">
+                <span class="theme-label-dark">🌙 Karanlık</span>
+                <span class="theme-label-light">☀️ Aydınlık</span>
+            </button>
         </div>
         <div class="card-k">
             <h1>Profiller (alt ekipler)</h1>
@@ -61,22 +74,20 @@
                             <button type="submit" class="btn btn-danger">Profili sil</button>
                         </form>
                     </div>
-                    <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:10px;">
-                        <div>
-                            <label for="yuzde_{{ loop.index }}" style="font-size:0.9rem; color:var(--lumen-text-light);">Verdiğin yüzde</label>
-                            <select id="yuzde_{{ loop.index }}" name="yuzde_{{ grup_adi }}" style="padding:8px 12px; border-radius:8px; font-size:1rem;">
-                                {% for p in [3, 4, 5, 6, 7, 8, 9, 10, 12, 15] %}
-                                <option value="{{ p }}" {% if (profil.yuzde|int) == p %}selected{% endif %}>{{ p }}%</option>
-                                {% endfor %}
-                            </select>
-                        </div>
+                    <div style="margin-bottom:12px;">
+                        <label for="yuzde_{{ loop.index }}" style="font-size:0.9rem; color:var(--lumen-text-light);">Verdiğin yüzde (virgül kullanabilirsin: 5,5)</label>
+                        <input type="text" id="yuzde_{{ loop.index }}" name="yuzde_{{ grup_adi }}" class="yuzde-input" value="{{ (profil.yuzde|round(1)|string)|replace('.', ',') }}" placeholder="5,5" inputmode="decimal" style="margin-left:8px;">
+                        <span style="font-size:0.9rem; color:var(--lumen-text-light);">%</span>
                     </div>
-                    <label for="sel_{{ loop.index }}" style="font-size:0.9rem; color:var(--lumen-text-light);">Bu profildeki kuryeler (Ctrl ile çoklu seç)</label>
-                    <select id="sel_{{ loop.index }}" name="kuryeler_{{ grup_adi }}" multiple style="width:100%; min-height:100px; margin-top:6px;">
+                    <p style="font-size:0.9rem; color:var(--lumen-text-light); margin-bottom:6px;">Listedeki kuryelere tıkla: seçili olanlar bu profilde. (Tekrar tıkla çıkarmak için.)</p>
+                    <div class="kurye-chips">
                         {% for isim in isimler %}
-                        <option value="{{ isim }}" {% if isim in profil.kuryeler %}selected{% endif %}>{{ isim }}</option>
+                        <label class="kurye-chip {% if isim in profil.kuryeler %}selected{% endif %}">
+                            <input type="checkbox" name="kuryeler_{{ grup_adi }}" value="{{ isim }}" {% if isim in profil.kuryeler %}checked{% endif %}>
+                            {{ isim }}
+                        </label>
                         {% endfor %}
-                    </select>
+                    </div>
                 </div>
                 {% endfor %}
                 <button type="submit" class="btn btn-primary">Tüm profilleri kaydet</button>
@@ -86,5 +97,10 @@
             {% endif %}
         </div>
     </div>
+    <script>
+        document.querySelectorAll('.kurye-chip input[type=checkbox]').forEach(function(cb) {
+            cb.addEventListener('change', function() { cb.closest('.kurye-chip').classList.toggle('selected', cb.checked); });
+        });
+    </script>
 </body>
 </html>
