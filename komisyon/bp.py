@@ -166,7 +166,7 @@ def eski_kuryeler():
 
 @komisyon_bp.route('/alt-ekipler', methods=['GET', 'POST'])
 def alt_ekipler():
-    """Alt ekip gruplarını düzenle – her gruba (Barış vb.) kurye ataması, %5 hesaplaması için."""
+    """Profil düzenle – her profil (Barış vb.) için kurye listesi ve yüzde seçimi."""
     isimler = logic.load_my_couriers_list()
     data = logic.load_alt_ekipler()
     if request.method == 'POST':
@@ -174,26 +174,31 @@ def alt_ekipler():
         if action == 'grup_ekle':
             grup = request.form.get('grup_adi', '').strip()
             if grup and grup not in data:
-                data[grup] = []
+                data[grup] = {'kuryeler': [], 'yuzde': 5}
                 logic.save_alt_ekipler(data)
-                flash(f'Grup eklendi: {grup}', 'success')
+                flash(f'Profil eklendi: {grup}', 'success')
             elif grup in data:
-                flash('Bu grup adı zaten var.', 'info')
+                flash('Bu profil adı zaten var.', 'info')
             return redirect(url_for('komisyon_bp.alt_ekipler'))
         if action == 'grup_sil':
             grup = request.form.get('grup_adi', '').strip()
             if grup in data:
                 del data[grup]
                 logic.save_alt_ekipler(data)
-                flash(f'Grup silindi: {grup}', 'success')
+                flash(f'Profil silindi: {grup}', 'success')
             return redirect(url_for('komisyon_bp.alt_ekipler'))
         if action == 'kaydet':
             for grup_adi in list(data.keys()):
                 names = request.form.getlist('kuryeler_' + grup_adi)
                 valid = [n.strip() for n in names if n and n.strip() in isimler]
-                data[grup_adi] = valid
+                try:
+                    yuzde = float(request.form.get('yuzde_' + grup_adi, 5) or 5)
+                    yuzde = max(0, min(100, yuzde))
+                except (TypeError, ValueError):
+                    yuzde = data.get(grup_adi, {}).get('yuzde', 5)
+                data[grup_adi] = {'kuryeler': valid, 'yuzde': yuzde}
             logic.save_alt_ekipler(data)
-            flash('Alt ekip atamaları kaydedildi.', 'success')
+            flash('Profil atamaları ve yüzdeler kaydedildi.', 'success')
             return redirect(url_for('komisyon_bp.alt_ekipler'))
     return render_template('komisyon_alt_ekipler.html', isimler=isimler, alt_ekipler=data)
 

@@ -69,8 +69,11 @@ def save_my_couriers(names: List[str]) -> None:
             f.write(line.strip() + '\n')
 
 
-def load_alt_ekipler() -> Dict[str, List[str]]:
-    """Alt ekip grupları: { "Barış": ["Ali Veli", ...], ... }. Her grupta o kişiye bağlı kurye isimleri."""
+def load_alt_ekipler() -> Dict[str, Dict]:
+    """
+    Profiller: { "Barış": {"kuryeler": ["Ali Veli", ...], "yuzde": 5}, ... }.
+    Eski format (sadece liste) okunursa yuzde=5 kabul edilir.
+    """
     path = ALT_EKIPLER_FILE
     if not os.path.exists(path):
         return {}
@@ -79,34 +82,49 @@ def load_alt_ekipler() -> Dict[str, List[str]]:
             data = json.load(f)
         if not isinstance(data, dict):
             return {}
-        return {k: (v if isinstance(v, list) else []) for k, v in data.items()}
-    except (json.JSONDecodeError, IOError):
+        out = {}
+        for k, v in data.items():
+            if isinstance(v, dict) and 'kuryeler' in v:
+                out[k] = {
+                    'kuryeler': v.get('kuryeler') if isinstance(v.get('kuryeler'), list) else [],
+                    'yuzde': max(0, min(100, float(v.get('yuzde', 5) or 5))),
+                }
+            elif isinstance(v, list):
+                out[k] = {'kuryeler': v, 'yuzde': 5}
+            else:
+                out[k] = {'kuryeler': [], 'yuzde': 5}
+        return out
+    except (json.JSONDecodeError, IOError, TypeError, ValueError):
         return {}
 
 
-def save_alt_ekipler(data: Dict[str, List[str]]) -> None:
-    """Alt ekipler JSON dosyasına yazılır."""
+def save_alt_ekipler(data: Dict[str, Dict]) -> None:
+    """Profiller JSON dosyasına yazılır: her key için { kuryeler: [...], yuzde: number }."""
     with open(ALT_EKIPLER_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
-def compute_alt_ekipler_ozet(kurye_detay: List[Dict], alt_ekipler: Dict[str, List[str]]) -> List[Dict]:
+def compute_alt_ekipler_ozet(kurye_detay: List[Dict], alt_ekipler: Dict[str, Dict]) -> List[Dict]:
     """
-    kurye_detay ve alt_ekipler ile her grup için bu dönemde eşleşen kuryeleri, toplamı ve %5'i hesaplar.
-    Dönen: [ {"grup_adi": "Barış", "kuryeler": [{"ad_soyad": "...", "toplam_hakedis": x}, ...], "toplam": y, "yuzde5": z}, ... ]
+    Her profil için bu dönemde eşleşen kuryeleri, toplamı ve seçilen yüzdeye göre tutarı hesaplar.
+    Dönen: [ {"grup_adi": "Barış", "kuryeler": [...], "toplam": y, "yuzde": 5, "tutar": z}, ... ]
     """
     if not kurye_detay or not alt_ekipler:
         return []
     out = []
-    for grup_adi, grup_isimleri in alt_ekipler.items():
-        grup_norm = {normalize_name(n) for n in (grup_isimleri or [])}
+    for grup_adi, profil in alt_ekipler.items():
+        kuryeler = profil.get('kuryeler') if isinstance(profil, dict) else []
+        yuzde = float(profil.get('yuzde', 5) or 5) if isinstance(profil, dict) else 5
+        grup_norm = {normalize_name(n) for n in (kuryeler or [])}
         matched = [k for k in kurye_detay if normalize_name(k.get('ad_soyad', '') or '') in grup_norm]
         toplam = sum(m.get('toplam_hakedis', 0) or 0 for m in matched)
+        tutar = round(toplam * (yuzde / 100.0), 2)
         out.append({
             'grup_adi': grup_adi,
             'kuryeler': matched,
             'toplam': toplam,
-            'yuzde5': round(toplam * 0.05, 2),
+            'yuzde': yuzde,
+            'tutar': tutar,
         })
     return out
 
