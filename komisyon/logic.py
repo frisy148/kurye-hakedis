@@ -214,6 +214,8 @@ def compute_period_summary(excel_path: str, my_couriers: Set[str]) -> Optional[D
 
     total_hakedis_col = find_column(columns, ['Toplam Hakediş', 'Toplam Hakediş Tutarı'], 11)
     odenecek_col = find_column(columns, ['Ödenecek Tutar', 'Odenecek Tutar', 'Net Ödeme'], None)
+    # Yemeksepeti iade kolonları (normal + YapıKredi varyantları)
+    ys_iade_cols = [c for c in columns if c in ['Yemeksepeti İade', 'Yemeksepeti İade (YapıKredi)', 'Yemeksepeti İade (Yapı Kredi)', 'Yemeksepeti iade Yapı Kredi']]
 
     toplam_hakedis = 0.0
     odenecek_ekside = 0.0
@@ -237,9 +239,12 @@ def compute_period_summary(excel_path: str, my_couriers: Set[str]) -> Optional[D
         kurye_kazanci[ad_soyad] = kurye_kazanci.get(ad_soyad, 0.0) + h
 
         odenecek = to_num(row.get(odenecek_col)) if odenecek_col else 0
-        if odenecek < 0:
-            odenecek_ekside += odenecek
-            ekside_listesi.append({'ad_soyad': ad_soyad, 'tutar': round(odenecek, 2)})
+        # Yemeksepeti iade (özellikle Yapı Kredi olanlar) net bakiyeye eklenmeli
+        ys_iade_toplam = sum(to_num(row.get(col)) for col in ys_iade_cols) if ys_iade_cols else 0.0
+        net_bakiye = odenecek + ys_iade_toplam
+        if net_bakiye < 0:
+            odenecek_ekside += net_bakiye
+            ekside_listesi.append({'ad_soyad': ad_soyad, 'tutar': round(net_bakiye, 2)})
 
     komisyon = toplam_hakedis * KOMISYON_ORANI
     kurye_detay = [{'ad_soyad': k, 'toplam_hakedis': round(v, 2)} for k, v in kurye_kazanci.items()]
